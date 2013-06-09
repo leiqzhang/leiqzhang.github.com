@@ -11,10 +11,6 @@ tags: [qemu, kvm, libvirt, scsi, virtio]
 
 ---
 
-# QEMU Features
-
-## Virtio Refactoring
-
 ### Background
 
 在研究QEMU的virtio-scsi时，发现了如下问题: 1.5的qemu相比1.2多了几种virtio及scsi相关的设备

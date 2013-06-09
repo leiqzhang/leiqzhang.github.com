@@ -11,10 +11,6 @@ tags: [qemu, kvm, libvirt]
 
 ---
 
-# QEMU Block Features
-
-## Live Snapshot
-
 ### libvirt blockcopy switch to dest when complete
 
 1. create vm

@@ -3,17 +3,13 @@ comments: true
 date: 2013-04-17 11:38:31
 layout: post
 slug: qemu-block-features
-title: 'QEMU Block Features'
+title: 'QEMU Block Features: Image Formats'
 categories:
 - QEMU
 - Virtualization
 tags: [qemu, kvm, libvirt]
 
 ---
-
-# QEMU Block Features
-
-## 虚拟机镜像
 
 ### 镜像格式
 

@@ -11,10 +11,6 @@ tags: [qemu, kvm, libvirt]
 
 ---
 
-# QEMU Block Features
-
-## Live Snapshot
-
 ### Block Streaming
 
 1. Ref: [QEMU-Feature-LiveSnapshotMerge-BlockStreaming](http://wiki.qemu.org/Features/Snapshots#Block_Streaming)

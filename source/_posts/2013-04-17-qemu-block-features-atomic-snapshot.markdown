@@ -11,10 +11,6 @@ tags: [qemu, kvm, libvirt]
 
 ---
 
-# QEMU Block Features
-
-## 虚拟机镜像
-
 ### SnapshotsMultipleDevices
 
 1. ref: [QEMU-Feature-SnapshotsMultipleDevices](http://wiki.qemu.org/Features/SnapshotsMultipleDevices#Atomic_Snapshots_of_Multiple_Devices)

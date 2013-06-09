@@ -11,10 +11,6 @@ tags: [qemu, kvm, libvirt]
 
 ---
 
-# QEMU Block Features
-
-## Live Snapshot
-
 ### Live Block Copy
 
 1. Ref: [QEMU-Feature-SnapshotsMultipleDevices-LiveBlockCopy](http://wiki.qemu.org/Features/SnapshotsMultipleDevices#Application_to_live_block_copy)
