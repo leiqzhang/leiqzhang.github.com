@@ -7,7 +7,7 @@ title: CSS的block formatting context
 wordpress_id: 83
 categories:
 - JavaScript/CSS
-tags:[bfc, css, float, hasLayout, margin, collapse, position]
+tags: [bfc, css, float, hasLayout, margin, collapse, position]
 
 ---
 
