@@ -22,7 +22,8 @@ tags: [qemu, kvm, libvirt]
 3. qemu启动虚拟机
 	* ARGS： -drive file=/path/to/img,if=none,format=**FORMAT**,cache=none,id=drive0
 4. libvirt配置
-	<pre><code>
+
+```
 		<disk type="file" device="disk">
 		    <driver name="qemu" type="raw"/> 
 		    <!-- avaliable types when use the name "qemu": raw, bochs, qcow2 and qed -->
@@ -38,7 +39,4 @@ tags: [qemu, kvm, libvirt]
 		    <target dev="vda" bus="virtio"/>  
 		    <!-- avaliable bus: ide, scsi, virtio, usb, sata, etc. if ommited, the bus type is inferred from the style of the device name (e.g. "sda" => "scsi"). -->
 		</disk>
-	</code></pre>
-
-
-
+```
