@@ -6,6 +6,7 @@ widgets:
 - search
 - category
 - tagcloud
+- weibo
 - blogroll
 
 excerpt_link: Read More
