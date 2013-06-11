@@ -13,59 +13,58 @@ tags: [qemu, kvm, libvirt, scsi, virtio]
 
 ### Background
 
-在研究QEMU的virtio-scsi时，发现了如下问题: 1.5的qemu相比1.2多了几种virtio及scsi相关的设备
+在研究QEMU的virtio-scsi时，发现了如下问题: 1.5的qemu相比1.2多了几种virtio及scsi相关的设备 
 
 1. qemu-1.2
 
-    > **CMD:** qemu-kvm -device ? 2>&1 | grep "virtio\|scsi"
+``` bash
+    qemu-kvm -device ? 2>&1 | grep "virtio\|scsi"
 
-    > **OUTPUT:** 
-    
-    > - name "scsi-hd", bus SCSI, desc "virtual SCSI disk"
-    > - name "virtio-blk-pci", bus PCI, alias "virtio-blk"
-    > - name "virtio-9p-pci", bus PCI
-    > - name "scsi-block", bus SCSI, desc "SCSI block device passthrough"
-    > - name "scsi-generic", bus SCSI, desc "pass through generic scsi device (/dev/sg*)"
-    > - name "scsi-disk", bus SCSI, desc "virtual SCSI disk or CD-ROM (legacy)"
-    > - name "virtserialport", bus virtio-serial-bus
-    > - name "scsi-cd", bus SCSI, desc "virtual SCSI CD-ROM"
-    > - name "virtconsole", bus virtio-serial-bus
-    > - name "virtio-serial-pci", bus PCI, alias "virtio-serial"
-    > - name "am53c974", bus PCI, desc "AMD Am53c974 PCscsi-PCI SCSI adapter"
-    > - name "virtio-net-pci", bus PCI, alias "virtio-net"
-    > - name "virtio-balloon-pci", bus PCI, alias "virtio-balloon"
-    > - name "virtio-scsi-pci", bus PCI
+    name "scsi-hd", bus SCSI, desc "virtual SCSI disk"
+    name "virtio-blk-pci", bus PCI, alias "virtio-blk"
+    name "virtio-9p-pci", bus PCI
+    name "scsi-block", bus SCSI, desc "SCSI block device passthrough"
+    name "scsi-generic", bus SCSI, desc "pass through generic scsi device (/dev/sg*)"
+    name "scsi-disk", bus SCSI, desc "virtual SCSI disk or CD-ROM (legacy)"
+    name "virtserialport", bus virtio-serial-bus
+    name "scsi-cd", bus SCSI, desc "virtual SCSI CD-ROM"
+    name "virtconsole", bus virtio-serial-bus
+    name "virtio-serial-pci", bus PCI, alias "virtio-serial"
+    name "am53c974", bus PCI, desc "AMD Am53c974 PCscsi-PCI SCSI adapter"
+    name "virtio-net-pci", bus PCI, alias "virtio-net"
+    name "virtio-balloon-pci", bus PCI, alias "virtio-balloon"
+    name "virtio-scsi-pci", bus PCI
+```
 
 2. qemu-1.5
 
-    > **CMD:** ./x86_64-softmmu/qemu-system-x86_64  -device ? 2>&1 | grep "virtio\|scsi"
+``` bash
+    ./x86_64-softmmu/qemu-system-x86_64  -device ? 2>&1 | grep "virtio\|scsi"
 
-    > **OUTPUT:** 
-    
-    > - name "scsi-hd", bus SCSI, desc "virtual SCSI disk"
-    > - name "virtio-blk-pci", bus PCI, alias "virtio-blk"
-    > - name "vhost-scsi-pci", bus PCI
-    > - name "scsi-block", bus SCSI, desc "SCSI block device passthrough"
-    > - name "virtio-serial-device", bus virtio-bus
-    > - name "virtio-scsi-common", bus virtio-bus
-    > - name "scsi-generic", bus SCSI, desc "pass through generic scsi device (/dev/sg*)"
-    > - name "vhost-scsi", bus virtio-bus
-    > - name "scsi-disk", bus SCSI, desc "virtual SCSI disk or CD-ROM (legacy)"
-    > - name "virtserialport", bus virtio-serial-bus
-    > - name "scsi-cd", bus SCSI, desc "virtual SCSI CD-ROM"
-    > - name "virtio-net-device", bus virtio-bus
-    > - name "virtconsole", bus virtio-serial-bus
-    > - name "virtio-serial-pci", bus PCI, alias "virtio-serial"
-    > - name "virtio-balloon-device", bus virtio-bus
-    > - name "virtio-rng-pci", bus PCI
-    > - name "pvscsi", bus PCI
-    > - name "am53c974", bus PCI, desc "AMD Am53c974 PCscsi-PCI SCSI adapter"
-    > - name "virtio-balloon-pci", bus PCI, alias "virtio-balloon"
-    > - name "virtio-scsi-pci", bus PCI
-    > - name "virtio-blk-device", bus virtio-bus
-    > - name "virtio-scsi-device", bus virtio-bus
-    > - name "virtio-net-pci", bus PCI, alias "virtio-net"
-
+    name "scsi-hd", bus SCSI, desc "virtual SCSI disk"
+    name "virtio-blk-pci", bus PCI, alias "virtio-blk"
+    name "vhost-scsi-pci", bus PCI
+    name "scsi-block", bus SCSI, desc "SCSI block device passthrough"
+    name "virtio-serial-device", bus virtio-bus
+    name "virtio-scsi-common", bus virtio-bus
+    name "scsi-generic", bus SCSI, desc "pass through generic scsi device (/dev/sg*)"
+    name "vhost-scsi", bus virtio-bus
+    name "scsi-disk", bus SCSI, desc "virtual SCSI disk or CD-ROM (legacy)"
+    name "virtserialport", bus virtio-serial-bus
+    name "scsi-cd", bus SCSI, desc "virtual SCSI CD-ROM"
+    name "virtio-net-device", bus virtio-bus
+    name "virtconsole", bus virtio-serial-bus
+    name "virtio-serial-pci", bus PCI, alias "virtio-serial"
+    name "virtio-balloon-device", bus virtio-bus
+    name "virtio-rng-pci", bus PCI
+    name "pvscsi", bus PCI
+    name "am53c974", bus PCI, desc "AMD Am53c974 PCscsi-PCI SCSI adapter"
+    name "virtio-balloon-pci", bus PCI, alias "virtio-balloon"
+    name "virtio-scsi-pci", bus PCI
+    name "virtio-blk-device", bus virtio-bus
+    name "virtio-scsi-device", bus virtio-bus
+    name "virtio-net-pci", bus PCI, alias "virtio-net"
+```
 
 ### Questions
 
@@ -79,22 +78,24 @@ tags: [qemu, kvm, libvirt, scsi, virtio]
 1. Ref: http://wiki.qemu.org/Features/virtio-refactoring
 2. Details:
 
-    > Actually QEMU has a lot of virtio devices, which are not QOM compliant; they can be used with two different transports:
-    > 
-    > PCI: with eg: -device virtio-blk-pci.
-    > S390: with eg: -device virtio-blk-s390.
-    > The new implementation is as follows:
-    > 
-    > A new bus is introduced: virtio-bus which is an abstract bus.
-    
-    > For each transport a specific implementation of virtio-bus is created. (eg: virtio-pci-bus for virtio-pci).
-    
-    > Each virtio transport is built with a virtio-bus that the virtio devices connect to.
-    > VirtIODevice becomes a device which is abstract and must be connected on a virtio-bus.
-    
-    > Each virtio device are created (eg: virtio-blk) extends VirtioDevice and then connects on a virtio-bus.
-    
-    > As we discussed, we must keep the backward compatibility. So the re-factored device must have the same properties and the same behavior. We should have only one way to create the device, so the transport/virtio-bus/virtio-device layout is only internal to QEMU for S390 and PCI device.
+``` 
+    Actually QEMU has a lot of virtio devices, which are not QOM compliant; they can be used with two different transports:
+ 
+    PCI: with eg: -device virtio-blk-pci.
+    S390: with eg: -device virtio-blk-s390.
+    The new implementation is as follows:
+
+    A new bus is introduced: virtio-bus which is an abstract bus.
+
+    For each transport a specific implementation of virtio-bus is created. (eg: virtio-pci-bus for virtio-pci).
+
+    Each virtio transport is built with a virtio-bus that the virtio devices connect to.
+    VirtIODevice becomes a device which is abstract and must be connected on a virtio-bus.
+
+    Each virtio device are created (eg: virtio-blk) extends VirtioDevice and then connects on a virtio-bus.
+
+    As we discussed, we must keep the backward compatibility. So the re-factored device must have the same properties and the same behavior. We should have only one way to create the device, so the transport/virtio-bus/virtio-device layout is only internal to QEMU for S390 and PCI device.
+```
 
 ### Answers:
 
