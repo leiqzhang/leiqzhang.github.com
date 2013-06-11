@@ -1,0 +1,373 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>PHP | Technology &amp; Life</title>
+  <meta name="author" content="leiqzhang">
+  
+  <meta name="description" content="Virtualization Related Technologies">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+  <meta property="og:site_name" content="Technology &amp; Life"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.png" rel="icon">
+  <link rel="alternate" href="/atom.xml" title="Technology &amp; Life" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
+  
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">Technology &amp; Life</a></h1>
+  <h2><a href="/">blog of leiqzhang</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div></header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper">
+<h2 class="archive-title category">PHP</h2>
+
+
+  
+    <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2010-11-03T16:38:31.000Z"><a href="/2010/11/2010-11-04-pdo-unbuffered-query/">Nov 4 2010</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2010/11/2010-11-04-pdo-unbuffered-query/">PDO:  2014 Cannot execute queries while other unbuffered queries are active</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>注：以下结论均是在php 5.2.10+mysql 5.1.30环境下得出</p>
+<p>出现此类PDO错误往往是pdo与mysql搭档时出现，可能原因如下:</p>
+<ol>
+<li><strong>PDO-&gt;exec()执行select语句后（即使该select结果集为空），再执行PDO-&gt;query()、PDO-&gt;exec()、PDOStatement-&gt;execute()等会出现该异常</strong></li>
+</ol>
+<p>如PHP manual所述，exec方法主要是用于执行一次sql命令，并返回该sql语句所影响的条目数量的，对于select语句，exec并不返回结果。对于只执行一次的sql select，建议使用PDO-&gt;query()，如果selec需要多次执行，则建议使用准备语句(PDOStatement-&gt;execute())。</p>
+<p>对于mysql来说，在通过PDO-&gt;exec()执行一条select后，再次执行PDO相关数据操作，如PDO-&gt;query()、PDO-&gt;exec()、PDOStatement-&gt;execute()等均会抛出“unbuffered queries are active”的异常，如：</p>
+<p>[php]
+    $dbh = new PDO(DB_CON_STRING,DB_CON_USER,DB_CON_PASSWORD);
+    $dbh -&gt; setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
+    $sql = &#39;select handle_time from workflow where 0=1&#39;; //注意:即使这里的select必定没有返回结果，后面也会报错
+    $result = $dbh-&gt;exec($sql); //执行一次exec</p>
+<pre><code><figure class="highlight"><pre><span class="variable">$sql</span> = <span class="string">'select handle_time from workflow where list_id=3000'</span>;
+//<span class="variable">$ret</span> = <span class="variable">$dbh</span>-&gt;query(<span class="variable">$sql</span>); //此时执行query会报错
+//<span class="variable">$ret</span> = <span class="variable">$dbh</span>-&gt;exec(<span class="variable">$sql</span>);//如果此时执行exec也会报错
+
+<span class="variable">$i</span>=3000;
+<span class="variable">$sql</span> = <span class="string">'select handle_time from workflow where list_id=:id'</span>;
+<span class="variable">$sth</span> = <span class="variable">$dbh</span>-&gt;prepare(<span class="variable">$sql</span>);
+<span class="variable">$sth</span>-&gt;bindParam(<span class="string">':id'</span>,<span class="variable">$i</span>);
+<span class="variable">$ret</span> = <span class="variable">$sth</span>-&gt;execute();//执行execute会报错
+</pre></figure></code></pre>
+<p>[/php]</p>
+<p>在<a href="http://www.yiiframework.com/">YII</a> 1.0.6版本的CDbLogRoute.php中就存在这个问题，该类是用来记录日志到DB的，其init初始化方法中存在判断log表是否存在时，使用的是如下代码：</p>
+<p>[php]
+/<em>*
+ </em> Initializes the route.
+ <em> This method is invoked after the route is created by the route manager.
+ </em>/
+ public function init()
+ {
+parent::init();</p>
+<p>$db=$this-&gt;getDbConnection();
+$db-&gt;setActive(true);</p>
+<p>$sql=&quot;SELECT * FROM {$this-&gt;logTableName} WHERE 0=1&quot;;
+try
+{
+$db-&gt;createCommand($sql)-&gt;execute(); //这里实际是调用的PDO-&gt;exec($sql)，
+//可以改为$db-&gt;createCommand($sql)-&gt;queryAll(),而调用PDO-&gt;query($sql)来避免遗产的产生
+}
+catch(Exception $e)
+{
+// The log table does not exist
+if($this-&gt;autoCreateLogTable)
+$this-&gt;createLogTable($db,$this-&gt;logTableName);
+else
+throw new CException(Yii::t(&#39;yii&#39;,&#39;CDbLogRoute requires database table &quot;{table}&quot; to store log messages.&#39;,
+array(&#39;{table}&#39;=&gt;$this-&gt;logTableName)));
+}
+ }
+[/php]</p>
+<p>而在真正记录日志时，使用的是如下的processLogs方法:</p>
+<p>[php]
+/<em>*
+ </em> Stores log messages into database.
+ <em> @param array list of log messages
+ </em>/
+ protected function processLogs($logs)
+ {
+$sql=&quot;
+INSERT INTO {$this-&gt;logTableName}
+(level, category, logtime, message) VALUES
+(:level, :category, :logtime, :message)
+&quot;;
+$command=$this-&gt;getDbConnection()-&gt;createCommand($sql);
+foreach($logs as $log)
+{
+$command-&gt;bindValue(&#39;:level&#39;,$log[1]);
+$command-&gt;bindValue(&#39;:category&#39;,$log[2]);
+$command-&gt;bindValue(&#39;:logtime&#39;,(int)$log[3]);
+$command-&gt;bindValue(&#39;:message&#39;,$log[0]);
+$command-&gt;execute();  //实际上是调用的PDOStatement-&gt;execute(),使用mysql时会报错
+}
+ }
+[/php]</p>
+<p>这样就会在执行$command-&gt;execute()记录日志时就会出现“unbuffered queries are active”的异常。在Yii 1.0.7中，qiang改变了init的处理逻辑，在判断表是否存在时，不再使用</p>
+<p>[sql]</p>
+<p>SELECT * FROM {$this-&gt;logTableName} WHERE 0=1[/sql]</p>
+<p>了，而是采用了</p>
+<p>[sql]DELETE FROM {$this-&gt;logTableName} WHERE 0=1[/sql]</p>
+<p>,从而也就避免了该异常的产生。 但如果PDO-&gt;exec()中执行的是update、delete等sql语句，则后面的query、exec、execute不会报错。</p>
+<ol>
+<li><strong>PDO::exec()中连续执行两条sql语句</strong>（包括set names, update, insert等），也会在下一次query exec execute时抛该异常，</li>
+</ol>
+<p>但网上有说php 5.3以上不会出现该问题，未验证。如</p>
+<p>[php]
+$sql = &quot;set names utf8;update workflow set status=3 where list_id=3000&quot;;
+$result = $dbh-&gt;exec($sql); //exec后，后面的exec query execute等会报出异常
+[/php]</p>
+<ol>
+<li>另外，按照php manual中关于PDO::query 和 PDOStatement-&gt;closeCursor的说明，在没有完全fetchall一个result set时，再次使用query等就会出现问题:</li>
+</ol>
+<p>If you do not fetch all of the data in a result set before issuing your next  call to <a href="function.pdo-query.html">PDO-&gt;query()</a>, your call may  fail.</p>
+<p>Call <a href="function.pdostatement-closecursor.html">PDOStatement-&gt;closeCursor()</a> to release the database resources associated with the PDOStatement object</p>
+<p>before  issuing your next call to <a href="function.pdo-query.html">PDO-&gt;query()</a>.</p>
+<p>但实际试验中没有该问题，只有以上两种情况下会出现此问题，不过为了规避潜在问题，最好还是在每次query后，可以fetchAll或closeCursor  <em>**</em></p>
+<p><strong>总结：</strong></p>
+<ol>
+<li>不要使用PDO::exec()执行select，也不要一次执行分号分隔的多条sql</li>
+</ol>
+<ol>
+<li>各个PDO::query及PDOStatement::execute()后，最好是closeCursor或fetchAll（并设置null值）</li>
+</ol>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  
+
+  <nav id="pagination">
+  
+  
+  <div class="clearfix"></div>
+</nav>
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:leiqzhang.com">
+  </form>
+</div>
+
+  
+<div class="widget tag">
+  <h3 class="title">Categories</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/HTTP/">HTTP</a><small>2</small></li>
+  
+    <li><a href="/categories/JavaScriptCSS/">JavaScript/CSS</a><small>2</small></li>
+  
+    <li><a href="/categories/LinuxUnix/">Linux/Unix</a><small>3</small></li>
+  
+    <li><a href="/categories/MySQL/">MySQL</a><small>2</small></li>
+  
+    <li><a href="/categories/MySQL/PHP/">PHP</a><small>1</small></li>
+  
+    <li><a href="/categories/PHP/">PHP</a><small>2</small></li>
+  
+    <li><a href="/categories/QEMU/">QEMU</a><small>9</small></li>
+  
+    <li><a href="/categories/QEMU/Virtualization/">Virtualization</a><small>9</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>2</small></li>
+  
+    <li><a href="/categories/vim/">vim</a><small>3</small></li>
+  
+    <li><a href="/categories/virtualization/">virtualization</a><small>1</small></li>
+  
+    <li><a href="/categories/virtualization/vmware/">vmware</a><small>1</small></li>
+  
+    <li><a href="/categories/未分类/">未分类</a><small>1</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">Tags</h3>
+  <ul class="entry">
+  
+    <li><a href="/tags/bfc/">bfc</a><small>1</small></li>
+  
+    <li><a href="/tags/cache-control/">cache-control</a><small>1</small></li>
+  
+    <li><a href="/tags/collapse/">collapse</a><small>1</small></li>
+  
+    <li><a href="/tags/css/">css</a><small>1</small></li>
+  
+    <li><a href="/tags/dataplane/">dataplane</a><small>1</small></li>
+  
+    <li><a href="/tags/ervernote/">ervernote</a><small>1</small></li>
+  
+    <li><a href="/tags/etag/">etag</a><small>1</small></li>
+  
+    <li><a href="/tags/expires/">expires</a><small>1</small></li>
+  
+    <li><a href="/tags/float/">float</a><small>1</small></li>
+  
+    <li><a href="/tags/greasemonkey/">greasemonkey</a><small>1</small></li>
+  
+    <li><a href="/tags/hasLayout/">hasLayout</a><small>1</small></li>
+  
+    <li><a href="/tags/http/">http</a><small>2</small></li>
+  
+    <li><a href="/tags/javascript/">javascript</a><small>1</small></li>
+  
+    <li><a href="/tags/kvm/">kvm</a><small>9</small></li>
+  
+    <li><a href="/tags/last-modified/">last-modified</a><small>1</small></li>
+  
+    <li><a href="/tags/libvirt/">libvirt</a><small>8</small></li>
+  
+    <li><a href="/tags/lighthttpd/">lighthttpd</a><small>1</small></li>
+  
+    <li><a href="/tags/linux/">linux</a><small>1</small></li>
+  
+    <li><a href="/tags/mac/">mac</a><small>1</small></li>
+  
+    <li><a href="/tags/margin/">margin</a><small>1</small></li>
+  
+    <li><a href="/tags/md5sum/">md5sum</a><small>1</small></li>
+  
+    <li><a href="/tags/mysql/">mysql</a><small>2</small></li>
+  
+    <li><a href="/tags/patch/">patch</a><small>1</small></li>
+  
+    <li><a href="/tags/pdo/">pdo</a><small>1</small></li>
+  
+    <li><a href="/tags/perf/">perf</a><small>1</small></li>
+  
+    <li><a href="/tags/permalink/">permalink</a><small>1</small></li>
+  
+    <li><a href="/tags/php/">php</a><small>2</small></li>
+  
+    <li><a href="/tags/position/">position</a><small>1</small></li>
+  
+    <li><a href="/tags/post/">post</a><small>1</small></li>
+  
+    <li><a href="/tags/proxy/">proxy</a><small>1</small></li>
+  
+    <li><a href="/tags/qemu/">qemu</a><small>9</small></li>
+  
+    <li><a href="/tags/rewrite/">rewrite</a><small>1</small></li>
+  
+    <li><a href="/tags/scsi/">scsi</a><small>1</small></li>
+  
+    <li><a href="/tags/site-memory/">site memory</a><small>1</small></li>
+  
+    <li><a href="/tags/soap/">soap</a><small>1</small></li>
+  
+    <li><a href="/tags/sql/">sql</a><small>1</small></li>
+  
+    <li><a href="/tags/svn/">svn</a><small>1</small></li>
+  
+    <li><a href="/tags/tip/">tip</a><small>1</small></li>
+  
+    <li><a href="/tags/tree_conflict/">tree_conflict</a><small>1</small></li>
+  
+    <li><a href="/tags/vim/">vim</a><small>3</small></li>
+  
+    <li><a href="/tags/virtio/">virtio</a><small>1</small></li>
+  
+    <li><a href="/tags/vmware/">vmware</a><small>1</small></li>
+  
+    <li><a href="/tags/vpn/">vpn</a><small>1</small></li>
+  
+    <li><a href="/tags/wget/">wget</a><small>1</small></li>
+  
+    <li><a href="/tags/wordpress/">wordpress</a><small>2</small></li>
+  
+  </ul>
+</div>
+
+
+  
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2013 leiqzhang
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+<script type="text/javascript">
+var disqus_shortname = 'leiqzhang';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+</body>
+</html>

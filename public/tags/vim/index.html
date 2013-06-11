@@ -1,0 +1,404 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>vim | Technology &amp; Life</title>
+  <meta name="author" content="leiqzhang">
+  
+  <meta name="description" content="Virtualization Related Technologies">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+  <meta property="og:site_name" content="Technology &amp; Life"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.png" rel="icon">
+  <link rel="alternate" href="/atom.xml" title="Technology &amp; Life" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
+  
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">Technology &amp; Life</a></h1>
+  <h2><a href="/">blog of leiqzhang</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div></header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper">
+<h2 class="archive-title tag">vim</h2>
+
+
+  
+    <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2010-12-06T09:37:57.000Z"><a href="/2010/12/2010-12-06-vim-tips-incresing-list-substitute-replace/">Dec 6 2010</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2010/12/2010-12-06-vim-tips-incresing-list-substitute-replace/">VIM中通过substitute/replace快速生成一系列连续的IP地址</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>今天有这么一个操作，需要快速添加一个IP段，如220.181.50.206～220.181.50.254，我需要快速生成该段中一个所有IP地址的列表，以进行IP地址的导入。</p>
+<p>在VIM中可以这样：</p>
+<p>首先输入第一行:</p>
+<p>[code]</p>
+<p>220.181.50.206</p>
+<p>[/code]</p>
+<p>然后yy复制第一行，并48p复制出49行&quot;220.181.50.206&quot;, 然后执行以下命令即可</p>
+<p>[code]</p>
+<p>：%s/50.\zs(\d+)\ze$/\=eval(submatch(1)+line(&quot;.&quot;)-1)/g</p>
+<p>[/code]</p>
+<p>该命令是指对于所有匹配的部分（ip最后一个段），加上当前行号减一，这样就生成了一个从206到254的连续ip地址列表。</p>
+<p>Just Enjoy It！</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  
+    <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2010-11-14T15:18:45.000Z"><a href="/2010/11/2010-11-14-vim-force-overwrite/">Nov 14 2010</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2010/11/2010-11-14-vim-force-overwrite/">VIM overwrite read-only file</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>今天在使用vim编辑一个read-only的文件（权限为r-- r-- r--)，在保存时虽然提示只读不能保存，但是通过w!可以强制覆盖原文件内容，难道VIM可以绕过权限限制么？</p>
+<p>后来发现是在使用w！时，vim会强制删除原文件，并新建一个新的同名文件，并写入新的内容，所以，使用w！强制保存时，就要求当前用户有删除原文件的权限，即：</p>
+<ol>
+<li>该文件所在的目录必须具有w权限</li>
+</ol>
+<ol>
+<li>如果所在目录设置了t标志，还需要当前文件的所有者为自己</li>
+</ol>
+<p>其实这也可以从vim的帮助中看到：</p>
+<p><em>write-readonly</em></p>
+<p>When the &#39;cpoptions&#39; option contains &#39;W&#39;, Vim will refuse to overwrite a</p>
+<p>readonly file.  When &#39;W&#39; is not present, &quot;:w!&quot; will overwrite a readonly file,</p>
+<p>if the system allows it (the directory must be writable).</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  
+    <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2010-11-05T09:41:46.000Z"><a href="/2010/11/2010-11-05-vim-tips/">Nov 5 2010</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2010/11/2010-11-05-vim-tips/">VIM TIPS</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <ol>
+<li>词自动补全： <C-P>（向上搜索） <C-N>(向下搜索)</li>
+<li>行自动补全： <C-X><C-L></li>
+<li>文件名自动补全： <C-X><C-F></li>
+<li>搜索的正则表达式：
+\         取消后面所跟字符的特殊含义。比如 [vim] 匹配字符串“[vim]”
+[]        匹配其中之一。比如 [vim] 匹配字母“v”、“i”或者“m”，[a-zA-Z] 匹配任意字母
+[^]       匹配非其中之一。比如 [^vim] 匹配除字母“v”、“i”和“m”之外的所有字符
+.         匹配任意字符</li>
+<li>匹配前一字符大于等于零遍。比如 vi<em>m 匹配“vm”、“vim”、“viim”……
++        匹配前一字符大于等于一遍。比如 vi+m 匹配“vim”、“viim”、“viiim”……
+\?        匹配前一字符零遍或者一遍。比如 vi\?m 匹配“vm”或者“vim”
+^         匹配行首。例如 /^hello 查找出现在行首的单词 hello
+$         匹配行末。例如 /hello$ 查找出现在行末的单词 hello
+()      括住某段正规表达式
+\数字     重复匹配前面某段括住的表达式。例如 (hello).</em>\1 匹配一个开始和末尾都是“hello”，中间是任意字符串的字符串</li>
+</ol>
+<p>对于替换字符串，可以用“&amp;”代表整个搜索字符串，或者用“\数字”代表搜索字符串中的某段括住的表达式。</p>
+<ol>
+<li>替换1,3s/pattern/replace/gc</li>
+</ol>
+<p>1,3表示从第一行到第3行，可以用.,$表示当前行到文件末尾，可以用%表示当前行</p>
+<p>s表示替换</p>
+<p>pattern表示要替换的模式（可以是正则）</p>
+<p>replace表示要使用的替换文本；</p>
+<p>g表示全局，会在替换一个后替换下一个</p>
+<p>c表示确认，再替换每一个时提示确认信息</p>
+<p>6.替换中：可用v选中一个区域，使用&#39;&lt;和&#39;&gt;分别代表区域开始和结束</p>
+<p>7.替换中，可用\zs和\ze分别表示匹配由此开始和匹配到此结束；\=表示后面是一个表达式，可以使用printf等方法，来根据匹配到的串计算值；</p>
+<p>line（)方法用来获取行号，如line(&quot;.&quot;)表示当前行，line(&quot;&#39;&lt;&quot;)表示选中的第一行行号</p>
+<p>submatch(0) == \0</p>
+<p>|可用于分隔多条命令</p>
+<p>g/str1/s//str2/  表示对于匹配“str1”的所有串，执行后面的命令（g的作用，后面命令指s替换），s省略匹配串，表示使用前面g命令的匹配串，str2表示替换为str2</p>
+<ol>
+<li><p>f@表示在该行向后调到第一个<a href="mailto:%20@">&#39;@&#39;</a>字符处，F@是向左跳转</p>
+</li>
+<li><p>[{向前跳转到第一个{  ]}是像后跳转到第一个}</p>
+</li>
+<li><p>v|c|d i|a { | [ | &quot; | &#39;  实现块级编辑</p>
+</li>
+</ol>
+<p>如在</p>
+<p>{</p>
+<p>aaaaaaaaaa</p>
+<p>}</p>
+<p>的aaa这行出按下vi{将选中aaa这一行，如果是va{则表示选中包含左右大括号和aaa那一行的三行</p>
+<p>待补充。。。</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  
+
+  <nav id="pagination">
+  
+  
+  <div class="clearfix"></div>
+</nav>
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:leiqzhang.com">
+  </form>
+</div>
+
+  
+<div class="widget tag">
+  <h3 class="title">Categories</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/HTTP/">HTTP</a><small>2</small></li>
+  
+    <li><a href="/categories/JavaScriptCSS/">JavaScript/CSS</a><small>2</small></li>
+  
+    <li><a href="/categories/LinuxUnix/">Linux/Unix</a><small>3</small></li>
+  
+    <li><a href="/categories/MySQL/">MySQL</a><small>2</small></li>
+  
+    <li><a href="/categories/MySQL/PHP/">PHP</a><small>1</small></li>
+  
+    <li><a href="/categories/PHP/">PHP</a><small>2</small></li>
+  
+    <li><a href="/categories/QEMU/">QEMU</a><small>9</small></li>
+  
+    <li><a href="/categories/QEMU/Virtualization/">Virtualization</a><small>9</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>2</small></li>
+  
+    <li><a href="/categories/vim/">vim</a><small>3</small></li>
+  
+    <li><a href="/categories/virtualization/">virtualization</a><small>1</small></li>
+  
+    <li><a href="/categories/virtualization/vmware/">vmware</a><small>1</small></li>
+  
+    <li><a href="/categories/未分类/">未分类</a><small>1</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">Tags</h3>
+  <ul class="entry">
+  
+    <li><a href="/tags/bfc/">bfc</a><small>1</small></li>
+  
+    <li><a href="/tags/cache-control/">cache-control</a><small>1</small></li>
+  
+    <li><a href="/tags/collapse/">collapse</a><small>1</small></li>
+  
+    <li><a href="/tags/css/">css</a><small>1</small></li>
+  
+    <li><a href="/tags/dataplane/">dataplane</a><small>1</small></li>
+  
+    <li><a href="/tags/ervernote/">ervernote</a><small>1</small></li>
+  
+    <li><a href="/tags/etag/">etag</a><small>1</small></li>
+  
+    <li><a href="/tags/expires/">expires</a><small>1</small></li>
+  
+    <li><a href="/tags/float/">float</a><small>1</small></li>
+  
+    <li><a href="/tags/greasemonkey/">greasemonkey</a><small>1</small></li>
+  
+    <li><a href="/tags/hasLayout/">hasLayout</a><small>1</small></li>
+  
+    <li><a href="/tags/http/">http</a><small>2</small></li>
+  
+    <li><a href="/tags/javascript/">javascript</a><small>1</small></li>
+  
+    <li><a href="/tags/kvm/">kvm</a><small>9</small></li>
+  
+    <li><a href="/tags/last-modified/">last-modified</a><small>1</small></li>
+  
+    <li><a href="/tags/libvirt/">libvirt</a><small>8</small></li>
+  
+    <li><a href="/tags/lighthttpd/">lighthttpd</a><small>1</small></li>
+  
+    <li><a href="/tags/linux/">linux</a><small>1</small></li>
+  
+    <li><a href="/tags/mac/">mac</a><small>1</small></li>
+  
+    <li><a href="/tags/margin/">margin</a><small>1</small></li>
+  
+    <li><a href="/tags/md5sum/">md5sum</a><small>1</small></li>
+  
+    <li><a href="/tags/mysql/">mysql</a><small>2</small></li>
+  
+    <li><a href="/tags/patch/">patch</a><small>1</small></li>
+  
+    <li><a href="/tags/pdo/">pdo</a><small>1</small></li>
+  
+    <li><a href="/tags/perf/">perf</a><small>1</small></li>
+  
+    <li><a href="/tags/permalink/">permalink</a><small>1</small></li>
+  
+    <li><a href="/tags/php/">php</a><small>2</small></li>
+  
+    <li><a href="/tags/position/">position</a><small>1</small></li>
+  
+    <li><a href="/tags/post/">post</a><small>1</small></li>
+  
+    <li><a href="/tags/proxy/">proxy</a><small>1</small></li>
+  
+    <li><a href="/tags/qemu/">qemu</a><small>9</small></li>
+  
+    <li><a href="/tags/rewrite/">rewrite</a><small>1</small></li>
+  
+    <li><a href="/tags/scsi/">scsi</a><small>1</small></li>
+  
+    <li><a href="/tags/site-memory/">site memory</a><small>1</small></li>
+  
+    <li><a href="/tags/soap/">soap</a><small>1</small></li>
+  
+    <li><a href="/tags/sql/">sql</a><small>1</small></li>
+  
+    <li><a href="/tags/svn/">svn</a><small>1</small></li>
+  
+    <li><a href="/tags/tip/">tip</a><small>1</small></li>
+  
+    <li><a href="/tags/tree_conflict/">tree_conflict</a><small>1</small></li>
+  
+    <li><a href="/tags/vim/">vim</a><small>3</small></li>
+  
+    <li><a href="/tags/virtio/">virtio</a><small>1</small></li>
+  
+    <li><a href="/tags/vmware/">vmware</a><small>1</small></li>
+  
+    <li><a href="/tags/vpn/">vpn</a><small>1</small></li>
+  
+    <li><a href="/tags/wget/">wget</a><small>1</small></li>
+  
+    <li><a href="/tags/wordpress/">wordpress</a><small>2</small></li>
+  
+  </ul>
+</div>
+
+
+  
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2013 leiqzhang
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+<script type="text/javascript">
+var disqus_shortname = 'leiqzhang';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+</body>
+</html>

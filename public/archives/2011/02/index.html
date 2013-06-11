@@ -1,0 +1,423 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Archives: 2011/2 | Technology &amp; Life</title>
+  <meta name="author" content="leiqzhang">
+  
+  <meta name="description" content="Virtualization Related Technologies">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+  <meta property="og:site_name" content="Technology &amp; Life"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.png" rel="icon">
+  <link rel="alternate" href="/atom.xml" title="Technology &amp; Life" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
+  
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">Technology &amp; Life</a></h1>
+  <h2><a href="/">blog of leiqzhang</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div></header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper">
+<h2 class="archive-title">2011/2</h2>
+
+
+  
+    <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2011-02-28T07:30:40.000Z"><a href="/2011/02/2011-02-28-mysql-delete-rows-from-multi-tables/">Feb 28 2011</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2011/02/2011-02-28-mysql-delete-rows-from-multi-tables/">MySQL同时删除多表数据</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>假设有如下三个表：</p>
+<p>[sql]
+CREATE TABLE <code>list</code> (
+<code>id</code> int(11) NOT NULL AUTO_INCREMENT,
+<code>name</code> varchar(255) DEFAULT NULL,
+PRIMARY KEY (<code>id</code>)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8</p>
+<p>CREATE TABLE <code>detail</code> (
+<code>id</code> int(11) NOT NULL AUTO_INCREMENT,
+<code>list_id</code> int(11) DEFAULT NULL,
+PRIMARY KEY (<code>id</code>)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8</p>
+<p>CREATE TABLE <code>workflow</code> (
+<code>id</code> int(11) NOT NULL AUTO_INCREMENT,
+<code>list_id</code> int(11) DEFAULT NULL,
+PRIMARY KEY (<code>id</code>)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8</p>
+<p>[/sql]</p>
+<p>detail和workflow表均通过list_id和list表的id关联
+如果我们需要删除list表中id为1及其关联的detail和workflow表记录时，除了通过添加外键关联ON DELETE约束外，可否在一条语句中完成?即可否使用类似于如下的语句：
+[sql]
+delete from list,detail,workflow where list.id=detail.list_id and workflow.list_id=list.id;
+[/sql]</p>
+<blockquote>
+<p>答案是不行的，但是MySQL是可以支持多表删除的，具体用法如下(摘自MySQL<a href="http://dev.mysql.com/doc/refman/5.0/en/delete.html">官方文档</a>)</p>
+</blockquote>
+<p>对于第一种多表删除语法，只有在FROM语句之前列出的表中的匹配记录会被删除;第二种语法中,只有在FROM语句中列出的表(USING语句之前)中匹配的记录会被删除.效果是你可以同时从多个表中删除记录，而另外一些的表可仅起辅助查询作用.
+For the first multiple-table syntax, only matching rows from the tables listed before the FROM clause are deleted. For the second multiple-table syntax, only matching rows from the tables listed in the FROM clause (before the USING clause) are deleted. The effect is that you can delete rows from many tables at the same time and have additional tables that are used only for searching:</p>
+<p>DELETE t1, t2 FROM t1 INNER JOIN t2 INNER JOIN t3
+WHERE t1.id=t2.id AND t2.id=t3.id;</p>
+<p>Or:</p>
+<p>DELETE FROM t1, t2 USING t1 INNER JOIN t2 INNER JOIN t3
+WHERE t1.id=t2.id AND t2.id=t3.id;</p>
+<p>这些语句使用了三个表来查找需要删除的记录，但是仅仅从t1和t2表中删除符合条件的记录
+These statements use all three tables when searching for rows to delete, but delete matching rows only from tables t1 and t2.</p>
+<p>前面的例子使用的是INNER JOIN，而多表删除时也可以使用其余类型的JOIN，如LEFT JOIN等等。例如，如果需要删除在t1中存在而在t2中不存在的数据，可以使用如下的删除语句:
+The preceding examples use INNER JOIN, but multiple-table DELETE statements can use other types of join permitted in SELECT statements, such as LEFT JOIN. For example, to delete rows that exist in t1 that have no match in t2, use a LEFT JOIN:</p>
+<p>DELETE t1 FROM t1 LEFT JOIN t2 ON t1.id=t2.id WHERE t2.id IS NULL;</p>
+<p>如果多表删除涉及了存在外键约束的InnoDB表,MySQL优化器处理多表的顺序可能会和其父子关系不一致,这样的话,该语句会执行失败并进行回滚。这种情况下，可以通过添加ON DELETE外键约束来完成多表删除。
+If you use a multiple-table DELETE statement involving InnoDB tables for which there are foreign key constraints, the MySQL optimizer might process tables in an order that differs from that of their parent/child relationship. In this case, the statement fails and rolls back. Instead, you should delete from a single table and rely on the ON DELETE capabilities that InnoDB provides to cause the other tables to be modified accordingly.</p>
+<p>对于开头的三个表删除需求，可以这么进行删除:</p>
+<p>[sql]
+delete list,detail,workflow from list,detail,workflow where list.id=detail.list_id and workflow.list_id=list.id and list.id=1;</p>
+<p>delete list,detail,workflow from list inner join detail inner join workflow where list.id=detail.list_id and workflow.list_id=list.id and list.id=1;</p>
+<p>delete from list,detail,workflow using list inner join workflow inner join detail where list.id=detail.list_id and workflow.list_id=list.id and list.id=1;</p>
+<p>[/sql]</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  
+    <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2011-02-25T12:44:03.000Z"><a href="/2011/02/2011-02-25-php-ignore_user_abort/">Feb 25 2011</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2011/02/2011-02-25-php-ignore_user_abort/">PHP的ignore_user_abort方法</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>按照PHP文档说明：</p>
+<blockquote>
+<p>在 PHP 内部，系统维护着连接状态，其状态有三种可能的情况：</p>
+<ul>
+<li>0 - NORMAL（正常）</li>
+</ul>
+<ul>
+<li>1 - ABORTED（异常退出）</li>
+</ul>
+<ul>
+<li>2 - TIMEOUT（超时）</li>
+</ul>
+</blockquote>
+<p>当 PHP 脚本正常地运行 NORMAL 状态时，连接为有效。当远程客户端中断连接时，ABORTED  状态的标记将会被打开。远程客户端连接的中断通常是由用户点击 STOP 按钮导致的。当连接时间超过 PHP 的时限（请参阅 <a href="http://www.php.net/manual/en/function.set-time-limit.php"><strong>set_time_limit()</strong></a> 函数）时，TIMEOUT 状态的标记将被打开。</p>
+<p>可以决定脚本是否需要在客户端中断连接时退出。有时候让脚本完整地运行会带来很多方便，即使没有远程浏览器接受脚本的输出。默认的情况是当远程客户端连接中断时脚本将会退出。该处理过程可由  php.ini 的 ignore_user_abort 或由 Apache .conf  设置中对应的“php_value ignore_user_abort”以及 <a href="http://www.php.net/manual/en/function.ignore-user-abort.php"><strong>ignore_user_abort()</strong></a> 函数来控制。如果没有告诉 PHP 忽略用户的中断，脚本将会被中断，除非通过  <a href="http://www.php.net/manual/en/function.register-shutdown-function.php"><strong>register_shutdown_function()</strong></a> 设置了关闭触发函数。通过该关闭触发函数，当远程用户点击  STOP 按钮后，脚本再次尝试输出数据时，PHP 将会检测到连接已被中断，并调用关闭触发函数。</p>
+<p>对于ignore_user_abort的理解误区主要是，认为应当用户在一个脚本加载期间点击了浏览器的“stop”按钮时：</p>
+<ol>
+<li>服务器端如果没有调用ignore_user_abort(true)，那么服务器端脚本的执行将会中断</li>
+</ol>
+<ol>
+<li>如果调用了ignore_user_abort(true), 那么服务器端脚本将会继续执行</li>
+</ol>
+<ol>
+<li>点击stop后，通过connection_status方法，就可以获取连接状态为ABORTED</li>
+</ol>
+<p>而实际上，只有php执行了输出操作，要将字符串输出到浏览器时才会去检测连接状态，也只有这时候才可以知道用户是否点击了&quot;stop&quot;按钮。当然，这是指后台脚本真正将字符串输出到浏览器时，如果中间存在缓存，则必须在缓存内容真正flush到浏览器时才可以知道连接状态（这里也需要注意一些杀毒软件会首先对网页输出进行缓存）。</p>
+<p>实际上，ignore_user_abort的作用是：</p>
+<ol>
+<li>当脚本执行前调用了ignore_user_abort(true)忽略用户中断后，当有输出操作需要将信息输出给浏览器时，脚本会检测到连接其实已经终止了，会将connection的status设置为ABORTED，但会继续执行后面的脚本，而不会异常退出</li>
+</ol>
+<ol>
+<li>而当脚本没有设置忽略用户中断时，在第一次将信息输出到浏览器时，检测到连接中断，此时后台脚本就会直接异常退出，并不会继续执行下去</li>
+</ol>
+<p>也就是说，如果一个PHP脚本没有输出，那么不论是否用户中断，也无论是否设置了忽略中断(ignore_user_abort)，脚本均会执行下去直至结束（除非超过脚本最长执行时间或者脚本本身异常)；当PHP脚本有输出时，仅会在输出到达浏览器时可以检测到用户是否已经中断，并根据ignore_user_abort的设置来决定是直接结束还是继续进行。</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  
+    <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2011-02-25T12:24:13.000Z"><a href="/2011/02/2011-02-25-lighthttpd-wordpress-permalink-postname/">Feb 25 2011</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2011/02/2011-02-25-lighthttpd-wordpress-permalink-postname/">lighthttpd实现WordPress永久链接(Permalink)</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>WordPress的永久链接(permalink)可支持自定义的链接结构,如本博客的url格式为<a href="http://leivli.duapp.com/%postname%,其中postname表示文章的别名。">http://leivli.duapp.com/%postname%,其中postname表示文章的别名。</a></p>
+<p>站点迁移到lighthttpd环境后，需要进行一些配置才可以支持:</p>
+<p>[code]</p>
+<p>$HTTP[&quot;host&quot;] =~ &quot;leivli.(.<em>)&quot; {
+url.rewrite-once = (
+ &quot;^/(wp-admin\/.</em>)/?$&quot; =&gt; &quot;/$1&quot;,
+ &quot;^/([_0-9a-zA-Z-]+)/?$&quot; =&gt; &quot;/index.php?name=$1&quot;,
+ )
+}</p>
+<p>[/code]</p>
+<p>原理其实就是将/postname形式的url重新改为index.php?name=postname的形式，但需要特殊处理管理入口(/wp-admin)，否则会认为wp-admin也是一个postname</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  
+
+  <nav id="pagination">
+  
+  
+  <div class="clearfix"></div>
+</nav>
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:leiqzhang.com">
+  </form>
+</div>
+
+  
+<div class="widget tag">
+  <h3 class="title">Categories</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/HTTP/">HTTP</a><small>2</small></li>
+  
+    <li><a href="/categories/JavaScriptCSS/">JavaScript/CSS</a><small>2</small></li>
+  
+    <li><a href="/categories/LinuxUnix/">Linux/Unix</a><small>3</small></li>
+  
+    <li><a href="/categories/MySQL/">MySQL</a><small>2</small></li>
+  
+    <li><a href="/categories/MySQL/PHP/">PHP</a><small>1</small></li>
+  
+    <li><a href="/categories/PHP/">PHP</a><small>2</small></li>
+  
+    <li><a href="/categories/QEMU/">QEMU</a><small>9</small></li>
+  
+    <li><a href="/categories/QEMU/Virtualization/">Virtualization</a><small>9</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>2</small></li>
+  
+    <li><a href="/categories/vim/">vim</a><small>3</small></li>
+  
+    <li><a href="/categories/virtualization/">virtualization</a><small>1</small></li>
+  
+    <li><a href="/categories/virtualization/vmware/">vmware</a><small>1</small></li>
+  
+    <li><a href="/categories/未分类/">未分类</a><small>1</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">Tags</h3>
+  <ul class="entry">
+  
+    <li><a href="/tags/bfc/">bfc</a><small>1</small></li>
+  
+    <li><a href="/tags/cache-control/">cache-control</a><small>1</small></li>
+  
+    <li><a href="/tags/collapse/">collapse</a><small>1</small></li>
+  
+    <li><a href="/tags/css/">css</a><small>1</small></li>
+  
+    <li><a href="/tags/dataplane/">dataplane</a><small>1</small></li>
+  
+    <li><a href="/tags/ervernote/">ervernote</a><small>1</small></li>
+  
+    <li><a href="/tags/etag/">etag</a><small>1</small></li>
+  
+    <li><a href="/tags/expires/">expires</a><small>1</small></li>
+  
+    <li><a href="/tags/float/">float</a><small>1</small></li>
+  
+    <li><a href="/tags/greasemonkey/">greasemonkey</a><small>1</small></li>
+  
+    <li><a href="/tags/hasLayout/">hasLayout</a><small>1</small></li>
+  
+    <li><a href="/tags/http/">http</a><small>2</small></li>
+  
+    <li><a href="/tags/javascript/">javascript</a><small>1</small></li>
+  
+    <li><a href="/tags/kvm/">kvm</a><small>9</small></li>
+  
+    <li><a href="/tags/last-modified/">last-modified</a><small>1</small></li>
+  
+    <li><a href="/tags/libvirt/">libvirt</a><small>8</small></li>
+  
+    <li><a href="/tags/lighthttpd/">lighthttpd</a><small>1</small></li>
+  
+    <li><a href="/tags/linux/">linux</a><small>1</small></li>
+  
+    <li><a href="/tags/mac/">mac</a><small>1</small></li>
+  
+    <li><a href="/tags/margin/">margin</a><small>1</small></li>
+  
+    <li><a href="/tags/md5sum/">md5sum</a><small>1</small></li>
+  
+    <li><a href="/tags/mysql/">mysql</a><small>2</small></li>
+  
+    <li><a href="/tags/patch/">patch</a><small>1</small></li>
+  
+    <li><a href="/tags/pdo/">pdo</a><small>1</small></li>
+  
+    <li><a href="/tags/perf/">perf</a><small>1</small></li>
+  
+    <li><a href="/tags/permalink/">permalink</a><small>1</small></li>
+  
+    <li><a href="/tags/php/">php</a><small>2</small></li>
+  
+    <li><a href="/tags/position/">position</a><small>1</small></li>
+  
+    <li><a href="/tags/post/">post</a><small>1</small></li>
+  
+    <li><a href="/tags/proxy/">proxy</a><small>1</small></li>
+  
+    <li><a href="/tags/qemu/">qemu</a><small>9</small></li>
+  
+    <li><a href="/tags/rewrite/">rewrite</a><small>1</small></li>
+  
+    <li><a href="/tags/scsi/">scsi</a><small>1</small></li>
+  
+    <li><a href="/tags/site-memory/">site memory</a><small>1</small></li>
+  
+    <li><a href="/tags/soap/">soap</a><small>1</small></li>
+  
+    <li><a href="/tags/sql/">sql</a><small>1</small></li>
+  
+    <li><a href="/tags/svn/">svn</a><small>1</small></li>
+  
+    <li><a href="/tags/tip/">tip</a><small>1</small></li>
+  
+    <li><a href="/tags/tree_conflict/">tree_conflict</a><small>1</small></li>
+  
+    <li><a href="/tags/vim/">vim</a><small>3</small></li>
+  
+    <li><a href="/tags/virtio/">virtio</a><small>1</small></li>
+  
+    <li><a href="/tags/vmware/">vmware</a><small>1</small></li>
+  
+    <li><a href="/tags/vpn/">vpn</a><small>1</small></li>
+  
+    <li><a href="/tags/wget/">wget</a><small>1</small></li>
+  
+    <li><a href="/tags/wordpress/">wordpress</a><small>2</small></li>
+  
+  </ul>
+</div>
+
+
+  
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2013 leiqzhang
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+<script type="text/javascript">
+var disqus_shortname = 'leiqzhang';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+</body>
+</html>

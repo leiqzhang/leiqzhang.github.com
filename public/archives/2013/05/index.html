@@ -1,0 +1,514 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Archives: 2013/5 | Technology &amp; Life</title>
+  <meta name="author" content="leiqzhang">
+  
+  <meta name="description" content="Virtualization Related Technologies">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+  <meta property="og:site_name" content="Technology &amp; Life"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.png" rel="icon">
+  <link rel="alternate" href="/atom.xml" title="Technology &amp; Life" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
+  
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">Technology &amp; Life</a></h1>
+  <h2><a href="/">blog of leiqzhang</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div></header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper">
+<h2 class="archive-title">2013/5</h2>
+
+
+  
+    <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-05-20T12:40:31.000Z"><a href="/2013/05/2013-05-20-qemu-virtio-refactoring/">May 20 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/05/2013-05-20-qemu-virtio-refactoring/">QEMU Fetures: Virtio Refactoring</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <h3>Background</h3>
+<p>在研究QEMU的virtio-scsi时，发现了如下问题: 1.5的qemu相比1.2多了几种virtio及scsi相关的设备</p>
+<ol>
+<li><p>qemu-1.2</p>
+<blockquote>
+<p><strong>CMD:</strong> qemu-kvm -device ? 2&gt;&amp;1 | grep &quot;virtio|scsi&quot;</p>
+<p><strong>OUTPUT:</strong> </p>
+<ul>
+<li>name &quot;scsi-hd&quot;, bus SCSI, desc &quot;virtual SCSI disk&quot;</li>
+<li>name &quot;virtio-blk-pci&quot;, bus PCI, alias &quot;virtio-blk&quot;</li>
+<li>name &quot;virtio-9p-pci&quot;, bus PCI</li>
+<li>name &quot;scsi-block&quot;, bus SCSI, desc &quot;SCSI block device passthrough&quot;</li>
+<li>name &quot;scsi-generic&quot;, bus SCSI, desc &quot;pass through generic scsi device (/dev/sg*)&quot;</li>
+<li>name &quot;scsi-disk&quot;, bus SCSI, desc &quot;virtual SCSI disk or CD-ROM (legacy)&quot;</li>
+<li>name &quot;virtserialport&quot;, bus virtio-serial-bus</li>
+<li>name &quot;scsi-cd&quot;, bus SCSI, desc &quot;virtual SCSI CD-ROM&quot;</li>
+<li>name &quot;virtconsole&quot;, bus virtio-serial-bus</li>
+<li>name &quot;virtio-serial-pci&quot;, bus PCI, alias &quot;virtio-serial&quot;</li>
+<li>name &quot;am53c974&quot;, bus PCI, desc &quot;AMD Am53c974 PCscsi-PCI SCSI adapter&quot;</li>
+<li>name &quot;virtio-net-pci&quot;, bus PCI, alias &quot;virtio-net&quot;</li>
+<li>name &quot;virtio-balloon-pci&quot;, bus PCI, alias &quot;virtio-balloon&quot;</li>
+<li>name &quot;virtio-scsi-pci&quot;, bus PCI</li>
+</ul>
+</blockquote>
+</li>
+<li><p>qemu-1.5</p>
+<blockquote>
+<p><strong>CMD:</strong> ./x86_64-softmmu/qemu-system-x86_64  -device ? 2&gt;&amp;1 | grep &quot;virtio|scsi&quot;</p>
+<p><strong>OUTPUT:</strong> </p>
+<ul>
+<li>name &quot;scsi-hd&quot;, bus SCSI, desc &quot;virtual SCSI disk&quot;</li>
+<li>name &quot;virtio-blk-pci&quot;, bus PCI, alias &quot;virtio-blk&quot;</li>
+<li>name &quot;vhost-scsi-pci&quot;, bus PCI</li>
+<li>name &quot;scsi-block&quot;, bus SCSI, desc &quot;SCSI block device passthrough&quot;</li>
+<li>name &quot;virtio-serial-device&quot;, bus virtio-bus</li>
+<li>name &quot;virtio-scsi-common&quot;, bus virtio-bus</li>
+<li>name &quot;scsi-generic&quot;, bus SCSI, desc &quot;pass through generic scsi device (/dev/sg*)&quot;</li>
+<li>name &quot;vhost-scsi&quot;, bus virtio-bus</li>
+<li>name &quot;scsi-disk&quot;, bus SCSI, desc &quot;virtual SCSI disk or CD-ROM (legacy)&quot;</li>
+<li>name &quot;virtserialport&quot;, bus virtio-serial-bus</li>
+<li>name &quot;scsi-cd&quot;, bus SCSI, desc &quot;virtual SCSI CD-ROM&quot;</li>
+<li>name &quot;virtio-net-device&quot;, bus virtio-bus</li>
+<li>name &quot;virtconsole&quot;, bus virtio-serial-bus</li>
+<li>name &quot;virtio-serial-pci&quot;, bus PCI, alias &quot;virtio-serial&quot;</li>
+<li>name &quot;virtio-balloon-device&quot;, bus virtio-bus</li>
+<li>name &quot;virtio-rng-pci&quot;, bus PCI</li>
+<li>name &quot;pvscsi&quot;, bus PCI</li>
+<li>name &quot;am53c974&quot;, bus PCI, desc &quot;AMD Am53c974 PCscsi-PCI SCSI adapter&quot;</li>
+<li>name &quot;virtio-balloon-pci&quot;, bus PCI, alias &quot;virtio-balloon&quot;</li>
+<li>name &quot;virtio-scsi-pci&quot;, bus PCI</li>
+<li>name &quot;virtio-blk-device&quot;, bus virtio-bus</li>
+<li>name &quot;virtio-scsi-device&quot;, bus virtio-bus</li>
+<li>name &quot;virtio-net-pci&quot;, bus PCI, alias &quot;virtio-net&quot;</li>
+</ul>
+</blockquote>
+</li>
+</ol>
+<h3>Questions</h3>
+<ol>
+<li>What is virtio-bus?</li>
+<li>Which device can provide virtio-bus?</li>
+<li>How to use virtio-scsi-device or virtio-blk-device?</li>
+<li>What is virtio-scsi-common?</li>
+</ol>
+<h3>Root Cause: Virtio Refactoring</h3>
+<ol>
+<li>Ref: <a href="http://wiki.qemu.org/Features/virtio-refactoring">http://wiki.qemu.org/Features/virtio-refactoring</a></li>
+<li><p>Details:</p>
+<blockquote>
+<p>Actually QEMU has a lot of virtio devices, which are not QOM compliant; they can be used with two different transports:</p>
+<p>PCI: with eg: -device virtio-blk-pci.
+S390: with eg: -device virtio-blk-s390.
+The new implementation is as follows:</p>
+<p>A new bus is introduced: virtio-bus which is an abstract bus.</p>
+<p>For each transport a specific implementation of virtio-bus is created. (eg: virtio-pci-bus for virtio-pci).</p>
+<p>Each virtio transport is built with a virtio-bus that the virtio devices connect to.
+VirtIODevice becomes a device which is abstract and must be connected on a virtio-bus.</p>
+<p>Each virtio device are created (eg: virtio-blk) extends VirtioDevice and then connects on a virtio-bus.</p>
+<p>As we discussed, we must keep the backward compatibility. So the re-factored device must have the same properties and the same behavior. We should have only one way to create the device, so the transport/virtio-bus/virtio-device layout is only internal to QEMU for S390 and PCI device.</p>
+</blockquote>
+</li>
+</ol>
+<h3>Answers:</h3>
+<ul>
+<li><p><strong>Q:</strong> What is virtio-bus?</p>
+<blockquote>
+<p><strong>A:</strong> An abstract bus for virtio device</p>
+</blockquote>
+</li>
+<li><p><strong>Q:</strong> Which device can provide virtio-bus?</p>
+<blockquote>
+<p><strong>A:</strong> Every virtio related bus, such as virtio-pci-bus, virtio-scsi-bus, etc.</p>
+</blockquote>
+</li>
+<li><p><strong>Q:</strong> How to use virtio-scsi-device or virtio-blk-device?</p>
+<blockquote>
+<p><strong>A:</strong> Both of them are <strong>VirtIODevice</strong> mentioned above. There is no way to use them explicit</p>
+</blockquote>
+</li>
+<li><p><strong>Q:</strong> What is virtio-scsi-common?</p>
+<blockquote>
+<p><strong>A:</strong> Maybe not so related to this subject. It is used for new device supporting the tcm_vhost</p>
+<p><strong>Ref:</strong> <a href="http://lists.gnu.org/archive/html/qemu-devel/2013-01/msg05821.html">http://lists.gnu.org/archive/html/qemu-devel/2013-01/msg05821.html</a></p>
+<p><strong>Summary:</strong></p>
+<p>Ok, so here is my attempt at a vhost-scsi device.  I&#39;m creating an entirely separate device, with the common parts of virtio-scsi and vhost-scsi (actually little more than the initialization) grouped into a VirtIOSCSICommon type.  The device is used simply like &quot;-device vhost-scsi-pci,wwpn=WWPN&quot;, with all configuration done in configfs beforehand.</p>
+</blockquote>
+</li>
+</ul>
+<h3>The Change of Qtree</h3>
+<ol>
+<li><p>CMD</p>
+<blockquote>
+<p>qemu-kvm -enable-kvm -name win2003 -M pc-0.15 -m 1024 -boot c -drive file=/pkgs/imgs/win7.img,if=none,format=raw,cache=none,id=drive0 -monitor stdio -vga qxl -vnc 186.100.8.144:0 -nodefaults  -device virtio-scsi-pci,id=scsi -device scsi-hd,drive=drive0 -device piix3-usb-uhci,id=usb,bus=pci.0,addr=0x1.0x2 -device usb-tablet,id=input0</p>
+</blockquote>
+</li>
+<li><p>Qtree of Qemu 1.2</p>
+</li>
+</ol>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+</pre></td><td class="code"><pre>    dev: virtio-scsi-pci, id <span class="string">"scsi"</span>
+        ioeventfd = on
+        <span class="keyword">...</span>
+        bus: scsi.0
+            type SCSI
+                dev: scsi-hd, id <span class="string">""</span>
+                    drive = drive0
+</pre></td></tr></table></figure>
+3. Qtree of Qemu 1.3
+
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+</pre></td><td class="code"><pre>	    dev: virtio-scsi-pci, id <span class="string">"scsi"</span>
+         ioeventfd = on
+         <span class="keyword">...</span>
+         bus: scsi.0
+           type virtio-pci-bus
+           dev: virtio-scsi-device, id <span class="string">""</span>
+             num_queues = <span class="number">1</span>
+             max_sectors = <span class="number">65535</span>
+             cmd_per_lun = <span class="number">128</span>
+             bus: scsi.0
+               type SCSI
+               dev: scsi-hd, id <span class="string">""</span>
+                 drive = drive0
+</pre></td></tr></table></figure>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  
+    <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-05-06T08:56:31.000Z"><a href="/2013/05/2013-05-06-qemu-contribute-submit-patch-steps/">May 6 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/05/2013-05-06-qemu-contribute-submit-patch-steps/">QEMU Contribute: steps of submit a patch</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <ol>
+<li><p>邮件的收件人和抄送人</p>
+<ul>
+<li>收件人：qemu-devel@nongnu.org</li>
+<li>抄送人<ul>
+<li>参考代码库中的MAINTAINERS文件</li>
+<li>使用scripts/getmaintainer.pl来获取此文件的主要提交者</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>邮件的主题和内容的格式</p>
+<ul>
+<li>使用git format-patch来生成标准格式的patch</li>
+<li>需要带-s参数使得生成的PATCH中包含signed-off-by开头的行</li>
+<li>邮件主题使用此命令生成的Patch文件中的subject</li>
+<li>邮件正文使用此文盲生成的Patch文件中的body</li>
+<li>包含大量更改的Patch，需按代码逻辑拆分为多个patch，组成patch series<ul>
+<li>Patch series要求<ul>
+<li>每部分的change均需保证可编译通过</li>
+<li>文档类的change靠前</li>
+</ul>
+</li>
+<li>邮件要求<ul>
+<li>最开始是一个cover leter，必须包含PATCH的goal和diffstat，尽量使得cover letter的内容有意义<ul>
+<li>每部分change单独放到一封邮件中，并回复cover letter，标题为[PATCH v1 0/5]等形式</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Patch要求</p>
+<ul>
+<li>符合QEMU的代码规范</li>
+<li>注释明确，使用英文，没有拼写错误</li>
+<li>需要基于当前git master生成Patch</li>
+<li>不要包含无关内容</li>
+</ul>
+</li>
+<li><p>邮件发出后</p>
+<ul>
+<li>跟进社区的回复，并持续跟进</li>
+<li>如果是在社区review后再次发送的Patch，需在标题后加上v2、v3等后缀，依次类推</li>
+<li>当社区中有协助进行review的，在后续版本的PATCH中恰当使用&quot;Reviewed-by&quot; tag，使得reviewer方便区分review内容</li>
+<li>如果发现PATCH发出后没有回应，每隔一到两周，“全部回复”之前的Patch邮件，并在主题中带上”Ping“</li>
+</ul>
+</li>
+</ol>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  
+
+  <nav id="pagination">
+  
+  
+  <div class="clearfix"></div>
+</nav>
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:leiqzhang.com">
+  </form>
+</div>
+
+  
+<div class="widget tag">
+  <h3 class="title">Categories</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/HTTP/">HTTP</a><small>2</small></li>
+  
+    <li><a href="/categories/JavaScriptCSS/">JavaScript/CSS</a><small>2</small></li>
+  
+    <li><a href="/categories/LinuxUnix/">Linux/Unix</a><small>3</small></li>
+  
+    <li><a href="/categories/MySQL/">MySQL</a><small>2</small></li>
+  
+    <li><a href="/categories/MySQL/PHP/">PHP</a><small>1</small></li>
+  
+    <li><a href="/categories/PHP/">PHP</a><small>2</small></li>
+  
+    <li><a href="/categories/QEMU/">QEMU</a><small>9</small></li>
+  
+    <li><a href="/categories/QEMU/Virtualization/">Virtualization</a><small>9</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>2</small></li>
+  
+    <li><a href="/categories/vim/">vim</a><small>3</small></li>
+  
+    <li><a href="/categories/virtualization/">virtualization</a><small>1</small></li>
+  
+    <li><a href="/categories/virtualization/vmware/">vmware</a><small>1</small></li>
+  
+    <li><a href="/categories/未分类/">未分类</a><small>1</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">Tags</h3>
+  <ul class="entry">
+  
+    <li><a href="/tags/bfc/">bfc</a><small>1</small></li>
+  
+    <li><a href="/tags/cache-control/">cache-control</a><small>1</small></li>
+  
+    <li><a href="/tags/collapse/">collapse</a><small>1</small></li>
+  
+    <li><a href="/tags/css/">css</a><small>1</small></li>
+  
+    <li><a href="/tags/dataplane/">dataplane</a><small>1</small></li>
+  
+    <li><a href="/tags/ervernote/">ervernote</a><small>1</small></li>
+  
+    <li><a href="/tags/etag/">etag</a><small>1</small></li>
+  
+    <li><a href="/tags/expires/">expires</a><small>1</small></li>
+  
+    <li><a href="/tags/float/">float</a><small>1</small></li>
+  
+    <li><a href="/tags/greasemonkey/">greasemonkey</a><small>1</small></li>
+  
+    <li><a href="/tags/hasLayout/">hasLayout</a><small>1</small></li>
+  
+    <li><a href="/tags/http/">http</a><small>2</small></li>
+  
+    <li><a href="/tags/javascript/">javascript</a><small>1</small></li>
+  
+    <li><a href="/tags/kvm/">kvm</a><small>9</small></li>
+  
+    <li><a href="/tags/last-modified/">last-modified</a><small>1</small></li>
+  
+    <li><a href="/tags/libvirt/">libvirt</a><small>8</small></li>
+  
+    <li><a href="/tags/lighthttpd/">lighthttpd</a><small>1</small></li>
+  
+    <li><a href="/tags/linux/">linux</a><small>1</small></li>
+  
+    <li><a href="/tags/mac/">mac</a><small>1</small></li>
+  
+    <li><a href="/tags/margin/">margin</a><small>1</small></li>
+  
+    <li><a href="/tags/md5sum/">md5sum</a><small>1</small></li>
+  
+    <li><a href="/tags/mysql/">mysql</a><small>2</small></li>
+  
+    <li><a href="/tags/patch/">patch</a><small>1</small></li>
+  
+    <li><a href="/tags/pdo/">pdo</a><small>1</small></li>
+  
+    <li><a href="/tags/perf/">perf</a><small>1</small></li>
+  
+    <li><a href="/tags/permalink/">permalink</a><small>1</small></li>
+  
+    <li><a href="/tags/php/">php</a><small>2</small></li>
+  
+    <li><a href="/tags/position/">position</a><small>1</small></li>
+  
+    <li><a href="/tags/post/">post</a><small>1</small></li>
+  
+    <li><a href="/tags/proxy/">proxy</a><small>1</small></li>
+  
+    <li><a href="/tags/qemu/">qemu</a><small>9</small></li>
+  
+    <li><a href="/tags/rewrite/">rewrite</a><small>1</small></li>
+  
+    <li><a href="/tags/scsi/">scsi</a><small>1</small></li>
+  
+    <li><a href="/tags/site-memory/">site memory</a><small>1</small></li>
+  
+    <li><a href="/tags/soap/">soap</a><small>1</small></li>
+  
+    <li><a href="/tags/sql/">sql</a><small>1</small></li>
+  
+    <li><a href="/tags/svn/">svn</a><small>1</small></li>
+  
+    <li><a href="/tags/tip/">tip</a><small>1</small></li>
+  
+    <li><a href="/tags/tree_conflict/">tree_conflict</a><small>1</small></li>
+  
+    <li><a href="/tags/vim/">vim</a><small>3</small></li>
+  
+    <li><a href="/tags/virtio/">virtio</a><small>1</small></li>
+  
+    <li><a href="/tags/vmware/">vmware</a><small>1</small></li>
+  
+    <li><a href="/tags/vpn/">vpn</a><small>1</small></li>
+  
+    <li><a href="/tags/wget/">wget</a><small>1</small></li>
+  
+    <li><a href="/tags/wordpress/">wordpress</a><small>2</small></li>
+  
+  </ul>
+</div>
+
+
+  
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2013 leiqzhang
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+<script type="text/javascript">
+var disqus_shortname = 'leiqzhang';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+</body>
+</html>

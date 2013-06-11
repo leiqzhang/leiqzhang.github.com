@@ -1,0 +1,768 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Page 3 | Archives | Technology &amp; Life</title>
+  <meta name="author" content="leiqzhang">
+  
+  <meta name="description" content="Virtualization Related Technologies">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+  <meta property="og:site_name" content="Technology &amp; Life"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.png" rel="icon">
+  <link rel="alternate" href="/atom.xml" title="Technology &amp; Life" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
+  
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">Technology &amp; Life</a></h1>
+  <h2><a href="/">blog of leiqzhang</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div></header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper">
+<h2 class="archive-title">Archives</h2>
+
+
+  
+    <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2010-11-20T11:42:07.000Z"><a href="/2010/11/2010-11-20-free_green_vpn/">Nov 20 2010</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2010/11/2010-11-20-free_green_vpn/">一个申请免费VPN的地方</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>今天发现一个申请免费vpn的地方，一个月可以有200M的免费流量，而且有各种平台上的使用说明，很不错~</p>
+<p>可以点这个链接：<a href="http://www.greenvpn.net/join.php?ref=leivli">GreenVPN</a>进入查看，:)</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  
+    <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2010-11-16T16:27:56.000Z"><a href="/2010/11/2010-11-17-wp-evernote-bug-fix/">Nov 17 2010</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2010/11/2010-11-17-wp-evernote-bug-fix/">WP Evernote Site Memory插件1.1.1一个小问题的修正</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>Evernote是一个十分好用的笔记软件，针对wordpress有相应的WP Evernote Site Memory插件，安装完并进行相应的配置后，可以在每一篇博文开头或结尾有个小的evernote图标，点击后可以发送文章内容到读者自己的evernote笔记本中，十分方便。</p>
+<p>在site memory的配置中有如下选项：</p>
+<p><img src="file:///C:/Users/ADMINI%7E1/AppData/Local/Temp/moz-screenshot.png" alt=""><img src="file:///C:/Users/ADMINI%7E1/AppData/Local/Temp/moz-screenshot-1.png" alt=""><img src="http://leivli.duapp.com/wp-content/uploads/2010/11/11.png" alt="设置ContentID">即可以设定evernote获取页面哪一部分作为笔记内容，留空则可以使用id为“post-ID&quot;的div的内容，也即相应博文的内容。</p>
+<p>但昨天装了1.1.1后，发现点击某篇博文下的evernote图标后，发送到笔记的内容是整个页面的内容而非单独那篇博文的内容，刚才简单追踪了一下，发现是该插件附带js的一个小bug：生成的按钮中调用clip方法时传递postID的属性名是&quot;contentID&quot;,而之后却使用属性名&quot;contentId&quot;进行读取,这样导致Evernote认为没有传递合适的postID，从而就抓取了整个页面的内容。</p>
+<p>修改起来也十分简单，只需要将插件中所带的js文件（”plugins/wp-evernote-site-memory/js/noteit.js和noteit.min.js“）中所有的&quot;contentId&quot;替换为&quot;contentID&quot;即可。</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  
+    <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2010-11-15T09:17:35.000Z"><a href="/2010/11/2010-11-15-php_input_post/">Nov 15 2010</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2010/11/2010-11-15-php_input_post/">php://input和$_POST</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>一个soap_server的实现框架代码如下：</p>
+<p>[php]
+$wsdlFile = realpath(dirname(<strong>FILE</strong>).&#39;/../wsdl/service.wsdl&#39;);
+$actor = new soapServer($wsdlFile); //初始化soapServer
+$actor-&gt;setClass(&#39;ServiceInterface&#39;);//导入方法
+$actor-&gt;handle(file_get_contents(&#39;php://input&#39;)); //注意：这里使用了php://input
+[/php]</p>
+<p><strong>一个soap调用的数据是通过POST的方式发送给服务器的，那么上面的处理中为什么要使用php://input,是否可以使用$_POST？
+</strong></p>
+<p>一个典型的soap调用框架代码如下：</p>
+<p>[php]
+$client = new SoapClient(SOAP_SERVICEURL,array(&#39;trace&#39;=&gt;true));
+//使用trace选项，可以保证后面的<strong>getLastRequest、</strong>getLastResponse等方法可以读取到相应的请求/响应
+$ret = $client-&gt;getServiceName(&#39;serviceStr&#39;);
+echo htmlspecialchars($client-&gt;<strong>getLastRequestHeaders());
+ echo &quot;<br/>&quot;;
+ echo htmlspecialchars($client-&gt;</strong>getLastRequest());
+ echo &quot;<br/>&quot;;
+ var_dump($ret);
+ echo &quot;<br/>&quot;;
+ echo htmlspecialchars($client-&gt;<strong>getLastResponseHeaders());
+ echo &quot;<br/>&quot;;
+ echo htmlspecialchars($client-&gt;</strong>getLastResponse());
+ echo &quot;<br/>&quot;;
+[/php]</p>
+<p>以下是运行这段client后的输出：</p>
+<p>[code]
+POST <strong><strong> HTTP/1.1 Host: [*</strong></strong>] Connection: Keep-Alive User-Agent: PHP-SOAP/5.2.10 Content-Type: text/xml;
+charset=utf-8 SOAPAction: &quot;urn:<strong><em>*</em></strong>#getServiceName&quot; Content-Length: <em>*</em></p>
+<p>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt; <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ns1="urn:****" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"></p>
+<p><SOAP-ENV:Body><ns1:getServiceName><servicename xsi:type="xsd:string">serviceStr</servicename></ns1:getServiceName></SOAP-ENV:Body>
+</SOAP-ENV:Envelope></p>
+<p>NULL</p>
+<p>HTTP/1.1 200 OK Date: Mon, 15 Nov 2010 08:19:16 GMT Server: Apache/2.0.63 (Unix) PHP/5.2.10
+X-Powered-By: PHP/5.2.10 Set-Cookie: <strong>*</strong>; path=/; domain=<em>*</em> Expires: Thu, 19 Nov 1981 08:52:00 GMT
+Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0 Pragma: no-cache Content-Length: 521
+Keep-Alive: timeout=15, max=100 Connection: Keep-Alive Content-Type: text/xml; charset=utf-8</p>
+<p>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt; <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ns1="urn:AmsInterfaceswsdl" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><SOAP-ENV:Body></p>
+<p><ns1:getServiceNameResponse><return xsi:nil="true"/></ns1:getServiceNameResponse></SOAP-ENV:Body></SOAP-ENV:Envelope>
+[/code]</p>
+<p>由请求header可以看到，soap虽然使用的post的方式传输请求串，但是传递的数据是一个xml，content-type也是“text/xml”，而对于php://input,<a href="http://php.net/manual/en/wrappers.php.php">官方文档</a>给的是这样的说明:</p>
+<p>php://input allows you to read raw data from the request body. In case of POST requests, it preferrable to <a href="http://www.php.net/manual/en/reserved.variables.httprawpostdata.php">$HTTP_RAW_POST_DATA</a> as it does not depend on special php.ini directives. Moreover, for those cases where <a href="http://www.php.net/manual/en/reserved.variables.httprawpostdata.php">$HTTP_RAW_POST_DATA</a> is not populated by default, it is a potentially less memory intensive alternative to activating <a href="http://www.php.net/manual/en/ini.core.php#ini.always-populate-raw-post-data">always_populate_raw_post_data</a>. php://input is not available with <em>enctype=&quot;multipart/form-data&quot;</em>.</p>
+<blockquote>
+<p><strong>Note</strong>:  A stream opened with php://input can only be read once; the stream does not support seek operations. However, depending on the SAPI implementation, it may be possible to open another php://input stream and restart reading. This is only possible if the request body data has been saved. Typically, this is the case for POST requests, but not other request methods, such as PUT or PROPFIND. </p>
+</blockquote>
+<p>也就是说php://input可以用来读取http post的raw request data。对于一般的表单post，http头中设置的contentType是&#39;application/x-form-www-urlencoded&#39;(无文件上传)或&#39;multipart/form-data&#39;(一般用于文件上传),这两种情况下，post的数据会被设置到$_POST中（第一种情况下，php://input也会被设置，第二种情况下，php://input则不会被设置），而对于text/xml这种类型，post数据并不会被设置到$_POST中，具体的post、get和php://input的实验可参考这篇<a href="http://tuzwu.javaeye.com/blog/798978">博文</a>。</p>
+<p>这里只摘抄其测试结论：</p>
+<p>1，Coentent-Type仅在取值为application/x-www-data-urlencoded和multipart/form-data两种情况下，PHP才会将http请求数据包中相应的数据填入全局变量$_POST
+2，PHP不能识别的Content-Type类型的时候，会将http请求包中相应的数据填入变量$HTTP_RAW_POST_DATA
+3,  只有Coentent-Type不为multipart/form-data的时候，PHP不会将http请求数据包中的相应数据填入php://input，否则其它情况都会。填入的长度，由Coentent-Length指定。
+4，只有Content-Type为application/x-www-data-urlencoded时，php://input数据才跟$_POST数据相一致。
+5，php://input数据总是跟$HTTP_RAW_POST_DATA相同，但是php://input比$HTTP_RAW_POST_DATA更凑效，且不需要特殊设置php.ini
+6，PHP会将PATH字段的query_path部分，填入全局变量$_GET。通常情况下，GET方法提交的http请求，body为空。</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  
+    <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2010-11-14T17:12:11.000Z"><a href="/2010/11/2010-11-15-greasemonkey-baidu-space/">Nov 15 2010</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2010/11/2010-11-15-greasemonkey-baidu-space/">百度空间插入代码段和HTML代码片段的GreaseMonkey脚本</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>现在百度空间写日志时，在IE/firefox下的文本编辑器是不能直接查看和编辑日志的HTML代码的，应该是基于安全考虑。目前在chrome下，百度空间的兼容性不好，写新日志或者编辑日志时，直接是提供的一个文本框，可以直接敲入HTML代码（当然了，写入<script>是会被过滤掉的)。</p>
+<p>如果空间可以支持直接插入代码片段（语法高亮、缩进等等），则空间用来写技术文档就更方便了。最近刚好发现VIM的TOhtml命令非常强大，可以直接把编辑器中文本按照其颜色、缩进等生成相应的HTML片段，如果空间可以直接插入一段HTML代码的话，代码片段的插入也就不成问题了。</p>
+<p>之前在<a href="http://www.laruence.com/">雪候鸟</a>的博客上看到了<a href="http://www.laruence.com/2010/03/31/1377.html">东方时尚约车脚本</a>相关的内容，联想我的需求，参考其东方时尚约车脚本写了一个简单的Greasemonkey脚本，主要在以下两方面对空间的编辑器进行了扩展：
+1. 支持查看当前日志的HTML代码，以便进行简单的修改，和粘贴来自VIM的代码片段
+2. 支持直接插入一段来自VIM的代码段，该代码段可以具有一定的样式，如常见的有边框包围，字体更清晰等等</p>
+<p><strong>安装方法:</strong>
+1. 需要firefox
+2. firefox需要安装greaseMonkey插件, 插件地址: <a href="https://addons.mozilla.org/en-US/firefox/addon/748"><a href="https://addons.mozilla.org/en-US/firefox/addon/748">https://addons.mozilla.org/en-US/firefox/addon/748</a></a>
+3. 用firefox浏览本页, 并<a href="http://userscripts.org/scripts/show/78912">点此</a>下载安装</p>
+<p><strong>使用方法：</strong></p>
+<p>安装后打开自己的空间，“新建文章”或者“编辑”已发布的日志时，在标题的右侧会出现“插入代码段“和”HTML视图“两个按钮，如下图：</p>
+<p><img src="http://leivli.duapp.com/wp-content/uploads/1.png" alt=""></p>
+<p>其中”<strong>插入代码段</strong>“可以直接插入一段代码段，如我们VIM中TOhtml一个php脚本文件的结果，然后复制到”代码段“中：</p>
+<p><img src="http://leivli.duapp.com/wp-content/uploads/2.png" alt=""></p>
+<p>以下是结果：</p>
+<p>1 &lt;?php
+2 <strong>$</strong>file <strong>=</strong> file(&quot;harddisk.txt&quot;);
+3 <strong>foreach</strong>(<strong>$</strong>file <strong>as</strong> <strong>$</strong>line){
+4  <strong>$</strong>line <strong>=</strong> trim(<strong>$</strong>line);
+5  <strong>$</strong>s <strong>=</strong> preg_match_all(&quot;/(?:\d)+[GTM]/i&quot;,<strong>$</strong>line,<strong>$</strong>matches,PREG_PATTERN_ORDER);
+6  <strong>if</strong>(<strong>!**</strong>$<strong>s){
+7  echo &quot;error parse.. &quot;</strong>.<strong>**$</strong>line<strong>.</strong>&quot;\n&quot;;
+8  }
+9  <strong>else</strong> <strong>if</strong>(<strong>$</strong>s <strong>&gt;</strong> 1){
+10  echo &quot;multi match .. &quot;<strong>.**</strong>$<strong>line</strong>.<strong>&quot;: \n&quot;;
+11  </strong>foreach<strong>(</strong>$<strong>matches[0] </strong>as<strong> </strong>$<strong>match){
+12  echo &quot;</strong>$<strong>match\n&quot;;
+13  }
+14  }
+15  </strong>else<strong>{
+16  echo &quot;find..&quot;</strong>.<strong>**$</strong>line<strong>.</strong>&quot;: \n&quot;;
+17  echo <strong>$</strong>matches[0][0]<strong>.</strong>&quot;\n&quot;;
+18  }
+19 }
+20 ?&gt;</p>
+<p>代码段插入后，双击代码段可以进行<strong>编辑</strong>。</p>
+<p>”<strong>HTML视图</strong>“则显示当前日志的HTML代码，可以直接编辑：</p>
+<p><img src="http://leivli.duapp.com/wp-content/uploads/3.png" alt="">
+该对话框上面的”更新“按钮可以将改动写回空间的编辑器，而”加载“则是可以再次加载空间编辑器中的内容</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  
+    <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2010-11-14T15:18:45.000Z"><a href="/2010/11/2010-11-14-vim-force-overwrite/">Nov 14 2010</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2010/11/2010-11-14-vim-force-overwrite/">VIM overwrite read-only file</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>今天在使用vim编辑一个read-only的文件（权限为r-- r-- r--)，在保存时虽然提示只读不能保存，但是通过w!可以强制覆盖原文件内容，难道VIM可以绕过权限限制么？</p>
+<p>后来发现是在使用w！时，vim会强制删除原文件，并新建一个新的同名文件，并写入新的内容，所以，使用w！强制保存时，就要求当前用户有删除原文件的权限，即：</p>
+<ol>
+<li>该文件所在的目录必须具有w权限</li>
+</ol>
+<ol>
+<li>如果所在目录设置了t标志，还需要当前文件的所有者为自己</li>
+</ol>
+<p>其实这也可以从vim的帮助中看到：</p>
+<p><em>write-readonly</em></p>
+<p>When the &#39;cpoptions&#39; option contains &#39;W&#39;, Vim will refuse to overwrite a</p>
+<p>readonly file.  When &#39;W&#39; is not present, &quot;:w!&quot; will overwrite a readonly file,</p>
+<p>if the system allows it (the directory must be writable).</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  
+    <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2010-11-12T06:44:38.000Z"><a href="/2010/11/2010-11-12-wget-mirror/">Nov 12 2010</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2010/11/2010-11-12-wget-mirror/">wget下载整个网站的镜像</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p><span style="background-color: #ffff00;">$ wget --mirror -p --convert-links -P ./LOCAL-DIR WEBSITE-URL</span></p>
+<ul>
+<li>–mirror : 下载镜像</li>
+</ul>
+<ul>
+<li>-p : 下载gif等显示html必须的资源</li>
+</ul>
+<ul>
+<li>–convert-links : 下载后，将文档中所有的链接进行转换，以支持本地查看</li>
+</ul>
+<ul>
+<li>-P ./LOCAL-DIR : 需要保存下载文档的目录</li>
+</ul>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  
+    <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2010-11-05T09:41:46.000Z"><a href="/2010/11/2010-11-05-vim-tips/">Nov 5 2010</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2010/11/2010-11-05-vim-tips/">VIM TIPS</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <ol>
+<li>词自动补全： <C-P>（向上搜索） <C-N>(向下搜索)</li>
+<li>行自动补全： <C-X><C-L></li>
+<li>文件名自动补全： <C-X><C-F></li>
+<li>搜索的正则表达式：
+\         取消后面所跟字符的特殊含义。比如 [vim] 匹配字符串“[vim]”
+[]        匹配其中之一。比如 [vim] 匹配字母“v”、“i”或者“m”，[a-zA-Z] 匹配任意字母
+[^]       匹配非其中之一。比如 [^vim] 匹配除字母“v”、“i”和“m”之外的所有字符
+.         匹配任意字符</li>
+<li>匹配前一字符大于等于零遍。比如 vi<em>m 匹配“vm”、“vim”、“viim”……
++        匹配前一字符大于等于一遍。比如 vi+m 匹配“vim”、“viim”、“viiim”……
+\?        匹配前一字符零遍或者一遍。比如 vi\?m 匹配“vm”或者“vim”
+^         匹配行首。例如 /^hello 查找出现在行首的单词 hello
+$         匹配行末。例如 /hello$ 查找出现在行末的单词 hello
+()      括住某段正规表达式
+\数字     重复匹配前面某段括住的表达式。例如 (hello).</em>\1 匹配一个开始和末尾都是“hello”，中间是任意字符串的字符串</li>
+</ol>
+<p>对于替换字符串，可以用“&amp;”代表整个搜索字符串，或者用“\数字”代表搜索字符串中的某段括住的表达式。</p>
+<ol>
+<li>替换1,3s/pattern/replace/gc</li>
+</ol>
+<p>1,3表示从第一行到第3行，可以用.,$表示当前行到文件末尾，可以用%表示当前行</p>
+<p>s表示替换</p>
+<p>pattern表示要替换的模式（可以是正则）</p>
+<p>replace表示要使用的替换文本；</p>
+<p>g表示全局，会在替换一个后替换下一个</p>
+<p>c表示确认，再替换每一个时提示确认信息</p>
+<p>6.替换中：可用v选中一个区域，使用&#39;&lt;和&#39;&gt;分别代表区域开始和结束</p>
+<p>7.替换中，可用\zs和\ze分别表示匹配由此开始和匹配到此结束；\=表示后面是一个表达式，可以使用printf等方法，来根据匹配到的串计算值；</p>
+<p>line（)方法用来获取行号，如line(&quot;.&quot;)表示当前行，line(&quot;&#39;&lt;&quot;)表示选中的第一行行号</p>
+<p>submatch(0) == \0</p>
+<p>|可用于分隔多条命令</p>
+<p>g/str1/s//str2/  表示对于匹配“str1”的所有串，执行后面的命令（g的作用，后面命令指s替换），s省略匹配串，表示使用前面g命令的匹配串，str2表示替换为str2</p>
+<ol>
+<li><p>f@表示在该行向后调到第一个<a href="mailto:%20@">&#39;@&#39;</a>字符处，F@是向左跳转</p>
+</li>
+<li><p>[{向前跳转到第一个{  ]}是像后跳转到第一个}</p>
+</li>
+<li><p>v|c|d i|a { | [ | &quot; | &#39;  实现块级编辑</p>
+</li>
+</ol>
+<p>如在</p>
+<p>{</p>
+<p>aaaaaaaaaa</p>
+<p>}</p>
+<p>的aaa这行出按下vi{将选中aaa这一行，如果是va{则表示选中包含左右大括号和aaa那一行的三行</p>
+<p>待补充。。。</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  
+    <article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2010-11-03T16:38:31.000Z"><a href="/2010/11/2010-11-04-pdo-unbuffered-query/">Nov 4 2010</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2010/11/2010-11-04-pdo-unbuffered-query/">PDO:  2014 Cannot execute queries while other unbuffered queries are active</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>注：以下结论均是在php 5.2.10+mysql 5.1.30环境下得出</p>
+<p>出现此类PDO错误往往是pdo与mysql搭档时出现，可能原因如下:</p>
+<ol>
+<li><strong>PDO-&gt;exec()执行select语句后（即使该select结果集为空），再执行PDO-&gt;query()、PDO-&gt;exec()、PDOStatement-&gt;execute()等会出现该异常</strong></li>
+</ol>
+<p>如PHP manual所述，exec方法主要是用于执行一次sql命令，并返回该sql语句所影响的条目数量的，对于select语句，exec并不返回结果。对于只执行一次的sql select，建议使用PDO-&gt;query()，如果selec需要多次执行，则建议使用准备语句(PDOStatement-&gt;execute())。</p>
+<p>对于mysql来说，在通过PDO-&gt;exec()执行一条select后，再次执行PDO相关数据操作，如PDO-&gt;query()、PDO-&gt;exec()、PDOStatement-&gt;execute()等均会抛出“unbuffered queries are active”的异常，如：</p>
+<p>[php]
+    $dbh = new PDO(DB_CON_STRING,DB_CON_USER,DB_CON_PASSWORD);
+    $dbh -&gt; setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
+    $sql = &#39;select handle_time from workflow where 0=1&#39;; //注意:即使这里的select必定没有返回结果，后面也会报错
+    $result = $dbh-&gt;exec($sql); //执行一次exec</p>
+<pre><code><figure class="highlight"><pre><span class="variable">$sql</span> = <span class="string">'select handle_time from workflow where list_id=3000'</span>;
+//<span class="variable">$ret</span> = <span class="variable">$dbh</span>-&gt;query(<span class="variable">$sql</span>); //此时执行query会报错
+//<span class="variable">$ret</span> = <span class="variable">$dbh</span>-&gt;exec(<span class="variable">$sql</span>);//如果此时执行exec也会报错
+
+<span class="variable">$i</span>=3000;
+<span class="variable">$sql</span> = <span class="string">'select handle_time from workflow where list_id=:id'</span>;
+<span class="variable">$sth</span> = <span class="variable">$dbh</span>-&gt;prepare(<span class="variable">$sql</span>);
+<span class="variable">$sth</span>-&gt;bindParam(<span class="string">':id'</span>,<span class="variable">$i</span>);
+<span class="variable">$ret</span> = <span class="variable">$sth</span>-&gt;execute();//执行execute会报错
+</pre></figure></code></pre>
+<p>[/php]</p>
+<p>在<a href="http://www.yiiframework.com/">YII</a> 1.0.6版本的CDbLogRoute.php中就存在这个问题，该类是用来记录日志到DB的，其init初始化方法中存在判断log表是否存在时，使用的是如下代码：</p>
+<p>[php]
+/<em>*
+ </em> Initializes the route.
+ <em> This method is invoked after the route is created by the route manager.
+ </em>/
+ public function init()
+ {
+parent::init();</p>
+<p>$db=$this-&gt;getDbConnection();
+$db-&gt;setActive(true);</p>
+<p>$sql=&quot;SELECT * FROM {$this-&gt;logTableName} WHERE 0=1&quot;;
+try
+{
+$db-&gt;createCommand($sql)-&gt;execute(); //这里实际是调用的PDO-&gt;exec($sql)，
+//可以改为$db-&gt;createCommand($sql)-&gt;queryAll(),而调用PDO-&gt;query($sql)来避免遗产的产生
+}
+catch(Exception $e)
+{
+// The log table does not exist
+if($this-&gt;autoCreateLogTable)
+$this-&gt;createLogTable($db,$this-&gt;logTableName);
+else
+throw new CException(Yii::t(&#39;yii&#39;,&#39;CDbLogRoute requires database table &quot;{table}&quot; to store log messages.&#39;,
+array(&#39;{table}&#39;=&gt;$this-&gt;logTableName)));
+}
+ }
+[/php]</p>
+<p>而在真正记录日志时，使用的是如下的processLogs方法:</p>
+<p>[php]
+/<em>*
+ </em> Stores log messages into database.
+ <em> @param array list of log messages
+ </em>/
+ protected function processLogs($logs)
+ {
+$sql=&quot;
+INSERT INTO {$this-&gt;logTableName}
+(level, category, logtime, message) VALUES
+(:level, :category, :logtime, :message)
+&quot;;
+$command=$this-&gt;getDbConnection()-&gt;createCommand($sql);
+foreach($logs as $log)
+{
+$command-&gt;bindValue(&#39;:level&#39;,$log[1]);
+$command-&gt;bindValue(&#39;:category&#39;,$log[2]);
+$command-&gt;bindValue(&#39;:logtime&#39;,(int)$log[3]);
+$command-&gt;bindValue(&#39;:message&#39;,$log[0]);
+$command-&gt;execute();  //实际上是调用的PDOStatement-&gt;execute(),使用mysql时会报错
+}
+ }
+[/php]</p>
+<p>这样就会在执行$command-&gt;execute()记录日志时就会出现“unbuffered queries are active”的异常。在Yii 1.0.7中，qiang改变了init的处理逻辑，在判断表是否存在时，不再使用</p>
+<p>[sql]</p>
+<p>SELECT * FROM {$this-&gt;logTableName} WHERE 0=1[/sql]</p>
+<p>了，而是采用了</p>
+<p>[sql]DELETE FROM {$this-&gt;logTableName} WHERE 0=1[/sql]</p>
+<p>,从而也就避免了该异常的产生。 但如果PDO-&gt;exec()中执行的是update、delete等sql语句，则后面的query、exec、execute不会报错。</p>
+<ol>
+<li><strong>PDO::exec()中连续执行两条sql语句</strong>（包括set names, update, insert等），也会在下一次query exec execute时抛该异常，</li>
+</ol>
+<p>但网上有说php 5.3以上不会出现该问题，未验证。如</p>
+<p>[php]
+$sql = &quot;set names utf8;update workflow set status=3 where list_id=3000&quot;;
+$result = $dbh-&gt;exec($sql); //exec后，后面的exec query execute等会报出异常
+[/php]</p>
+<ol>
+<li>另外，按照php manual中关于PDO::query 和 PDOStatement-&gt;closeCursor的说明，在没有完全fetchall一个result set时，再次使用query等就会出现问题:</li>
+</ol>
+<p>If you do not fetch all of the data in a result set before issuing your next  call to <a href="function.pdo-query.html">PDO-&gt;query()</a>, your call may  fail.</p>
+<p>Call <a href="function.pdostatement-closecursor.html">PDOStatement-&gt;closeCursor()</a> to release the database resources associated with the PDOStatement object</p>
+<p>before  issuing your next call to <a href="function.pdo-query.html">PDO-&gt;query()</a>.</p>
+<p>但实际试验中没有该问题，只有以上两种情况下会出现此问题，不过为了规避潜在问题，最好还是在每次query后，可以fetchAll或closeCursor  <em>**</em></p>
+<p><strong>总结：</strong></p>
+<ol>
+<li>不要使用PDO::exec()执行select，也不要一次执行分号分隔的多条sql</li>
+</ol>
+<ol>
+<li>各个PDO::query及PDOStatement::execute()后，最好是closeCursor或fetchAll（并设置null值）</li>
+</ol>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+  
+
+  <nav id="pagination">
+  
+    <a href="/archives/page/2/" class="alignleft prev">Prev</a>
+  
+  
+  <div class="clearfix"></div>
+</nav>
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:leiqzhang.com">
+  </form>
+</div>
+
+  
+<div class="widget tag">
+  <h3 class="title">Categories</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/HTTP/">HTTP</a><small>2</small></li>
+  
+    <li><a href="/categories/JavaScriptCSS/">JavaScript/CSS</a><small>2</small></li>
+  
+    <li><a href="/categories/LinuxUnix/">Linux/Unix</a><small>3</small></li>
+  
+    <li><a href="/categories/MySQL/">MySQL</a><small>2</small></li>
+  
+    <li><a href="/categories/MySQL/PHP/">PHP</a><small>1</small></li>
+  
+    <li><a href="/categories/PHP/">PHP</a><small>2</small></li>
+  
+    <li><a href="/categories/QEMU/">QEMU</a><small>9</small></li>
+  
+    <li><a href="/categories/QEMU/Virtualization/">Virtualization</a><small>9</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>2</small></li>
+  
+    <li><a href="/categories/vim/">vim</a><small>3</small></li>
+  
+    <li><a href="/categories/virtualization/">virtualization</a><small>1</small></li>
+  
+    <li><a href="/categories/virtualization/vmware/">vmware</a><small>1</small></li>
+  
+    <li><a href="/categories/未分类/">未分类</a><small>1</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">Tags</h3>
+  <ul class="entry">
+  
+    <li><a href="/tags/bfc/">bfc</a><small>1</small></li>
+  
+    <li><a href="/tags/cache-control/">cache-control</a><small>1</small></li>
+  
+    <li><a href="/tags/collapse/">collapse</a><small>1</small></li>
+  
+    <li><a href="/tags/css/">css</a><small>1</small></li>
+  
+    <li><a href="/tags/dataplane/">dataplane</a><small>1</small></li>
+  
+    <li><a href="/tags/ervernote/">ervernote</a><small>1</small></li>
+  
+    <li><a href="/tags/etag/">etag</a><small>1</small></li>
+  
+    <li><a href="/tags/expires/">expires</a><small>1</small></li>
+  
+    <li><a href="/tags/float/">float</a><small>1</small></li>
+  
+    <li><a href="/tags/greasemonkey/">greasemonkey</a><small>1</small></li>
+  
+    <li><a href="/tags/hasLayout/">hasLayout</a><small>1</small></li>
+  
+    <li><a href="/tags/http/">http</a><small>2</small></li>
+  
+    <li><a href="/tags/javascript/">javascript</a><small>1</small></li>
+  
+    <li><a href="/tags/kvm/">kvm</a><small>9</small></li>
+  
+    <li><a href="/tags/last-modified/">last-modified</a><small>1</small></li>
+  
+    <li><a href="/tags/libvirt/">libvirt</a><small>8</small></li>
+  
+    <li><a href="/tags/lighthttpd/">lighthttpd</a><small>1</small></li>
+  
+    <li><a href="/tags/linux/">linux</a><small>1</small></li>
+  
+    <li><a href="/tags/mac/">mac</a><small>1</small></li>
+  
+    <li><a href="/tags/margin/">margin</a><small>1</small></li>
+  
+    <li><a href="/tags/md5sum/">md5sum</a><small>1</small></li>
+  
+    <li><a href="/tags/mysql/">mysql</a><small>2</small></li>
+  
+    <li><a href="/tags/patch/">patch</a><small>1</small></li>
+  
+    <li><a href="/tags/pdo/">pdo</a><small>1</small></li>
+  
+    <li><a href="/tags/perf/">perf</a><small>1</small></li>
+  
+    <li><a href="/tags/permalink/">permalink</a><small>1</small></li>
+  
+    <li><a href="/tags/php/">php</a><small>2</small></li>
+  
+    <li><a href="/tags/position/">position</a><small>1</small></li>
+  
+    <li><a href="/tags/post/">post</a><small>1</small></li>
+  
+    <li><a href="/tags/proxy/">proxy</a><small>1</small></li>
+  
+    <li><a href="/tags/qemu/">qemu</a><small>9</small></li>
+  
+    <li><a href="/tags/rewrite/">rewrite</a><small>1</small></li>
+  
+    <li><a href="/tags/scsi/">scsi</a><small>1</small></li>
+  
+    <li><a href="/tags/site-memory/">site memory</a><small>1</small></li>
+  
+    <li><a href="/tags/soap/">soap</a><small>1</small></li>
+  
+    <li><a href="/tags/sql/">sql</a><small>1</small></li>
+  
+    <li><a href="/tags/svn/">svn</a><small>1</small></li>
+  
+    <li><a href="/tags/tip/">tip</a><small>1</small></li>
+  
+    <li><a href="/tags/tree_conflict/">tree_conflict</a><small>1</small></li>
+  
+    <li><a href="/tags/vim/">vim</a><small>3</small></li>
+  
+    <li><a href="/tags/virtio/">virtio</a><small>1</small></li>
+  
+    <li><a href="/tags/vmware/">vmware</a><small>1</small></li>
+  
+    <li><a href="/tags/vpn/">vpn</a><small>1</small></li>
+  
+    <li><a href="/tags/wget/">wget</a><small>1</small></li>
+  
+    <li><a href="/tags/wordpress/">wordpress</a><small>2</small></li>
+  
+  </ul>
+</div>
+
+
+  
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2013 leiqzhang
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+<script type="text/javascript">
+var disqus_shortname = 'leiqzhang';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+</body>
+</html>
