@@ -11,23 +11,33 @@ tags: [qemu, kvm, libvirt]
 
 ---
 
-### libvirt blockcopy switch to dest when complete
+## libvirt blockcopy switch to dest when complete
 
 1. create vm
-    <pre><code>virsh create /pkgs/imgs/win2003.xml</code></pre>
+{% codeblock create vm %}
+virsh create /pkgs/imgs/win2003.xml
+{% endcodeblock %}
 2. start blockcopy
-    <pre><code>virsh blockcopy win2003 /pkgs/imgs/win2003.img /pkgs/imgs/t322.img --pivot --wait</code></pre>
+{% codeblock start blockcopy %}
+virsh blockcopy win2003 /pkgs/imgs/win2003.img /pkgs/imgs/t322.img --pivot --wait
+{% endcodeblock %}
 3. query blockcopy info
-    <pre><code>virsh blockjob --info win2003 /pkgs/imgs/win2003.img</code></pre>
-    <pre><code>Block Copy: [ 17 %]</code></pre>
+<!-- more -->
+{% codeblock query blockcopy info %}
+virsh blockjob --info win2003 /pkgs/imgs/win2003.img
+Block Copy: [ 17 %]
+{% endcodeblock %}
 4. dumpxml after job complete
-    <pre><code>virsh dumpxml win2003</code></pre>
-    <pre><code>
-                     <disk type='file' device='disk'>
-                          <driver name='qemu' type='raw' cache='none'/>
-                          <source file='/pkgs/imgs/t322.img'/>
-                           <target dev='vda' bus='virtio'/>
-                           <alias name='virtio-disk0'/>
-                           <address type='pci' domain='0x0000' bus='0x00' slot='0x04' function='0x0'/>
-                     </disk>
-    </code></pre>
+{% codeblock dumpxml %}
+virsh dumpxml win2003
+{% endcodeblock %}
+
+{% codeblock xmlinfo lang:xml %}
+<disk type='file' device='disk'>
+  <driver name='qemu' type='raw' cache='none'/>
+  <source file='/pkgs/imgs/t322.img'/>
+   <target dev='vda' bus='virtio'/>
+   <alias name='virtio-disk0'/>
+   <address type='pci' domain='0x0000' bus='0x00' slot='0x04' function='0x0'/>
+</disk>
+{% endcodeblock %}

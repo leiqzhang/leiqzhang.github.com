@@ -18,6 +18,7 @@ tags: [qemu, kvm, patch]
         * 使用scripts/getmaintainer.pl来获取此文件的主要提交者
 
 2. 邮件的主题和内容的格式
+<!-- more -->
     * 使用git format-patch来生成标准格式的patch
     * 需要带-s参数使得生成的PATCH中包含signed-off-by开头的行
     * 邮件主题使用此命令生成的Patch文件中的subject
