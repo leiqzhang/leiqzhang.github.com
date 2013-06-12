@@ -77,6 +77,7 @@ exclude_generator:
 
 plugins:
 - hexo-generator-feed
+- hexo-generator-sitemap
 
 
 # Deployment
