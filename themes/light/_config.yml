@@ -28,5 +28,5 @@ addthis:
 
 fancybox: true
 
-google_analytics:
+google_analytics: UA-40319520-1
 rss: /atom.xml
