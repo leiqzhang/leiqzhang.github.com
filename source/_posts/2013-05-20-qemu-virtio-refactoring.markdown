@@ -69,6 +69,8 @@ tags: [qemu, kvm, libvirt, scsi, virtio]
 3. How to use virtio-scsi-device or virtio-blk-device?
 4. What is virtio-scsi-common?
 
+<!--more-->
+
 ## Root Cause: Virtio Refactoring
 
 {% blockquote Fred Konrad http://wiki.qemu.org/Features/virtio-refactoring Features/virtio-refactoring %}
