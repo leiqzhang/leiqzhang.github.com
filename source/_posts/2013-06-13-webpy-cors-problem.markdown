@@ -74,3 +74,7 @@ include "conf.d/proxy.conf"
 ## TODO
 
 webpy如何配置以只接受来自本机lighttpd的请求而拒绝来自外部的请求
+
+## Ref
+
+1. CORS: https://developer.mozilla.org/zh-CN/docs/HTTP/Access_control_CORS
