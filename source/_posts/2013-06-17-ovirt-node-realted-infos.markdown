@@ -30,6 +30,8 @@ ovirt-node提供的镜像所需资源很小，可以将更多的资源保留给V
 
 ## 优缺点
 
+<!-- more-->
+
 优点：
 
 * Single Image
