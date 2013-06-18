@@ -2,12 +2,10 @@
 comments: true
 date: 2011-02-28 15:30:40
 layout: post
-slug: mysql-delete-rows-from-multi-tables
 title: MySQL同时删除多表数据
 wordpress_id: 140
-categories:
-- MySQL
-tags: [mysql, sql]
+categories: [web_dev]
+tags:  [mysql, sql]
 
 ---
 

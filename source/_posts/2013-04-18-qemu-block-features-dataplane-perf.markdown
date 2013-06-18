@@ -2,12 +2,9 @@
 comments: true
 date: 2013-04-18 13:00:31
 layout: post
-slug: dataplane-perf
 title: 'QEMU Block Fetures: dataplane perf'
-categories:
-- QEMU
-- Virtualization
-tags: [qemu, kvm, libvirt, dataplane, perf]
+categories:  [Virtualization]
+tags:  [QEMU, libvirt, dataplane, performance]
 
 ---
 

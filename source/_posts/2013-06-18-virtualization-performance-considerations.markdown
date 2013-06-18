@@ -2,12 +2,9 @@
 comments: true
 date: 2013-06-18 20:40:31
 layout: post
-slug: virtualization-perf
 title: 'Virtualization performance considerations'
-categories:
-- Virtualization
-- Performance
-tags: [NUMA, DBPM, ELI]
+categories:  [Virtualization]
+tags:  [NUMA, DBPM, ELI, performance]
 
 ---
 

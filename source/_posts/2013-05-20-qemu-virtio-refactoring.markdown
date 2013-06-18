@@ -2,12 +2,9 @@
 comments: true
 date: 2013-05-20 20:40:31
 layout: post
-slug: qemu-virtio-refactoring
 title: 'QEMU Fetures: Virtio Refactoring'
-categories:
-- QEMU
-- Virtualization
-tags: [qemu, kvm, libvirt, scsi, virtio]
+categories:  [Virtualization]
+tags:  [QEMU, libvirt, scsi, virtio]
 
 ---
 

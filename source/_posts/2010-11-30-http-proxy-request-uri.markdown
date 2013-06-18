@@ -2,12 +2,10 @@
 comments: true
 date: 2010-11-30 21:27:24
 layout: post
-slug: http-proxy-request-uri
 title: HTTP请求头中Request-URI的取值和代理服务器proxy的关系
 wordpress_id: 112
-categories:
-- HTTP
-tags: [http, proxy]
+categories: [web_dev]
+tags:  [http, proxy]
 
 ---
 

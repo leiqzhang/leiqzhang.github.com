@@ -2,12 +2,9 @@
 comments: true
 date: 2013-04-19 11:30:31
 layout: post
-slug: libvirt-blockcopy-pivot
 title: 'QEMU Block Fetures: libvirt blockcopy switch to dest when complete'
-categories:
-- QEMU
-- Virtualization
-tags: [qemu, kvm, libvirt]
+categories:  [Virtualization]
+tags:  [QEMU, libvirt, blockcopy]
 
 ---
 

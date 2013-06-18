@@ -2,12 +2,10 @@
 comments: true
 date: 2010-11-23 00:35:16
 layout: post
-slug: css-block-formatting-context
 title: CSS的block formatting context
 wordpress_id: 83
-categories:
-- JavaScript/CSS
-tags: [bfc, css, float, hasLayout, margin, collapse, position]
+categories: [web_dev]
+tags:  [bfc, css]
 
 ---
 

@@ -2,12 +2,10 @@
 comments: true
 date: 2010-11-15 01:12:11
 layout: post
-slug: greasemonkey-baidu-space
 title: 百度空间插入代码段和HTML代码片段的GreaseMonkey脚本
 wordpress_id: 40
-categories:
-- JavaScript/CSS
-tags: [greasemonkey, javascript]
+categories:  [web_dev]
+tags:  [greasemonkey, javascript, css]
 
 ---
 

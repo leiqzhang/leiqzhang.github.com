@@ -2,12 +2,10 @@
 comments: true
 date: 2013-06-17 20:40:31
 layout: post
-slug: ovirt-node-related
 title: 'Ovirt Node Related Infomation'
-categories:
-- ovirt
+categories: 
 - Virtualization
-tags: [ovirt]
+tags:  [oVirt, livecd, CIM]
 
 ---
 

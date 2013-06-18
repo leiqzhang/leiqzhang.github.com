@@ -2,12 +2,10 @@
 comments: true
 date: 2010-12-06 17:37:57
 layout: post
-slug: vim-tips-incresing-list-substitute-replace
 title: VIM中通过substitute/replace快速生成一系列连续的IP地址
 wordpress_id: 119
-categories:
-- vim
-tags: [vim]
+categories: [VIM]
+tags:  [eval, submatch]
 
 ---
 

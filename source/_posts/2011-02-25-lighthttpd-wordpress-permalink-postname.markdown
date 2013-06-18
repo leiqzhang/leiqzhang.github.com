@@ -2,12 +2,10 @@
 comments: true
 date: 2011-02-25 20:24:13
 layout: post
-slug: lighthttpd-wordpress-permalink-postname
 title: lighthttpd实现WordPress永久链接(Permalink)
 wordpress_id: 129
-categories:
-- WordPress
-tags: [lighthttpd, permalink, rewrite, wordpress]
+categories:  [WordPress]
+tags:  [lighthttpd, permalink, rewrite]
 
 ---
 

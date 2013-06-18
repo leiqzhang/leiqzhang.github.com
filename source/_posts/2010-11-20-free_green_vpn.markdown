@@ -2,12 +2,10 @@
 comments: true
 date: 2010-11-20 19:42:07
 layout: post
-slug: free_green_vpn
 title: 一个申请免费VPN的地方
 wordpress_id: 80
-categories:
-- 未分类
-tags: [vpn]
+categories: [miscellaneous]
+tags:  [vpn]
 
 ---
 

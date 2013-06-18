@@ -2,12 +2,9 @@
 comments: true
 date: 2013-04-18 10:30:31
 layout: post
-slug: live-snapshot-merge
 title: 'QEMU Block Fetures: live snapshot merge (block commit/block stream)'
-categories:
-- QEMU
-- Virtualization
-tags: [qemu, kvm, libvirt]
+categories: [Virtualization]
+tags:  [QEMU, libvirt, block-stream, snapshot]
 
 ---
 

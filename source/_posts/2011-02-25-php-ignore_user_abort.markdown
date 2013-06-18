@@ -2,12 +2,10 @@
 comments: true
 date: 2011-02-25 20:44:03
 layout: post
-slug: php-ignore_user_abort
 title: PHP的ignore_user_abort方法
 wordpress_id: 133
-categories:
-- PHP
-tags: [php]
+categories:  [web_dev]
+tags:  [php]
 
 ---
 

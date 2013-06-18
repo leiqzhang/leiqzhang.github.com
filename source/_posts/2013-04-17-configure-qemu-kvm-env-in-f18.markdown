@@ -2,12 +2,9 @@
 comments: true
 date: 2013-04-17 11:40:31
 layout: post
-slug: configure-qemu-kvm-env-in-f18
 title: '新的F18环境下KVM环境搭建'
-categories:
-- QEMU
-- Virtualization
-tags: [qemu, kvm, libvirt]
+categories: [Virtualization]
+tags:  [QEMU, libvirt, fedora]
 
 ---
 

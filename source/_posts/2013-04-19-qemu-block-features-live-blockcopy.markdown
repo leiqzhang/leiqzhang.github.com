@@ -2,12 +2,9 @@
 comments: true
 date: 2013-04-19 15:00:31
 layout: post
-slug: live-snapshot-blockcopy
 title: 'QEMU Block Fetures: live snapshot blockcopy'
-categories:
-- QEMU
-- Virtualization
-tags: [qemu, kvm, libvirt]
+categories:  [Virtualization]
+tags:  [QEMU, libvirt, blockcopy]
 
 ---
 

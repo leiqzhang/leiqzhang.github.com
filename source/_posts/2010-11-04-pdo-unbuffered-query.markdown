@@ -2,13 +2,10 @@
 comments: true
 date: 2010-11-04 00:38:31
 layout: post
-slug: pdo-unbuffered-query
 title: 'PDO:  2014 Cannot execute queries while other unbuffered queries are active'
 wordpress_id: 7
-categories:
-- MySQL
-- PHP
-tags: [mysql, pdo]
+categories:  [web_dev]
+tags:  [mysql, pdo, php]
 
 ---
 

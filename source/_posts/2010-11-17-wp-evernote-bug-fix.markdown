@@ -2,12 +2,10 @@
 comments: true
 date: 2010-11-17 00:27:56
 layout: post
-slug: wp-evernote-bug-fix
 title: WP Evernote Site Memory插件1.1.1一个小问题的修正
 wordpress_id: 72
-categories:
-- WordPress
-tags: [ervernote, site memory, wordpress]
+categories: [WordPress]
+tags:  [ervernote]
 
 ---
 

@@ -2,12 +2,10 @@
 comments: true
 date: 2010-11-12 14:44:38
 layout: post
-slug: wget-mirror
 title: wget下载整个网站的镜像
 wordpress_id: 32
-categories:
-- Linux/Unix
-tags: [wget]
+categories:  [Linux]
+tags:  [wget]
 
 ---
 

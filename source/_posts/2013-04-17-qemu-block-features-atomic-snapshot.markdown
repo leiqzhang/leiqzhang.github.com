@@ -2,12 +2,9 @@
 comments: true
 date: 2013-04-17 11:38:31
 layout: post
-slug: atomic snapshot
 title: 'QEMU Block Fetures: Atomic Snapshot'
-categories:
-- QEMU
-- Virtualization
-tags: [qemu, kvm, libvirt]
+categories: [Virtualization]
+tags:  [QEMU, libvirt, transaction, snapshot]
 
 ---
 

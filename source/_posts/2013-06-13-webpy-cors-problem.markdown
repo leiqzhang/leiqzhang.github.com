@@ -2,12 +2,9 @@
 comments: true
 date: 2013-06-13 20:40:31
 layout: post
-slug: webpy-CORS
 title: 'HTTP access control (CORS) of Web.py'
-categories:
-- ovirt
-- webpy
-tags: [ovirt, webpy, CORS]
+categories:  [Virtualization]
+tags:  [oVirt, CORS, OPTIONS, lighttpd, webpy]
 
 ---
 

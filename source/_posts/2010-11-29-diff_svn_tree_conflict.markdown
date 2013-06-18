@@ -2,12 +2,10 @@
 comments: true
 date: 2010-11-29 20:37:07
 layout: post
-slug: diff_svn_tree_conflict
 title: 整体diff比较SVN的tree conflict文件
 wordpress_id: 108
-categories:
-- Linux/Unix
-tags: [svn, tree_conflict]
+categories:  [Linux]
+tags:  [svn, tree_conflict]
 
 ---
 

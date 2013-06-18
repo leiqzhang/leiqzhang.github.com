@@ -2,12 +2,10 @@
 comments: true
 date: 2011-01-05 21:58:32
 layout: post
-slug: md5sum-check-with-file
 title: md5sum的--check用法
 wordpress_id: 124
-categories:
-- Linux/Unix
-tags: [linux, md5sum]
+categories:  [Linux]
+tags:  [md5sum]
 
 ---
 

@@ -2,13 +2,10 @@
 comments: true
 date: 2011-04-02 00:38:37
 layout: post
-slug: install-mac-os-snow-leopard-on-vmware
 title: vmware上安装Mac OS Snow Leopard
 wordpress_id: 143
-categories:
-- virtualization
-- vmware
-tags: [mac, vmware]
+categories:  [Virtualization]
+tags:  [mac, vmware]
 
 ---
 

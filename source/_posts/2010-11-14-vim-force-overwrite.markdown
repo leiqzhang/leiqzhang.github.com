@@ -2,12 +2,10 @@
 comments: true
 date: 2010-11-14 23:18:45
 layout: post
-slug: vim-force-overwrite
 title: VIM overwrite read-only file
 wordpress_id: 36
-categories:
-- vim
-tags: [vim]
+categories: [VIM]
+tags:  [tee]
 
 ---
 

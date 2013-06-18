@@ -2,12 +2,9 @@
 comments: true
 date: 2013-05-06 16:56:31
 layout: post
-slug: live-block-backup
 title: 'QEMU Contribute: steps of submit a patch'
-categories:
-- QEMU
-- Virtualization
-tags: [qemu, kvm, patch]
+categories:  [Virtualization]
+tags:  [QEMU]
 
 ---
 

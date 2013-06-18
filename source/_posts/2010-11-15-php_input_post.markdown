@@ -2,12 +2,10 @@
 comments: true
 date: 2010-11-15 17:17:35
 layout: post
-slug: php_input_post
 title: php://input和$_POST
 wordpress_id: 50
-categories:
-- PHP
-tags: [php, post, soap]
+categories: [web_dev]
+tags:  [php, post, soap]
 
 ---
 

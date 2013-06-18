@@ -2,12 +2,10 @@
 comments: true
 date: 2010-11-05 17:41:46
 layout: post
-slug: vim-tips
 title: VIM TIPS
 wordpress_id: 19
-categories:
-- vim
-tags: [tip, vim]
+categories:  [VIM]
+tags:  [tip]
 
 ---
 
