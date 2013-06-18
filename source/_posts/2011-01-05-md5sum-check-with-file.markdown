@@ -13,31 +13,29 @@ tags:  [md5sum]
 
 用法是
 
-[code]
-
+{%codeblock md5sum_check lang:bash %}
 md5sum --check ~/data_md5
-
-[/code]
+{%endcodeblock %}
 
 其中data_md5文件的内容如下：
 
-[code]
+{%codeblock md5sum_data lang:bash %}
 
 MD5值[空格][空格]文件1路径
 MD5值[空格][空格]文件2路径
 ...
 
-[/code]
+{%endcodeblock %}
 
 需要注意的是，每一行中的MD5值和路径之间必须是两个空格，否则md5sum会报文件不存在之类的错误。
 
 检测的输出结果的格式如下：
 
-[code]
+{%codeblock md5sum_data lang:bash %}
 
 文件1路径： OK
 文件2路径： FAILED
 
-[/code]
+{%endcodeblock %}
 
 其中OK表示验证通过（文件md5和文件中给定的md5一直），FAILED表示验证失败

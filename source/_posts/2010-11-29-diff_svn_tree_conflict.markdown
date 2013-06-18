@@ -13,7 +13,7 @@ tags:  [svn, tree_conflict]
 
 目前我们组的并行项目很多，svn merge时，树冲突往往非常多，一个一个手动去diff是一个很繁琐的过程，下午大概写了一个shell方法对所有树冲突的文件进行diff，可以将以下代码加入~/.bash_profile文件：
 
-[shell]
+{%codeblock batch_diff lang:shell%}
 #设定项目所在目录
 export PRJ=/home/work/var/www/htdocs
 #根据svn info获取当前目录层次，并构造相应的diff目的文件路径
@@ -25,13 +25,15 @@ function getDir() { DIR=`echo $1 | sed 's/\//\\\\\//g'`; svn info | grep "^URL" 
 #通过svn st和awk获取所有树冲突文件相对路径
 #依次和指定的目标文件进行diff,其中忽略了对.png .gif等类型文件的处理
 function td() { svn st | grep "^[[:space:]]\+C" | awk '$2!~/(.*\.png)|(.*\.gif)/ {print $2}' | xargs -t -i diff -u --exclude="\.svn" {} "`getDir $1`/{}"; }
-[/shell]
+{%endcodeblock%}
 
 假设合并代码后的目录是$PRJ/pro_merge,而合入的版本代码在$PRJ/pro_src,则可以在$PRJ/pro_merge的任意子目录下执行如下命令：
 
-[shell]
+<!--more-->
+
+{%codeblock batch_diff lang:shell%}
 td $PRJ/pro_src
-[/shell]
+{%endcodeblock%}
 
 即可输出当前目录下所有子目录的树冲突文件和带合并文件的diff情况
 
@@ -39,7 +41,7 @@ td $PRJ/pro_src
 
 该方法可以进一步扩展，将diff出来的没有不同的文件直接”svn resolved“了，因此写了一个简单的shell脚本：
 
-[bash]
+{%codeblock batch_diff lang:shell%}
 
 #! /bin/sh
 function getDir() { DIR=`echo $1 | sed 's/\//\\\\\//g'`; svn info | grep "^URL" | awk '{print $2}' | sed "s/^https:.*\(_BRANC
@@ -60,4 +62,4 @@ do
     fi
 done
 
-[/bash] 
+{%endcodeblock%}
