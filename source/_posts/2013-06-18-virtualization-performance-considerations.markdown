@@ -26,7 +26,6 @@ tags: [NUMA, DBPM, ELI]
 
 	Vmware ESX 5.0及之后的版本支持一种叫做__vNUMA__的特性，它将Host的NUMA特征暴露给了Guest OS，从而使得Guest OS可以根据NUMA特征进行更高性能的调度。
 
-
 2. CPU相关的一些指标和新特性
 
 	* Processor Clock Frequency
@@ -90,12 +89,15 @@ tags: [NUMA, DBPM, ELI]
 主要是应用层面的考虑了，和非虚拟化场景下的一般考虑因素基本一样。
 
 1. Right sizing
+
 2. Use a Modern OS
+
 3. Install VMware Tools (vEthernet Adapters/vSCSI Controller)
 
 	对于其余的Hypervisor，主要是指需要在Guest中安装相应的半虚驱动(ParDriver),如Xen下的PVDriver、KVM下的Virtio等等
 
 4. VM Disk Layout
+
 5. Limit Snapshots Use
 
 	无论是COW快照还是ROW快照，均会影响到VM的IO性能。
@@ -110,45 +112,44 @@ tags: [NUMA, DBPM, ELI]
 
 1. BIOS
 
-当启用__DBPM__时，不可避免的CPU需要参与到电源管理中去，必然会增加IO处理的延迟，故可以考虑将电源管理设置为“Static High”模式。
+    当启用__DBPM__时，不可避免的CPU需要参与到电源管理中去，必然会增加IO处理的延迟，故可以考虑将电源管理设置为“Static High”模式。
 
-对于更新一些的CPU(Intel Nehalem class), CPU还提供了C-states和更高级的C1E两种电源管理选项，为了追求低延迟，此俩选项也许禁用。
+    对于更新一些的CPU(Intel Nehalem class), CPU还提供了C-states和更高级的C1E两种电源管理选项，为了追求低延迟，此俩选项也许禁用。
 
 2. NUMA
 
-参考上文中的描述，主要依赖于Hypervisor的NUMA感知的调度能力，并提供的类似于__vNUMA__的能力。
+    参考上文中的描述，主要依赖于Hypervisor的NUMA感知的调度能力，并提供的类似于__vNUMA__的能力。
 
 3. Guest
 
-首先是使用更新版本的Guest OS。
+    首先是使用更新版本的Guest OS。
 
 4. 物理网卡
 
-当前的NIC一般均会默认启用一些尽可能减少对CPU中断次数的技术，以避免CPU被频繁中断，这些技术即__interrupt moderation__或者__interrupt throttling__，它们会对部分中断进行合并后再中断CPU。
+    当前的NIC一般均会默认启用一些尽可能减少对CPU中断次数的技术，以避免CPU被频繁中断，这些技术即__interrupt moderation__或者__interrupt throttling__，它们会对部分中断进行合并后再中断CPU。
 
-如果考虑低延迟，则需要通过ethtool等工具将上面的特性关闭掉。当然关闭此特性会影响到LRO(Large Receive Offloads)特性。
+    如果考虑低延迟，则需要通过ethtool等工具将上面的特性关闭掉。当然关闭此特性会影响到LRO(Large Receive Offloads)特性。
 
 5. 虚拟网卡
 
-VMware是建议使用其最新版本的VMXNET3.
+    VMware是建议使用其最新版本的VMXNET3.
 
 6. VM配置
 
-如果应用是计算密集型的则给VM配置更多地vCPU，如果是存储密集型的，给VM配置更多的内存。当然需要避免vCPU和内存的overcommit。
+    如果应用是计算密集型的则给VM配置更多地vCPU，如果是存储密集型的，给VM配置更多的内存。当然需要避免vCPU和内存的overcommit。
 
-如果Hypersior支持，可设置不允许Hypersior在VM的vcpu空闲时将其调度出去。
+    如果Hypersior支持，可设置不允许Hypersior在VM的vcpu空闲时将其调度出去。
 
 7. 其它
 
-考虑开发支持Poll机制的设备驱动，对于IO的执行不依赖于设备返回中断而是直接通过poll方式等待IO的完成。因为设备中断返回到VM中，会引发VM的几次退出。
+    考虑开发支持Poll机制的设备驱动，对于IO的执行不依赖于设备返回中断而是直接通过poll方式等待IO的完成。因为设备中断返回到VM中，会引发VM的几次退出。
 
-PS，关于如何避免中断引起VM的退出，QEMU社区已经有了方案（ELI/PV-EOI），可参考：
+    PS，关于如何避免中断引起VM的退出，QEMU社区已经有了方案（ELI/PV-EOI），可参考：
+    * 原始论文：http://www.mulix.org/pubs/eli/eli.pdf
+    * http://blog.csdn.net/luo_brian/article/details/8686717
+    * http://blog.csdn.net/luo_brian/article/details/8744025
 
-1. 原始论文：http://www.mulix.org/pubs/eli/eli.pdf
-2. http://blog.csdn.net/luo_brian/article/details/8686717
-3. http://blog.csdn.net/luo_brian/article/details/8744025
-
-在PS，在下一代的Intel Haswell处理器中，已经通过硬件实现了所谓的vAPIC，可有效避免中断引起的VM退出。故QEMU社区的软件方案未能进入到Kernel中，期待一下Intel的新处理器中的此新特性吧。
+    再PS，在下一代的Intel Haswell处理器中，已经通过硬件实现了所谓的vAPIC，可有效避免中断引起的VM退出。故QEMU社区的软件方案未能进入到Kernel中，期待一下Intel的新处理器中的此新特性吧。
 
 
 ## References
@@ -156,24 +157,3 @@ PS，关于如何避免中断引起VM的退出，QEMU社区已经有了方案（
 1. https://www.emcworldonline.com/2013/connect/sessionDetail.ww?SESSION_ID=1496
 2. http://en.community.dell.com/techcenter/power-cooling/w/wiki/best-practices-in-power-management.aspx
 3. http://www.vmware.com/files/pdf/techpaper/VMW-Tuning-Latency-Sensitive-Workloads.pdf
-
-
-
-
-
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-
-
-
-
-
-
