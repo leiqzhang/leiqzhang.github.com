@@ -15,19 +15,19 @@ tags:  [eval, submatch]
 
 首先输入第一行:
 
-[code]
+{%codeblock first_step lang:linux%}
 
 220.181.50.206
 
-[/code]
+{%endcodeblock%}
 
 然后yy复制第一行，并48p复制出49行"220.181.50.206", 然后执行以下命令即可
 
-[code]
+{%codeblock substitute lang:linux%}
 
 ：%s/50.\zs\(\d\+\)\ze$/\=eval(submatch(1)+line(".")-1)/g
 
-[/code]
+{%endcodeblock%}
 
 该命令是指对于所有匹配的部分（ip最后一个段），加上当前行号减一，这样就生成了一个从206到254的连续ip地址列表。
 

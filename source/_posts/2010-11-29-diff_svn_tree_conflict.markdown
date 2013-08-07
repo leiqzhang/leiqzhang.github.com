@@ -31,7 +31,7 @@ function td() { svn st | grep "^[[:space:]]\+C" | awk '$2!~/(.*\.png)|(.*\.gif)/
 
 <!--more-->
 
-{%codeblock batch_diff lang:shell%}
+{%codeblock use_batch_diff lang:shell%}
 td $PRJ/pro_src
 {%endcodeblock%}
 
@@ -41,7 +41,7 @@ td $PRJ/pro_src
 
 该方法可以进一步扩展，将diff出来的没有不同的文件直接”svn resolved“了，因此写了一个简单的shell脚本：
 
-{%codeblock batch_diff lang:shell%}
+{%codeblock new_batch_diff lang:shell%}
 
 #! /bin/sh
 function getDir() { DIR=`echo $1 | sed 's/\//\\\\\//g'`; svn info | grep "^URL" | awk '{print $2}' | sed "s/^https:.*\(_BRANC
