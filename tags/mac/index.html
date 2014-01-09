@@ -1,0 +1,244 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="baidu-site-verification" content="kZ3lZdC9wn" />
+  
+  <title>mac | Technology &amp; Life</title>
+  <meta name="author" content="leiqzhang">
+  
+  <meta name="description" content="Virtualization Related Technologies">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+  <meta property="og:site_name" content="Technology &amp; Life"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico">
+  <link rel="alternate" href="/atom.xml" title="Technology &amp; Life" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
+  
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-40319520-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+  <script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3F6f62dffd0688838f0bc52fc65fd62af4' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">Technology &amp; Life</a></h1>
+  <h2><a href="/">blog of leiqzhang</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about">About</a></li>
+    
+      <li><a href="/atom.xml">RSS</a></li>
+    
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper">
+<h2 class="archive-title tag">mac</h2>
+
+
+  
+    <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2011-04-01T16:38:37.000Z"><a href="/2011/04/2011-04-02-install-mac-os-snow-leopard-on-vmware/">Apr 2 2011</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2011/04/2011-04-02-install-mac-os-snow-leopard-on-vmware/">vmware上安装Mac OS Snow Leopard</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>今天在vmware上安装了Mac OS Snow Leopard，记录过程以作备忘和参考。</p>
+<p><strong>安装环境：</strong></p>
+<p>Windows 7 + VmWare 7.1.2</p>
+<p><strong>安装过程：</strong></p>
+<ol>
+<li><p>下载Hazard修改的Snow Leopard系统镜像，种子地址：<a href="http://thepiratebay.org/torrent/5203531/Snow_Leopard_10.6.1-10.6.2_Intel_AMD_made_by_Hazard" target="_blank">http://thepiratebay.org/torrent/5203531/Snow_Leopard_10.6.1-10.6.2_Intel_AMD_made_by_Hazard</a></p>
+</li>
+<li><p>下载一个事先定制好的一个vmware虚拟磁盘（VMDK）和引导iso：dariwn_snow.iso，地址：<a href="http://download607.mediafire.com/6ce95acc9glg/dhbxnndmznw/Snowy_Vmware_files.tbz2" target="_blank">http://download607.mediafire.com/6ce95acc9glg/dhbxnndmznw/Snowy_Vmware_files.tbz2</a></p>
+</li>
+<li><p>通过vmware打开step 2中下载的vmdk虚拟机，编辑其参数，将dariwn_snow.iso挂载到cd中，并开启此虚拟机</p>
+</li>
+<li><p>出现boot menu后，通过vmware插入step 1中下载的系统镜像（连接），然后根据boot menu提示按c启动安装</p>
+</li>
+<li><p>安装完毕在提示需要重启的时候，通过vmware将dariwn_snow.iso重新加载到cd中，然后强制重启虚拟机</p>
+</li>
+<li><p>进入苹果系统</p>
+</li>
+<li><p>通过vmware连接cd room，将dariwn_snow.iso挂载到系统中，桌面会出现vmware tools图标，点击安装vmware tools</p>
+</li>
+</ol>
+<p>8.安装后会提示重启，直接点击重启虚拟机不能重启，需要手动强制重启。重启进入后，会在系统桌面看到vmware share doc的文件夹，点击进入时会提示找不到此路径，这是因为vmware还未设置共享文件夹的原因。通过vmware添加共享文件夹后即可使用</p>
+<ol>
+<li>从<a href="http://downloads.sourceforge.net/project/vmsvga2/Display/VMsvga2_v1.2.2_Common_Installer.pkg?use_mirror=garr下载Mac显示驱动，放在共享文件夹中，通过Mac安装，安装后重启，在系统设置中既可以选择更多的分辨率了" target="_blank">http://downloads.sourceforge.net/project/vmsvga2/Display/VMsvga2_v1.2.2_Common_Installer.pkg?use_mirror=garr下载Mac显示驱动，放在共享文件夹中，通过Mac安装，安装后重启，在系统设置中既可以选择更多的分辨率了</a></li>
+</ol>
+<p><strong>参考：</strong></p>
+<p><a href="http://www.ihackintosh.com/2009/12/install-snow-leopard-in-vmware-7-windows-edition/" target="_blank">http://www.ihackintosh.com/2009/12/install-snow-leopard-in-vmware-7-windows-edition/</a></p>
+<p><a href="http://www.sysprobs.com/increase-screen-resolution-wide-screen-support-mac-os-virtual-machine-vmware-player-workstation" target="_blank">http://www.sysprobs.com/increase-screen-resolution-wide-screen-support-mac-os-virtual-machine-vmware-player-workstation</a></p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  
+
+  <nav id="pagination">
+  
+  
+  <div class="clearfix"></div>
+</nav>
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:leiqzhang.com">
+  </form>
+</div>
+
+  
+<div class="widget tag">
+  <h3 class="title">Categories</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/Linux/">Linux</a><small>3</small></li>
+  
+    <li><a href="/categories/OpenStack/">OpenStack</a><small>2</small></li>
+  
+    <li><a href="/categories/VIM/">VIM</a><small>3</small></li>
+  
+    <li><a href="/categories/Virtualization/">Virtualization</a><small>13</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>2</small></li>
+  
+    <li><a href="/categories/miscellaneous/">miscellaneous</a><small>1</small></li>
+  
+    <li><a href="/categories/web_dev/">web_dev</a><small>8</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tagcloud">
+  <h3 class="title">Tag Cloud</h3>
+  <div class="entry">
+    <a href="/tags/CIM/" style="font-size: 10.00px;">CIM</a><a href="/tags/CORS/" style="font-size: 10.00px;">CORS</a><a href="/tags/DBPM/" style="font-size: 10.00px;">DBPM</a><a href="/tags/Deploy/" style="font-size: 10.00px;">Deploy</a><a href="/tags/ELI/" style="font-size: 10.00px;">ELI</a><a href="/tags/NUMA/" style="font-size: 10.00px;">NUMA</a><a href="/tags/Nova/" style="font-size: 12.50px;">Nova</a><a href="/tags/OPTIONS/" style="font-size: 10.00px;">OPTIONS</a><a href="/tags/Paste/" style="font-size: 10.00px;">Paste</a><a href="/tags/QEMU/" style="font-size: 20.00px;">QEMU</a><a href="/tags/RabbitMQ/" style="font-size: 10.00px;">RabbitMQ</a><a href="/tags/WSGI/" style="font-size: 10.00px;">WSGI</a><a href="/tags/bfc/" style="font-size: 10.00px;">bfc</a><a href="/tags/block-stream/" style="font-size: 10.00px;">block-stream</a><a href="/tags/blockcopy/" style="font-size: 12.50px;">blockcopy</a><a href="/tags/cache/" style="font-size: 10.00px;">cache</a><a href="/tags/css/" style="font-size: 12.50px;">css</a><a href="/tags/dataplane/" style="font-size: 10.00px;">dataplane</a><a href="/tags/ervernote/" style="font-size: 10.00px;">ervernote</a><a href="/tags/etag/" style="font-size: 10.00px;">etag</a><a href="/tags/eval/" style="font-size: 10.00px;">eval</a><a href="/tags/fedora/" style="font-size: 10.00px;">fedora</a><a href="/tags/greasemonkey/" style="font-size: 10.00px;">greasemonkey</a><a href="/tags/http/" style="font-size: 12.50px;">http</a><a href="/tags/javascript/" style="font-size: 10.00px;">javascript</a><a href="/tags/libvirt/" style="font-size: 17.50px;">libvirt</a><a href="/tags/lighthttpd/" style="font-size: 10.00px;">lighthttpd</a><a href="/tags/lighttpd/" style="font-size: 10.00px;">lighttpd</a><a href="/tags/livecd/" style="font-size: 10.00px;">livecd</a><a href="/tags/mac/" style="font-size: 10.00px;">mac</a><a href="/tags/md5sum/" style="font-size: 10.00px;">md5sum</a><a href="/tags/mysql/" style="font-size: 12.50px;">mysql</a><a href="/tags/oVirt/" style="font-size: 12.50px;">oVirt</a><a href="/tags/pdo/" style="font-size: 10.00px;">pdo</a><a href="/tags/performance/" style="font-size: 12.50px;">performance</a><a href="/tags/permalink/" style="font-size: 10.00px;">permalink</a><a href="/tags/php/" style="font-size: 15.00px;">php</a><a href="/tags/post/" style="font-size: 10.00px;">post</a><a href="/tags/proxy/" style="font-size: 10.00px;">proxy</a><a href="/tags/qemu-img/" style="font-size: 10.00px;">qemu-img</a>
+  </div>
+</div>
+
+
+  <iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=2&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=0&uid=1644437791&verifier=c45a1931&dpc=1"></iframe>
+
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://blog.csdn.net/luo_brian" title="luo_brian">Luohao</a></li>
+<li><a href="http://blog.csdn.net/defeattroy" title="木马屠城">Defeattroy</a></li>
+<li><a href="http://www.smilgel.com/" title="听雨轩">MrSaxon</a></li>
+<li><a href="http://lanbolee.com/blog/" title="博之博">Rambolee</a></li>
+<li><a href="http://www.haoziyanwo.com/" title="耗子燕窝">浩子</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2014 leiqzhang
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+<script type="text/javascript">
+var disqus_shortname = 'leiqzhang';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+</body>
+</html>

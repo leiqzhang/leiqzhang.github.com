@@ -1,0 +1,959 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="baidu-site-verification" content="kZ3lZdC9wn" />
+  
+  <title>Archives: 2010/11 | Technology &amp; Life</title>
+  <meta name="author" content="leiqzhang">
+  
+  <meta name="description" content="Virtualization Related Technologies">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+  <meta property="og:site_name" content="Technology &amp; Life"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico">
+  <link rel="alternate" href="/atom.xml" title="Technology &amp; Life" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
+  
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-40319520-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+  <script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3F6f62dffd0688838f0bc52fc65fd62af4' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">Technology &amp; Life</a></h1>
+  <h2><a href="/">blog of leiqzhang</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about">About</a></li>
+    
+      <li><a href="/atom.xml">RSS</a></li>
+    
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper">
+<h2 class="archive-title">2010/11</h2>
+
+
+  
+    <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2010-11-30T13:27:24.000Z"><a href="/2010/11/2010-11-30-http-proxy-request-uri/">Nov 30 2010</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2010/11/2010-11-30-http-proxy-request-uri/">HTTP请求头中Request-URI的取值和代理服务器proxy的关系</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>一个合法的HTTP URL的格式如下：</p>
+<p>[code]http_URL = “http:” “//“ host [ “:” port ] [ abs_path [ “?” query ]][/code]</p>
+<p>当访问一个网站时，http的请求头中会包含一个Request-URI字段，该字段可以有四种类型的取值：</p>
+<p>[code]Request-URI    = “*” | absoluteURI | abs_path | authority[/code]</p>
+<p>其中星号”*”表示客户端请求的是服务器本身，而并没有请求特定的资源；authority格式只用于http协议的CONNECT方法。这两种本文不进行讨论，下面主要看另外两种</p>
+<p>当请求是发送给代理服务器时，必须使用absoluteURI(绝对URI)格式。代理服务器需要转发该请求或者直接从本地的cache给出响应。需要注意的，代理服务器可能会将该<br>请求转发给另一个代理服务器，也可能会按照absoluteURI直接发送给相应的服务器。如我们需要通过代理服务器访问被墙掉的Facebook时，可以看到请求头如下：</p>
+<p><img src="http://leivli.duapp.com/wp-content/uploads/2010/11/13.png" alt=""></p>
+<p>其它情况下，http请求头中的RequestURI将会使用一个资源相对地址abs_path,并加上一个Host头，供web服务器通过Host和RequestURI生成相应的URI，当我们输入的<br>url没有abs_path时，则传递的RequestURI中的abs_path将自动设置为’/‘。如我们直接访问我们的百度时，请求头如下：</p>
+<p><img src="http://leivli.duapp.com/wp-content/uploads/2010/11/21.png" alt=""></p>
+<p>结论：</p>
+<p>当通过代理服务器访问某个URL时，发送的RequestURI必须时一个绝对URI，否则将发送一个相对资源地址，即http_url中的abs_path段(及后面的query)</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  
+    <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2010-11-29T12:37:07.000Z"><a href="/2010/11/2010-11-29-diff_svn_tree_conflict/">Nov 29 2010</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2010/11/2010-11-29-diff_svn_tree_conflict/">整体diff比较SVN的tree conflict文件</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>通过svn merge合并代码时经常会报树冲突(tree conflict)，而对于每个树冲突不能简单的忽略了事，需要和待merge版本相应的文件进行diff才可以。</p>
+<p>目前我们组的并行项目很多，svn merge时，树冲突往往非常多，一个一个手动去diff是一个很繁琐的过程，下午大概写了一个shell方法对所有树冲突的文件进行diff，可以将以下代码加入~/.bash_profile文件：</p>
+<p>[shell]</p>
+<h1 id="-8bbe-5b9a-9879-76ee-6240-5728-76ee-5f55-">设定项目所在目录</h1>
+<p>export PRJ=/home/work/var/www/htdocs</p>
+<h1 id="-6839-636e-svn_info-83b7-53d6-5f53-524d-76ee-5f55-5c42-6b21-ff0c-5e76-6784-9020-76f8-5e94-7684-diff-76ee-7684-6587-4ef6-8def-5f84-">根据svn info获取当前目录层次，并构造相应的diff目的文件路径</h1>
+<h1 id="-5982-5f53-524d-5728-24-PRJ-2f-pro_merge-2f-protected-2f-modules-2f-operations-4e0b-">如当前在$PRJ/pro_merge/protected/modules/operations下</h1>
+<h1 id="-5219-201d-getDir_-24-PRJ-2f-pro-201d-7684-7ed3-679c-662f-24-PRJ-2f-pro-2f-protected-2f-modules-2f-operations">则”getDir $PRJ/pro”的结果是$PRJ/pro/protected/modules/operations</h1>
+<h1 id="-5f53-7136-524d-63d0-662f-svn_info-4e2d-7684-URL-884c-5bf9-5e94-7684-683c-5f0f-662f-3c-a_href-3d-22-https-3a-2f-2f-2a-2f-2a-_BRANCH-2f-protected-2f-modules-2f-operations-6216-https-3a-2f-2f-2a-2f-2a-_PD_BL-2f-protected-2f-modules-2f-operations-22-3e-https-3a-2f-2f-2a-2f-2a-_BRANCH-2f-protected-2f-modules-2f-operations-6216-https-3a-2f-2f-2a-2f-2a-_PD_BL-2f-protected-2f-modules-2f-operations-3c-2f-a-3e-">当然前提是svn info中的URL行对应的格式是<a href="https://*/*_BRANCH/protected/modules/operations或https://*/*_PD_BL/protected/modules/operations" target="_blank">https://*/*_BRANCH/protected/modules/operations或https://*/*_PD_BL/protected/modules/operations</a></h1>
+<h1 id="-53ef-6839-636e-5b9e-9645-60c5-51b5-8fdb-884c-4fee-6539-">可根据实际情况进行修改</h1>
+<p>function getDir() { DIR=<code>echo $1 | sed &#39;s/\//\\\\\//g&#39;</code>; svn info | grep “^URL” | awk ‘{print $2}’ | sed “s/^https:.*(_BRANCH|_PD_BL)/$DIR/g”; }</p>
+<h1 id="-901a-8fc7-svn_st-548c-awk-83b7-53d6-6240-6709-6811-51b2-7a81-6587-4ef6-76f8-5bf9-8def-5f84-">通过svn st和awk获取所有树冲突文件相对路径</h1>
+<h1 id="-4f9d-6b21-548c-6307-5b9a-7684-76ee-6807-6587-4ef6-8fdb-884c-diff-2c-5176-4e2d-5ffd-7565-4e86-5bf9-png_-gif-7b49-7c7b-578b-6587-4ef6-7684-5904-7406-">依次和指定的目标文件进行diff,其中忽略了对.png .gif等类型文件的处理</h1>
+<p>function td() { svn st | grep “^[[:space:]]+C” | awk ‘$2!~/(.<em>.png)|(.</em>.gif)/ {print $2}’ | xargs -t -i diff -u —exclude=”.svn” {} “<code>getDir $1</code>/{}”; }<br>[/shell]</p>
+<p>假设合并代码后的目录是$PRJ/pro_merge,而合入的版本代码在$PRJ/pro_src,则可以在$PRJ/pro_merge的任意子目录下执行如下命令：</p>
+<p>[shell]<br>td $PRJ/pro_src<br>[/shell]</p>
+<p>即可输出当前目录下所有子目录的树冲突文件和带合并文件的diff情况</p>
+<p>+++++++2010年12月6日更新++++++++++</p>
+<p>该方法可以进一步扩展，将diff出来的没有不同的文件直接”svn resolved“了，因此写了一个简单的shell脚本：</p>
+<p>[bash]</p>
+<h1 id="-21-_-2f-bin-2f-sh">! /bin/sh</h1>
+<p>function getDir() { DIR=<code>echo $1 | sed &#39;s/\//\\\\\//g&#39;</code>; svn info | grep “^URL” | awk ‘{print $2}’ | sed “s/^https:.*(_BRANC<br>H|_PD_BL)/$DIR/g”; }</p>
+<p>files=<code>svn st | grep &quot;^[[:space:]]\+C&quot; | awk &#39;$2!~/(.*\.png)|(.*\.gif)/ {print $2}&#39;</code><br>dir=<code>getDir $1</code><br>for file in $files<br>do<br>    echo “$file”<br>    out=<code>diff -ur --exclude=&quot;\.svn&quot; &quot;$file&quot; &quot;$dir/$file&quot; 2&gt;&amp;1</code><br>    if [ $? -eq “0” ]<br>    then<br>        echo will svn resolved $file<br>        svn resolved $file<br>    else<br>        echo “$out”<br>    fi<br>done</p>
+<p>[/bash] </p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  
+    <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2010-11-23T17:57:46.000Z"><a href="/2010/11/2010-11-24-http-cache/">Nov 24 2010</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2010/11/2010-11-24-http-cache/">HTTP Cache相关</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <h2 id="Advanced_Note-ff1a-">Advanced Note：</h2>
+<h3 id="Expiration">Expiration</h3>
+<p>Expires header</p>
+<p>Cache-Control header</p>
+<h3 id="Validation">Validation</h3>
+<p>Last-Modified header</p>
+<p>ETag header</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  
+    <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2010-11-22T16:35:16.000Z"><a href="/2010/11/2010-11-23-css-block-formatting-context/">Nov 23 2010</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2010/11/2010-11-23-css-block-formatting-context/">CSS的block formatting context</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p><strong>什么是块格式化内容：Block Formatting Context （BFC）</strong><br>网页布局的时候，BFC会在常规流(与之并列的是浮动和绝对定位)中进行布局。BFC提供了一个环境，使得html元素在该环境内按照一定规则进行布局，而不会影响其它环境中的布局</p>
+<p><strong>什么情况下生成BFC</strong></p>
+<p>当一个元素满足以下条件时，它的包含块将会形成一个BFC：</p>
+<ul>
+<li>浮动(float属性非none)</li>
+</ul>
+<ul>
+<li>overflow属性的计算值不是visible</li>
+</ul>
+<ul>
+<li>display属性是table-cell、table-caption或着inline-block</li>
+</ul>
+<ul>
+<li>绝对定位(position非static且非relative)</li>
+</ul>
+<p>需要注意的是，disaply属性为table时并不会建立一个BFC。但是由于display为table时，元素将会生成一个匿名框，这些框会具有display:table-cell属性，故会建立新的BFC。也就是说，建立BFC的是这个display为table-cell的匿名框而非table。所以在display:table和display:table-cell的元素上使用clear属性的效果是不一样的（见最后一小节示例）。<br><strong>BFC的影响</strong></p>
+<ol>
+<li>rule 1. 在bfc内部，垂直相邻的框的margin将会折叠(collapse)</li>
+</ol>
+<ol>
+<li>rule 2. 在同一个bfc内部，所有框的左外边均挨着包含块(bfc)的左侧(rtl时,是右外边挨着包含块的右侧)。即使该bfc中包含float元素也是如此，除非该bfc内部另外一个元素形成了一个新的bfc，这种情况下，该元素的框将会挨着float元素排列，宽度可能会由于float元素的存在而变窄</li>
+</ol>
+<ol>
+<li>rule 3. 一个BFC的border-box不能和与其在同一个BFC的float元素的margin-box相互重叠。这就意味着，浏览器会在BFC上生成不可见的margin来避免它和float元素的margin-box相互重叠。所以，在紧接着float元素的BFC上设置负的margin是没有作用的。而且BFC的margin还是可以和float元素重叠的，不能重叠的只是border-box。</li>
+</ol>
+<ol>
+<li>rule 4.  clear只能清除处于同一个bfc的元素</li>
+</ol>
+<p><strong>Rule 1 BFC and margin collapse</strong><br>从rule 1可知，垂直相邻的框的margin发生collapse的情况只会发生在这两个相邻框在同一个bfc的情形下，而如果两个垂直相邻的框分属于不同的bfc,则不会发生折叠。<br>如下例:</p>
+<p>[html]</p>
+<h3>margin collapse in the same BFC:</h3>
+
+ <div style="background-color:skyBlue"><br>     <p style="margin-bottom:20px;border:1px solid red"><br>        this is text 1 with style: <br/> {margin-bottom:20px;border:1px solid red}<br>     </p><br> </div><br> <div style="background-color:skyBlue"><br>     <p style="margin-top:10px;border:1px solid black"><br>        this is text 2 with style: <br/> {margin-top:10px;border:1px solid black”}<br>     </p><br> </div>
+
+ <h3>margin not collapse in different BFCs</h3><br> <div style="background-color:skyBlue"><br>     <p style="margin-bottom:20px;border:1px solid red"><br>        this is text 3 with style: <br/> {margin-bottom:20px;border:1px solid red}<br>     </p><br> </div><br> <div style="background-color:skyBlue;overflow:hidden"><br>     <p style="margin-top:10px;border:1px solid black"><br>        this is text 4 with style: <br/> {margin-top:10px;border:1px solid black”} <br/><br>        <b>but the containing div has property: “overflow:hidden”, make this div establish a new BFC</b><br>     </p><br> </div><br>[/html]<br><br>效果如下图所示，前两个段落中间的margin发生了collapse，变为了较大的20px，而下面两个段落并未发生collapse，总共是30px<br><img src="http://leivli.duapp.com/wp-content/uploads/2010/11/12-1024x286.png" alt=""><br><br>因此在需要避免margin collapse时，可以通过构建BFC来实现，这也是为什么浮动的元素和绝对定位的元素不会发生margin collapse的原因了<br><br><strong>Rule 2 float in the BFC</strong><br><br>如果一个无top/bottom border、无top/bottom padding且不形成bfc的div内部包含多个float元素，由于float元素是脱离文档流的，所以即使该div具有margin，也会由于margin相邻而会发生collapse，从而形成一个零高度的div。如果多个这样的div相邻，如果水平空间允许，那么这些div中的float元素将会排列在同一行上，这可能并非预期的效果。如本意要布局一个两行两列div的如下代码片段:<br><br>[html]<br> <h3>float in zero height divs of the same BFC</h3>
+
+ <div style="margin:20px"><br>      <div style="float:left;border:1px solid green;background-color:red">float div r1c1</div><br>      <div style="float:left;border:1px solid green;background-color:blue">float div r1c2</div><br> </div>
+
+ <div style="margin:20px"><br>      <div style="float:left;border:1px solid green;background-color:gray">float div r2c1</div><br>      <div style="float:left;border:1px solid green;background-color:yellow">float div r2c2</div><br> </div><br>[/html]<br><br>将生成下列效果的页面,四个浮动框会排列在一行上，而非预期的两行两列布局:<br><br><img src="http://leivli.duapp.com/wp-content/uploads/2010/11/2.png" alt=""><br><br>由rule 2可知，在同一个BFC内部，所有框的左外边会挨着左侧排列，即使包含float元素也是如此。因此，如果将上例中的两个div各自均改为BFC，就会达到预期的目的。由于bfc内部两个float元素均会各自生成一个bfc，这两个bfc就会并排排列（如果bfc宽度足够的话，如果不够，由于都是float，第二个float会下移)。而这两个不同BFC又处于初始包含块的BFC中，将会按照常规流进行布局，即第二个BFC排在第一个BFC下面，形成2行2列的样式：<br><br><br>    <span style="text-decoration: line-through;"><br>    <h3>float in zero height divs of the same BFC</h3><br><br>     <div style="margin:20px"><br>    <div style="float:left;border:1px solid green;background-color:red">float div r1c1</div><br>    <div style="float:left;border:1px solid green;background-color:blue">float div r1c2</div><br>     </div>
+
+<pre><code> &lt;div style=<span class="string">"margin:20px"</span>&gt;
+&lt;div style=<span class="string">"float:left;border:1px solid green;background-color:gray"</span>&gt;float div r2c1&lt;/div&gt;
+&lt;div style=<span class="string">"float:left;border:1px solid green;background-color:yellow"</span>&gt;float div r2c2&lt;/div&gt;
+ &lt;/div&gt;&lt;/span&gt;
+[html]
+&lt;h3&gt;float <span class="keyword">in</span> zero height divs of different BFCs&lt;/h3&gt;
+ &lt;div style=<span class="string">"margin:20px;overflow:hidden"</span>&gt;
+      &lt;div style=<span class="string">"float:left;border:1px solid green;background-color:red"</span>&gt;float div r1c1&lt;/div&gt;
+      &lt;div style=<span class="string">"float:left;border:1px solid green;background-color:blue"</span>&gt;float div r1c2&lt;/div&gt;
+ &lt;/div&gt;
+ &lt;div style=<span class="string">"margin:20px;overflow:hidden"</span>&gt;
+      &lt;div style=<span class="string">"float:left;border:1px solid green;background-color:gray"</span>&gt;float div r2c1&lt;/div&gt;
+      &lt;div style=<span class="string">"float:left;border:1px solid green;background-color:yellow"</span>&gt;float div r2c2&lt;/div&gt;
+ &lt;/div&gt;
+
+[/html]
+
+
+
+实际布局效果如下图：
+
+&lt;img src=<span class="string">"http://leivli.duapp.com/wp-content/uploads/2010/11/3.png"</span> title=<span class="string">"float_in_bfc"</span> height=<span class="string">"131"</span> width=<span class="string">"519"</span> alt=<span class="string">""</span> <span class="class"><span class="keyword">class</span>="<span class="title">aligncenter</span> <span class="title">size</span>-<span class="title">full</span> <span class="title">wp</span>-<span class="title">image</span>-92"&gt;&lt;/<span class="title">img</span>&gt;
+
+&lt;<span class="title">strong</span>&gt;<span class="title">Rule</span> 3 <span class="title">BFC</span>  <span class="title">adjoin</span> <span class="title">float</span>&lt;/<span class="title">strong</span>&gt;
+
+一个普通的<span class="title">div</span>元素(未生成新的<span class="title">BFC</span>)是会被相邻的<span class="title">float</span>元素覆盖的，而一个生成<span class="title">BFC</span>的<span class="title">div</span>元素的<span class="title">border</span>-<span class="title">box</span>是不会被相邻的<span class="title">float</span>元素覆盖的，但是其<span class="title">margin</span>可以被覆盖。如下面的代码：
+ [<span class="title">html</span>]
+
+&lt;<span class="title">h3</span>&gt;<span class="title">float</span> <span class="title">and</span> <span class="title">normal</span> <span class="title">div</span> <span class="title">overlap</span>&lt;/<span class="title">h3</span>&gt;
+ &lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">float</span>:<span class="title">left</span>;<span class="title">background</span>-<span class="title">color</span>:<span class="title">gray</span>"&gt;<span class="title">float</span> <span class="title">div</span>&lt;/<span class="title">div</span>&gt;
+ &lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">background</span>-<span class="title">color</span>:<span class="title">yellow</span>;<span class="title">border</span>:1<span class="title">px</span> <span class="title">solid</span> <span class="title">red</span>"&gt; <span class="title">normal</span> <span class="title">div</span> &lt;/<span class="title">div</span>&gt;
+
+ &lt;<span class="title">h3</span>&gt;<span class="title">float</span> <span class="title">and</span> <span class="title">bfc</span> <span class="title">div</span> <span class="title">no</span> <span class="title">overlap</span>&lt;/<span class="title">h3</span>&gt;
+ &lt;<span class="title">p</span>&gt;<span class="title">both</span> <span class="title">divs</span> <span class="title">have</span> <span class="title">no</span> <span class="title">margin</span>&lt;/<span class="title">p</span>&gt;
+ &lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">float</span>:<span class="title">left</span>;<span class="title">background</span>-<span class="title">color</span>:<span class="title">gray</span>"&gt;<span class="title">float</span> <span class="title">div</span>&lt;/<span class="title">div</span>&gt;
+ &lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">background</span>-<span class="title">color</span>:<span class="title">yellow</span>;<span class="title">border</span>:1<span class="title">px</span> <span class="title">solid</span> <span class="title">red</span>;<span class="title">overflow</span>:<span class="title">hidden</span>"&gt; <span class="title">bfc</span> <span class="title">div</span> &lt;/<span class="title">div</span>&gt;
+
+ &lt;<span class="title">p</span>&gt;<span class="title">bfc</span> <span class="title">div</span> <span class="title">has</span> <span class="title">margin</span>&lt;/<span class="title">p</span>&gt;
+ &lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">float</span>:<span class="title">left</span>;<span class="title">background</span>-<span class="title">color</span>:<span class="title">gray</span>"&gt;<span class="title">float</span> <span class="title">div</span>&lt;/<span class="title">div</span>&gt;
+ &lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">background</span>-<span class="title">color</span>:<span class="title">yellow</span>;<span class="title">border</span>:1<span class="title">px</span> <span class="title">solid</span> <span class="title">red</span>;<span class="title">overflow</span>:<span class="title">hidden</span>;<span class="title">margin</span>-<span class="title">left</span>:10<span class="title">px</span>"&gt; <span class="title">bfc</span> <span class="title">div</span> &lt;/<span class="title">div</span>&gt;
+
+ &lt;<span class="title">p</span>&gt;<span class="title">float</span> <span class="title">div</span> <span class="title">has</span> <span class="title">margin</span>&lt;/<span class="title">p</span>&gt;
+ &lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">float</span>:<span class="title">left</span>;<span class="title">background</span>-<span class="title">color</span>:<span class="title">gray</span>;<span class="title">margin</span>-<span class="title">right</span>:10<span class="title">px</span>;<span class="title">margin</span>-<span class="title">right</span>:10<span class="title">px</span>"&gt;<span class="title">float</span> <span class="title">div</span>&lt;/<span class="title">div</span>&gt;
+ &lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">background</span>-<span class="title">color</span>:<span class="title">yellow</span>;<span class="title">border</span>:1<span class="title">px</span> <span class="title">solid</span> <span class="title">red</span>;<span class="title">overflow</span>:<span class="title">hidden</span>"&gt; <span class="title">bfc</span> <span class="title">div</span> &lt;/<span class="title">div</span>&gt;
+
+[/<span class="title">html</span>]
+
+
+
+生成的效果如下图：
+
+&lt;<span class="title">img</span> <span class="title">src</span>="<span class="title">http</span>://<span class="title">leivli</span>.<span class="title">duapp</span>.<span class="title">com</span>/<span class="title">wp</span>-<span class="title">content</span>/<span class="title">uploads</span>/2010/11/4-1024<span class="title">x209</span>.<span class="title">png</span>" <span class="title">title</span>="<span class="title">float_adjoin_bfc</span>" <span class="title">height</span>="209" <span class="title">width</span>="1024" <span class="title">alt</span>="" <span class="title">class</span>="<span class="title">aligncenter</span> <span class="title">size</span>-<span class="title">large</span> <span class="title">wp</span>-<span class="title">image</span>-93"&gt;&lt;/<span class="title">img</span>&gt;如图所示，前两个<span class="title">div</span>中，<span class="title">float</span>的<span class="title">div</span>会和另一个<span class="title">div</span>发生重叠，而后面三个示例可以看出，<span class="title">float</span>框不会和相邻的<span class="title">bfc</span>的<span class="title">border</span> <span class="title">box</span>发生重叠。正如<span class="title">rule</span> 3所述，<span class="title">float</span>和<span class="title">bfc</span>的<span class="title">border</span> <span class="title">box</span>不会发生重叠：
+当<span class="title">float</span>和<span class="title">bfc</span>都没有<span class="title">margin</span>时，两者紧邻；当<span class="title">bfc</span>有<span class="title">left</span> <span class="title">margin</span>时，该<span class="title">left</span> <span class="title">margin</span>可以被<span class="title">float</span>框覆盖，两者还是紧邻；当<span class="title">float</span>框有<span class="title">right</span> <span class="title">margin</span>时，<span class="title">bfc</span>并不能将其覆盖。
+
+再看另外一个例子，不多说，贴代码:
+ [<span class="title">html</span>]
+
+&lt;<span class="title">h3</span>&gt;<span class="title">float</span> <span class="title">and</span> <span class="title">bfc</span> <span class="title">div</span> <span class="title">no</span> <span class="title">overlap</span>: <span class="title">another</span> <span class="title">example</span>&lt;/<span class="title">h3</span>&gt;
+
+ &lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">overflow</span>:<span class="title">hidden</span>"&gt;
+&lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">float</span>:<span class="title">left</span>;<span class="title">background</span>-<span class="title">color</span>:<span class="title">red</span>;<span class="title">width</span>:200<span class="title">px</span>"&gt;<span class="title">first</span>: <span class="title">left</span> <span class="title">float</span> <span class="title">div</span>&lt;/<span class="title">div</span>&gt;
+&lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">float</span>:<span class="title">right</span>;<span class="title">background</span>-<span class="title">color</span>:<span class="title">green</span>;<span class="title">width</span>:200<span class="title">px</span>"&gt;<span class="title">second</span>: <span class="title">right</span> <span class="title">float</span> <span class="title">div</span>&lt;/<span class="title">div</span>&gt;
+&lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">overflow</span>:<span class="title">hidden</span>;<span class="title">background</span>-<span class="title">color</span>:<span class="title">yellow</span>"&gt;<span class="title">third</span>: <span class="title">bfc</span> <span class="title">div</span>&lt;/<span class="title">div</span>&gt;
+ &lt;/<span class="title">div</span>&gt;
+
+ &lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">overflow</span>:<span class="title">hidden</span>"&gt;
+&lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">float</span>:<span class="title">left</span>;<span class="title">background</span>-<span class="title">color</span>:<span class="title">red</span>;<span class="title">margin</span>-<span class="title">right</span>:20<span class="title">px</span>;<span class="title">width</span>:200<span class="title">px</span>"&gt;<span class="title">first</span>: <span class="title">left</span> <span class="title">float</span> <span class="title">div</span>&lt;/<span class="title">div</span>&gt;
+&lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">float</span>:<span class="title">right</span>;<span class="title">background</span>-<span class="title">color</span>:<span class="title">green</span>;<span class="title">margin</span>-<span class="title">left</span>:20<span class="title">px</span>;<span class="title">width</span>:200<span class="title">px</span>"&gt;<span class="title">second</span>: <span class="title">right</span> <span class="title">float</span> <span class="title">div</span>&lt;/<span class="title">div</span>&gt;
+&lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">overflow</span>:<span class="title">hidden</span>;<span class="title">background</span>-<span class="title">color</span>:<span class="title">yellow</span>"&gt;<span class="title">third</span>: <span class="title">bfc</span> <span class="title">div</span>&lt;/<span class="title">div</span>&gt;
+ &lt;/<span class="title">div</span>&gt;
+
+ &lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">overflow</span>:<span class="title">hidden</span>"&gt;
+&lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">float</span>:<span class="title">left</span>;<span class="title">background</span>-<span class="title">color</span>:<span class="title">red</span>;<span class="title">width</span>:200<span class="title">px</span>"&gt;<span class="title">first</span>: <span class="title">left</span> <span class="title">float</span> <span class="title">div</span>&lt;/<span class="title">div</span>&gt;
+&lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">float</span>:<span class="title">right</span>;<span class="title">background</span>-<span class="title">color</span>:<span class="title">green</span>;<span class="title">width</span>:200<span class="title">px</span>"&gt;<span class="title">second</span>: <span class="title">right</span> <span class="title">float</span> <span class="title">div</span>&lt;/<span class="title">div</span>&gt;
+&lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">overflow</span>:<span class="title">hidden</span>;<span class="title">background</span>-<span class="title">color</span>:<span class="title">yellow</span>;<span class="title">margin</span>:0 220<span class="title">px</span>"&gt;<span class="title">third</span>: <span class="title">bfc</span> <span class="title">div</span>&lt;/<span class="title">div</span>&gt;
+ &lt;/<span class="title">div</span>&gt;
+
+[/<span class="title">html</span>]
+
+
+
+实际运行效果图：
+
+&lt;<span class="title">img</span> <span class="title">src</span>="<span class="title">http</span>://<span class="title">leivli</span>.<span class="title">duapp</span>.<span class="title">com</span>/<span class="title">wp</span>-<span class="title">content</span>/<span class="title">uploads</span>/2010/11/5-1024<span class="title">x95</span>.<span class="title">png</span>" <span class="title">title</span>="<span class="title">float_adjoin_bfc_another</span>" <span class="title">height</span>="95" <span class="title">width</span>="1024" <span class="title">alt</span>="" <span class="title">class</span>="<span class="title">aligncenter</span> <span class="title">size</span>-<span class="title">large</span> <span class="title">wp</span>-<span class="title">image</span>-94"&gt;&lt;/<span class="title">img</span>&gt;
+
+该例子中有三组，各组均有三个<span class="title">div</span>，分别为<span class="title">float</span> <span class="title">left</span>（<span class="title">width</span>:200<span class="title">px</span>）、<span class="title">float</span> <span class="title">right</span>（<span class="title">width</span>:200<span class="title">px</span>）和无<span class="title">float</span>的<span class="title">third</span> <span class="title">div</span>（一个<span class="title">bfc</span>），每组的包含<span class="title">div</span>具有<span class="title">overflow</span>:<span class="title">hidden</span>，故会形成一个<span class="title">bfc</span>，
+即各组的三个<span class="title">div</span>均处于一个独立的<span class="title">BFC</span>中。
+
+第一组中，根据<span class="title">Rule3</span>， <span class="title">third</span> <span class="title">div</span>形成的<span class="title">bfc</span>不会和<span class="title">float</span> <span class="title">div</span>发生重叠，因此在水平空间足够的情况下，三个<span class="title">div</span>会排在一行，中间没有间隙。此时在<span class="title">third</span> <span class="title">div</span>上应用<span class="title">margin</span>并不会在<span class="title">third</span> <span class="title">div</span>的两边和<span class="title">float</span> <span class="title">div</span>
+交界处形成空隙。因为这种情况下，如果需要在中间框的左右两侧产生空隙，通过给该框添加<span class="title">margin</span>是无法做到的，但是可以采用以下两个方法做到：
+
+&lt;<span class="title">ul</span>&gt;
+
+    &lt;<span class="title">li</span>&gt; 在两边的<span class="title">float</span>上设置<span class="title">margin</span>，如上图第二组所示&lt;/<span class="title">li</span>&gt;
+
+
+    &lt;<span class="title">li</span>&gt; 给<span class="title">third</span> <span class="title">div</span>设置一个大于两边<span class="title">float</span>框宽度的<span class="title">margin</span>，如上图第三组所示&lt;/<span class="title">li</span>&gt;
+
+&lt;/<span class="title">ul</span>&gt;
+
+
+&lt;<span class="title">strong</span>&gt;<span class="title">Rule</span> 4 <span class="title">BFC</span> <span class="title">and</span> <span class="title">clear</span>&lt;/<span class="title">strong</span>&gt;
+ <span class="title">clear</span>只能清除处于同一个<span class="title">bfc</span>的<span class="title">float</span>元素，这里给出的例子说明了该点，同时也表示了第一段提到的在<span class="title">table</span>元素和<span class="title">table</span>-<span class="title">cell</span>元素上使用<span class="title">clear</span>的不同:
+ [<span class="title">html</span>]
+
+&lt;<span class="title">h3</span>&gt;<span class="title">BFC</span> &amp; <span class="title">clear</span> -- <span class="title">clear</span> <span class="title">on</span> <span class="title">display</span>:<span class="title">talbe</span> <span class="title">vs</span> <span class="title">clear</span> <span class="title">on</span> <span class="title">display</span>:<span class="title">table</span>-<span class="title">cell</span>&lt;/<span class="title">h3</span>&gt;
+
+ &lt;<span class="title">p</span> <span class="title">style</span>="<span class="title">clear</span>:<span class="title">left</span>"&gt;<span class="title">normal</span> <span class="title">div</span> <span class="title">after</span> <span class="title">float</span> <span class="title">div</span> <span class="title">without</span> <span class="title">clear</span>&lt;/<span class="title">p</span>&gt;
+ &lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">border</span>:1<span class="title">px</span> <span class="title">solid</span> <span class="title">red</span>"&gt;
+&lt;<span class="title">p</span> <span class="title">style</span>="<span class="title">float</span>:<span class="title">left</span>;<span class="title">background</span>-<span class="title">color</span>:<span class="title">gray</span>;<span class="title">color</span>:<span class="title">white</span>;<span class="title">border</span>:1<span class="title">px</span> <span class="title">solid</span> <span class="title">green</span>"&gt;
+<span class="title">line</span> 1&lt;<span class="title">br</span>/&gt;
+<span class="title">line</span> 2
+&lt;/<span class="title">p</span>&gt;
+&lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">border</span>:2<span class="title">px</span> <span class="title">solid</span> <span class="title">yellow</span>"&gt;<span class="title">div</span> <span class="title">content</span>&lt;/<span class="title">div</span>&gt;
+ &lt;/<span class="title">div</span>&gt;
+
+ &lt;<span class="title">p</span> <span class="title">style</span>="<span class="title">clear</span>:<span class="title">left</span>"&gt;<span class="title">normal</span> <span class="title">div</span> <span class="title">after</span> <span class="title">float</span> <span class="title">div</span> <span class="title">with</span> <span class="title">clear</span>&lt;/<span class="title">p</span>&gt;
+ &lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">border</span>:1<span class="title">px</span> <span class="title">solid</span> <span class="title">red</span>"&gt;
+&lt;<span class="title">p</span> <span class="title">style</span>="<span class="title">float</span>:<span class="title">left</span>;<span class="title">background</span>-<span class="title">color</span>:<span class="title">gray</span>;<span class="title">color</span>:<span class="title">white</span>;<span class="title">border</span>:1<span class="title">px</span> <span class="title">solid</span> <span class="title">green</span>"&gt;
+<span class="title">line</span> 1&lt;<span class="title">br</span>/&gt;
+<span class="title">line</span> 2
+&lt;/<span class="title">p</span>&gt;
+&lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">border</span>:2<span class="title">px</span> <span class="title">solid</span> <span class="title">yellow</span>;<span class="title">clear</span>:<span class="title">left</span>"&gt;<span class="title">div</span> <span class="title">content</span>&lt;/<span class="title">div</span>&gt;
+ &lt;/<span class="title">div</span>&gt;
+
+ &lt;<span class="title">p</span> <span class="title">style</span>="<span class="title">clear</span>:<span class="title">left</span>"&gt;<span class="title">display</span>:<span class="title">table</span> <span class="title">after</span> <span class="title">float</span> <span class="title">div</span> <span class="title">without</span> <span class="title">clear</span>&lt;/<span class="title">p</span>&gt;
+ &lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">border</span>:1<span class="title">px</span> <span class="title">solid</span> <span class="title">red</span>"&gt;
+&lt;<span class="title">p</span> <span class="title">style</span>="<span class="title">float</span>:<span class="title">left</span>;<span class="title">background</span>-<span class="title">color</span>:<span class="title">gray</span>;<span class="title">color</span>:<span class="title">white</span>;<span class="title">border</span>:1<span class="title">px</span> <span class="title">solid</span> <span class="title">green</span>"&gt;
+<span class="title">line</span> 1&lt;<span class="title">br</span>/&gt;
+<span class="title">line</span> 2
+&lt;/<span class="title">p</span>&gt;
+&lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">display</span>:<span class="title">table</span>;<span class="title">border</span>:2<span class="title">px</span> <span class="title">solid</span> <span class="title">yellow</span>"&gt;&lt;<span class="title">span</span>&gt;<span class="title">div</span> <span class="title">content</span>&lt;/<span class="title">span</span>&gt;&lt;/<span class="title">div</span>&gt;
+ &lt;/<span class="title">div</span>&gt;
+
+ &lt;<span class="title">p</span> <span class="title">style</span>="<span class="title">clear</span>:<span class="title">left</span>"&gt;<span class="title">display</span>:<span class="title">table</span> <span class="title">after</span> <span class="title">float</span> <span class="title">div</span> <span class="title">with</span> <span class="title">clear</span>&lt;/<span class="title">p</span>&gt;
+&lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">border</span>:1<span class="title">px</span> <span class="title">solid</span> <span class="title">red</span>"&gt;
+&lt;<span class="title">p</span> <span class="title">style</span>="<span class="title">float</span>:<span class="title">left</span>;<span class="title">background</span>-<span class="title">color</span>:<span class="title">gray</span>;<span class="title">color</span>:<span class="title">white</span>;<span class="title">border</span>:1<span class="title">px</span> <span class="title">solid</span> <span class="title">green</span>"&gt;
+<span class="title">line</span> 1&lt;<span class="title">br</span>/&gt;
+<span class="title">line</span> 2
+&lt;/<span class="title">p</span>&gt;
+&lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">display</span>:<span class="title">table</span>;<span class="title">clear</span>:<span class="title">left</span>;<span class="title">border</span>:2<span class="title">px</span> <span class="title">solid</span> <span class="title">yellow</span>"&gt;<span class="title">div</span> <span class="title">content</span>&lt;/<span class="title">div</span>&gt;
+ &lt;/<span class="title">div</span>&gt;
+
+ &lt;<span class="title">p</span> <span class="title">style</span>="<span class="title">clear</span>:<span class="title">left</span>"&gt;<span class="title">display</span>:<span class="title">table</span>-<span class="title">cell</span> <span class="title">after</span> <span class="title">float</span> <span class="title">div</span> <span class="title">without</span> <span class="title">clear</span>&lt;/<span class="title">p</span>&gt;
+ &lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">border</span>:1<span class="title">px</span> <span class="title">solid</span> <span class="title">red</span>"&gt;
+&lt;<span class="title">p</span> <span class="title">style</span>="<span class="title">float</span>:<span class="title">left</span>;<span class="title">background</span>-<span class="title">color</span>:<span class="title">gray</span>;<span class="title">color</span>:<span class="title">white</span>;<span class="title">border</span>:1<span class="title">px</span> <span class="title">solid</span> <span class="title">green</span>"&gt;
+<span class="title">line</span> 1&lt;<span class="title">br</span>/&gt;
+<span class="title">line</span> 2
+&lt;/<span class="title">p</span>&gt;
+&lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">display</span>:<span class="title">table</span>-<span class="title">cell</span>;<span class="title">border</span>:2<span class="title">px</span> <span class="title">solid</span> <span class="title">yellow</span>"&gt;<span class="title">div</span> <span class="title">content</span>&lt;/<span class="title">div</span>&gt;
+ &lt;/<span class="title">div</span>&gt;
+
+&lt;<span class="title">p</span> <span class="title">style</span>="<span class="title">clear</span>:<span class="title">left</span>"&gt;<span class="title">display</span>:<span class="title">table</span>-<span class="title">cell</span> <span class="title">after</span> <span class="title">float</span> <span class="title">div</span> <span class="title">with</span> <span class="title">clear</span>&lt;/<span class="title">p</span>&gt;
+ &lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">border</span>:1<span class="title">px</span> <span class="title">solid</span> <span class="title">red</span>"&gt;
+&lt;<span class="title">p</span> <span class="title">style</span>="<span class="title">float</span>:<span class="title">left</span>;<span class="title">background</span>-<span class="title">color</span>:<span class="title">gray</span>;<span class="title">color</span>:<span class="title">white</span>;<span class="title">border</span>:1<span class="title">px</span> <span class="title">solid</span> <span class="title">green</span>"&gt;
+<span class="title">line</span> 1&lt;<span class="title">br</span>/&gt;
+<span class="title">line</span> 2
+&lt;/<span class="title">p</span>&gt;
+&lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">display</span>:<span class="title">table</span>-<span class="title">cell</span>;<span class="title">clear</span>:<span class="title">left</span>;<span class="title">border</span>:2<span class="title">px</span> <span class="title">solid</span> <span class="title">yellow</span>"&gt;<span class="title">div</span> <span class="title">content</span>&lt;/<span class="title">div</span>&gt;
+&lt;/<span class="title">div</span>&gt;
+[/<span class="title">html</span>]
+
+
+
+实际运行效果图：
+ &lt;<span class="title">img</span> <span class="title">src</span>="<span class="title">http</span>://<span class="title">leivli</span>.<span class="title">duapp</span>.<span class="title">com</span>/<span class="title">wp</span>-<span class="title">content</span>/<span class="title">uploads</span>/2010/11/6-1024<span class="title">x362</span>.<span class="title">png</span>" <span class="title">title</span>="<span class="title">bfc_and_clear</span>" <span class="title">height</span>="362" <span class="title">width</span>="1024" <span class="title">alt</span>="" <span class="title">class</span>="<span class="title">aligncenter</span> <span class="title">size</span>-<span class="title">large</span> <span class="title">wp</span>-<span class="title">image</span>-96"&gt;&lt;/<span class="title">img</span>&gt;第一组是一个<span class="title">float</span> <span class="title">div</span>后跟着一个普通的无设置<span class="title">clear</span>属性的<span class="title">div</span>（无<span class="title">display</span>属性）的情况，此时<span class="title">float</span> <span class="title">div</span>会覆盖后面的<span class="title">div</span>，从边框可以看到，后面的<span class="title">div</span>还是从包含<span class="title">div</span>的左侧开始的
+ 第二组和第一组一样，只是后面的<span class="title">div</span>设置了<span class="title">clear</span>:<span class="title">left</span>属性，这就使得后面的<span class="title">div</span>排列在了<span class="title">float</span> <span class="title">div</span>的下面
+ 第三组中后面的<span class="title">div</span>设置了<span class="title">display</span>:<span class="title">table</span>,但是没有设置<span class="title">clear</span>属性，与第一组相比，该<span class="title">div</span>的表现更像是一个ＢＦＣ，因为该<span class="title">div</span>没有从包含<span class="title">div</span>的左侧开始，而是从<span class="title">float</span> <span class="title">div</span>的右侧开始布局。
+ 这就是文章刚开始提到的，<span class="title">display</span>:<span class="title">table</span>本身不会新建一个<span class="title">bfc</span>，但是由于它会使得内部元素生成<span class="title">display</span>:<span class="title">talbe</span>-<span class="title">cell</span>的匿名框，而该匿名框会建立一个<span class="title">bfc</span>
+ 第四组可以看出第三组中的<span class="title">bfc</span>并不是<span class="title">display</span>:<span class="title">table</span>创建的，因为设置了<span class="title">clear</span>:<span class="title">left</span>后，该<span class="title">div</span>到了<span class="title">float</span> <span class="title">div</span>的下面。
+ 最后两组是<span class="title">display</span>:<span class="title">table</span>-<span class="title">cell</span>的情况，此时后面的<span class="title">div</span>会建立一个<span class="title">bfc</span>，由于和<span class="title">float</span>的<span class="title">div</span>分属不同的<span class="title">div</span>，<span class="title">clear</span>属性是不起作用的，这也就是为什么第五组设置了<span class="title">clear</span>属性后，表现和第四组一样的原因</span>
+</code></pre>
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  
+    <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2010-11-20T11:42:07.000Z"><a href="/2010/11/2010-11-20-free_green_vpn/">Nov 20 2010</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2010/11/2010-11-20-free_green_vpn/">一个申请免费VPN的地方</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>今天发现一个申请免费vpn的地方，一个月可以有200M的免费流量，而且有各种平台上的使用说明，很不错~</p>
+<p>可以点这个链接：<a href="http://www.greenvpn.net/join.php?ref=leivli" target="_blank">GreenVPN</a>进入查看，:)</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  
+    <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2010-11-16T16:27:56.000Z"><a href="/2010/11/2010-11-17-wp-evernote-bug-fix/">Nov 17 2010</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2010/11/2010-11-17-wp-evernote-bug-fix/">WP Evernote Site Memory插件1.1.1一个小问题的修正</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>Evernote是一个十分好用的笔记软件，针对wordpress有相应的WP Evernote Site Memory插件，安装完并进行相应的配置后，可以在每一篇博文开头或结尾有个小的evernote图标，点击后可以发送文章内容到读者自己的evernote笔记本中，十分方便。</p>
+<p>在site memory的配置中有如下选项：</p>
+<p><img src="file:///C:/Users/ADMINI%7E1/AppData/Local/Temp/moz-screenshot.png" alt=""><img src="file:///C:/Users/ADMINI%7E1/AppData/Local/Temp/moz-screenshot-1.png" alt=""><img src="http://leivli.duapp.com/wp-content/uploads/2010/11/11.png" alt="设置ContentID">即可以设定evernote获取页面哪一部分作为笔记内容，留空则可以使用id为“post-ID”的div的内容，也即相应博文的内容。</p>
+<p>但昨天装了1.1.1后，发现点击某篇博文下的evernote图标后，发送到笔记的内容是整个页面的内容而非单独那篇博文的内容，刚才简单追踪了一下，发现是该插件附带js的一个小bug：生成的按钮中调用clip方法时传递postID的属性名是”contentID”,而之后却使用属性名”contentId”进行读取,这样导致Evernote认为没有传递合适的postID，从而就抓取了整个页面的内容。</p>
+<p>修改起来也十分简单，只需要将插件中所带的js文件（”plugins/wp-evernote-site-memory/js/noteit.js和noteit.min.js“）中所有的”contentId”替换为”contentID”即可。</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  
+    <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2010-11-15T09:17:35.000Z"><a href="/2010/11/2010-11-15-php_input_post/">Nov 15 2010</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2010/11/2010-11-15-php_input_post/">php://input和$_POST</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>一个soap_server的实现框架代码如下：</p>
+<p>[php]<br>$wsdlFile = realpath(dirname(<strong>FILE</strong>).’/../wsdl/service.wsdl’);<br>$actor = new soapServer($wsdlFile); //初始化soapServer<br>$actor-&gt;setClass(‘ServiceInterface’);//导入方法<br>$actor-&gt;handle(file_get_contents(‘php://input’)); //注意：这里使用了php://input<br>[/php]</p>
+<p><strong>一个soap调用的数据是通过POST的方式发送给服务器的，那么上面的处理中为什么要使用php://input,是否可以使用$_POST？
+</strong></p>
+<p>一个典型的soap调用框架代码如下：</p>
+<p>[php]<br>$client = new SoapClient(SOAP_SERVICEURL,array(‘trace’=&gt;true));<br>//使用trace选项，可以保证后面的<strong>getLastRequest、</strong>getLastResponse等方法可以读取到相应的请求/响应<br>$ret = $client-&gt;getServiceName(‘serviceStr’);<br>echo htmlspecialchars($client-&gt;<strong>getLastRequestHeaders());<br> echo “<br/>“;<br> echo htmlspecialchars($client-&gt;</strong>getLastRequest());<br> echo “<br/>“;<br> var_dump($ret);<br> echo “<br/>“;<br> echo htmlspecialchars($client-&gt;<strong>getLastResponseHeaders());<br> echo “<br/>“;<br> echo htmlspecialchars($client-&gt;</strong>getLastResponse());<br> echo “<br/>“;<br>[/php]</p>
+<p>以下是运行这段client后的输出：</p>
+<p>[code]<br>POST <strong><strong> HTTP/1.1 Host: [*</strong></strong>] Connection: Keep-Alive User-Agent: PHP-SOAP/5.2.10 Content-Type: text/xml;<br>charset=utf-8 SOAPAction: “urn:<strong><em>*</em></strong>#getServiceName” Content-Length: <em>*</em></p>
+<p>&lt;?xml version=”1.0” encoding=”UTF-8”?&gt; <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ns1="urn:****" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"></p>
+<p><SOAP-ENV:Body><ns1:getServiceName><servicename xsi:type="xsd:string">serviceStr</servicename></ns1:getServiceName></SOAP-ENV:Body><br></SOAP-ENV:Envelope></p>
+<p>NULL</p>
+<p>HTTP/1.1 200 OK Date: Mon, 15 Nov 2010 08:19:16 GMT Server: Apache/2.0.63 (Unix) PHP/5.2.10<br>X-Powered-By: PHP/5.2.10 Set-Cookie: <strong>*</strong>; path=/; domain=<em>*</em> Expires: Thu, 19 Nov 1981 08:52:00 GMT<br>Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0 Pragma: no-cache Content-Length: 521<br>Keep-Alive: timeout=15, max=100 Connection: Keep-Alive Content-Type: text/xml; charset=utf-8</p>
+<p>&lt;?xml version=”1.0” encoding=”UTF-8”?&gt; <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ns1="urn:AmsInterfaceswsdl" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><SOAP-ENV:Body></p>
+<p><ns1:getServiceNameResponse><return xsi:nil="true"/></ns1:getServiceNameResponse></SOAP-ENV:Body></SOAP-ENV:Envelope><br>[/code]</p>
+<p>由请求header可以看到，soap虽然使用的post的方式传输请求串，但是传递的数据是一个xml，content-type也是“text/xml”，而对于php://input,<a href="http://php.net/manual/en/wrappers.php.php" target="_blank">官方文档</a>给的是这样的说明:</p>
+<p>php://input allows you to read raw data from the request body. In case of POST requests, it preferrable to <a href="http://www.php.net/manual/en/reserved.variables.httprawpostdata.php" target="_blank">$HTTP_RAW_POST_DATA</a> as it does not depend on special php.ini directives. Moreover, for those cases where <a href="http://www.php.net/manual/en/reserved.variables.httprawpostdata.php" target="_blank">$HTTP_RAW_POST_DATA</a> is not populated by default, it is a potentially less memory intensive alternative to activating <a href="http://www.php.net/manual/en/ini.core.php#ini.always-populate-raw-post-data" target="_blank">always_populate_raw_post_data</a>. php://input is not available with <em>enctype=”multipart/form-data”</em>.</p>
+<blockquote>
+<p><strong>Note</strong>:  A stream opened with php://input can only be read once; the stream does not support seek operations. However, depending on the SAPI implementation, it may be possible to open another php://input stream and restart reading. This is only possible if the request body data has been saved. Typically, this is the case for POST requests, but not other request methods, such as PUT or PROPFIND. </p>
+</blockquote>
+<p>也就是说php://input可以用来读取http post的raw request data。对于一般的表单post，http头中设置的contentType是’application/x-form-www-urlencoded’(无文件上传)或’multipart/form-data’(一般用于文件上传),这两种情况下，post的数据会被设置到$_POST中（第一种情况下，php://input也会被设置，第二种情况下，php://input则不会被设置），而对于text/xml这种类型，post数据并不会被设置到$_POST中，具体的post、get和php://input的实验可参考这篇<a href="http://tuzwu.javaeye.com/blog/798978" target="_blank">博文</a>。</p>
+<p>这里只摘抄其测试结论：</p>
+<p>1，Coentent-Type仅在取值为application/x-www-data-urlencoded和multipart/form-data两种情况下，PHP才会将http请求数据包中相应的数据填入全局变量$_POST<br>2，PHP不能识别的Content-Type类型的时候，会将http请求包中相应的数据填入变量$HTTP_RAW_POST_DATA<br>3,  只有Coentent-Type不为multipart/form-data的时候，PHP不会将http请求数据包中的相应数据填入php://input，否则其它情况都会。填入的长度，由Coentent-Length指定。<br>4，只有Content-Type为application/x-www-data-urlencoded时，php://input数据才跟$_POST数据相一致。<br>5，php://input数据总是跟$HTTP_RAW_POST_DATA相同，但是php://input比$HTTP_RAW_POST_DATA更凑效，且不需要特殊设置php.ini<br>6，PHP会将PATH字段的query_path部分，填入全局变量$_GET。通常情况下，GET方法提交的http请求，body为空。</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  
+    <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2010-11-14T17:12:11.000Z"><a href="/2010/11/2010-11-15-greasemonkey-baidu-space/">Nov 15 2010</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2010/11/2010-11-15-greasemonkey-baidu-space/">百度空间插入代码段和HTML代码片段的GreaseMonkey脚本</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>现在百度空间写日志时，在IE/firefox下的文本编辑器是不能直接查看和编辑日志的HTML代码的，应该是基于安全考虑。目前在chrome下，百度空间的兼容性不好，写新日志或者编辑日志时，直接是提供的一个文本框，可以直接敲入HTML代码（当然了，写入<script>是会被过滤掉的)。</p>
+<p>如果空间可以支持直接插入代码片段（语法高亮、缩进等等），则空间用来写技术文档就更方便了。最近刚好发现VIM的TOhtml命令非常强大，可以直接把编辑器中文本按照其颜色、缩进等生成相应的HTML片段，如果空间可以直接插入一段HTML代码的话，代码片段的插入也就不成问题了。</p>
+<p>之前在<a href="http://www.laruence.com/" target="_blank">雪候鸟</a>的博客上看到了<a href="http://www.laruence.com/2010/03/31/1377.html" target="_blank">东方时尚约车脚本</a>相关的内容，联想我的需求，参考其东方时尚约车脚本写了一个简单的Greasemonkey脚本，主要在以下两方面对空间的编辑器进行了扩展：</p>
+<ol>
+<li>支持查看当前日志的HTML代码，以便进行简单的修改，和粘贴来自VIM的代码片段</li>
+<li>支持直接插入一段来自VIM的代码段，该代码段可以具有一定的样式，如常见的有边框包围，字体更清晰等等</li>
+</ol>
+<p><strong>安装方法:</strong></p>
+<ol>
+<li>需要firefox</li>
+<li>firefox需要安装greaseMonkey插件, 插件地址: <a href="https://addons.mozilla.org/en-US/firefox/addon/748" target="_blank"><a href="https://addons.mozilla.org/en-US/firefox/addon/748">https://addons.mozilla.org/en-US/firefox/addon/748</a></a></li>
+<li>用firefox浏览本页, 并<a href="http://userscripts.org/scripts/show/78912" target="_blank">点此</a>下载安装</li>
+</ol>
+<p><strong>使用方法：</strong></p>
+<p>安装后打开自己的空间，“新建文章”或者“编辑”已发布的日志时，在标题的右侧会出现“插入代码段“和”HTML视图“两个按钮，如下图：</p>
+<p><img src="http://leivli.duapp.com/wp-content/uploads/1.png" alt=""></p>
+<p>其中”<strong>插入代码段</strong>“可以直接插入一段代码段，如我们VIM中TOhtml一个php脚本文件的结果，然后复制到”代码段“中：</p>
+<p><img src="http://leivli.duapp.com/wp-content/uploads/2.png" alt=""></p>
+<p>以下是结果：</p>
+<p>1 &lt;?php<br>2 <strong>$</strong>file <strong>=</strong> file(“harddisk.txt”);<br>3 <strong>foreach</strong>(<strong>$</strong>file <strong>as</strong> <strong>$</strong>line){<br>4  <strong>$</strong>line <strong>=</strong> trim(<strong>$</strong>line);<br>5  <strong>$</strong>s <strong>=</strong> preg_match_all(“/(?:\d)+[GTM]/i”,<strong>$</strong>line,<strong>$</strong>matches,PREG_PATTERN_ORDER);<br>6  <strong>if</strong>(<strong>!**</strong>$<strong>s){<br>7  echo “error parse.. “</strong>.<strong>**$</strong>line<strong>.</strong>“\n”;<br>8  }<br>9  <strong>else</strong> <strong>if</strong>(<strong>$</strong>s <strong>&gt;</strong> 1){<br>10  echo “multi match .. “<strong>.**</strong>$<strong>line</strong>.<strong>“: \n”;<br>11  </strong>foreach<strong>(</strong>$<strong>matches[0] </strong>as<strong> </strong>$<strong>match){<br>12  echo “</strong>$<strong>match\n”;<br>13  }<br>14  }<br>15  </strong>else<strong>{<br>16  echo “find..”</strong>.<strong>**$</strong>line<strong>.</strong>“: \n”;<br>17  echo <strong>$</strong>matches[0][0]<strong>.</strong>“\n”;<br>18  }<br>19 }<br>20 ?&gt;</p>
+<p>代码段插入后，双击代码段可以进行<strong>编辑</strong>。</p>
+<p>”<strong>HTML视图</strong>“则显示当前日志的HTML代码，可以直接编辑：</p>
+<p><img src="http://leivli.duapp.com/wp-content/uploads/3.png" alt=""><br>该对话框上面的”更新“按钮可以将改动写回空间的编辑器，而”加载“则是可以再次加载空间编辑器中的内容</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  
+    <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2010-11-14T15:18:45.000Z"><a href="/2010/11/2010-11-14-vim-force-overwrite/">Nov 14 2010</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2010/11/2010-11-14-vim-force-overwrite/">VIM overwrite read-only file</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>今天在使用vim编辑一个read-only的文件（权限为r— r— r—)，在保存时虽然提示只读不能保存，但是通过w!可以强制覆盖原文件内容，难道VIM可以绕过权限限制么？</p>
+<p>后来发现是在使用w！时，vim会强制删除原文件，并新建一个新的同名文件，并写入新的内容，所以，使用w！强制保存时，就要求当前用户有删除原文件的权限，即：</p>
+<ol>
+<li>该文件所在的目录必须具有w权限</li>
+</ol>
+<ol>
+<li>如果所在目录设置了t标志，还需要当前文件的所有者为自己</li>
+</ol>
+<p>其实这也可以从vim的帮助中看到：</p>
+<p><em>write-readonly</em></p>
+<p>When the ‘cpoptions’ option contains ‘W’, Vim will refuse to overwrite a</p>
+<p>readonly file.  When ‘W’ is not present, “:w!” will overwrite a readonly file,</p>
+<p>if the system allows it (the directory must be writable).</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  
+    <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2010-11-12T06:44:38.000Z"><a href="/2010/11/2010-11-12-wget-mirror/">Nov 12 2010</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2010/11/2010-11-12-wget-mirror/">wget下载整个网站的镜像</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p><span style="background-color: #ffff00;">$ wget —mirror -p —convert-links -P ./LOCAL-DIR WEBSITE-URL</span></p>
+<ul>
+<li>–mirror : 下载镜像</li>
+</ul>
+<ul>
+<li>-p : 下载gif等显示html必须的资源</li>
+</ul>
+<ul>
+<li>–convert-links : 下载后，将文档中所有的链接进行转换，以支持本地查看</li>
+</ul>
+<ul>
+<li>-P ./LOCAL-DIR : 需要保存下载文档的目录</li>
+</ul>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  
+
+  <nav id="pagination">
+  
+  
+    <a href="/archives/2010/11/page/2/" class="alignright next">Next</a>
+  
+  <div class="clearfix"></div>
+</nav>
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:leiqzhang.com">
+  </form>
+</div>
+
+  
+<div class="widget tag">
+  <h3 class="title">Categories</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/Linux/">Linux</a><small>3</small></li>
+  
+    <li><a href="/categories/OpenStack/">OpenStack</a><small>2</small></li>
+  
+    <li><a href="/categories/VIM/">VIM</a><small>3</small></li>
+  
+    <li><a href="/categories/Virtualization/">Virtualization</a><small>13</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>2</small></li>
+  
+    <li><a href="/categories/miscellaneous/">miscellaneous</a><small>1</small></li>
+  
+    <li><a href="/categories/web_dev/">web_dev</a><small>8</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tagcloud">
+  <h3 class="title">Tag Cloud</h3>
+  <div class="entry">
+    <a href="/tags/CIM/" style="font-size: 10.00px;">CIM</a><a href="/tags/CORS/" style="font-size: 10.00px;">CORS</a><a href="/tags/DBPM/" style="font-size: 10.00px;">DBPM</a><a href="/tags/Deploy/" style="font-size: 10.00px;">Deploy</a><a href="/tags/ELI/" style="font-size: 10.00px;">ELI</a><a href="/tags/NUMA/" style="font-size: 10.00px;">NUMA</a><a href="/tags/Nova/" style="font-size: 12.50px;">Nova</a><a href="/tags/OPTIONS/" style="font-size: 10.00px;">OPTIONS</a><a href="/tags/Paste/" style="font-size: 10.00px;">Paste</a><a href="/tags/QEMU/" style="font-size: 20.00px;">QEMU</a><a href="/tags/RabbitMQ/" style="font-size: 10.00px;">RabbitMQ</a><a href="/tags/WSGI/" style="font-size: 10.00px;">WSGI</a><a href="/tags/bfc/" style="font-size: 10.00px;">bfc</a><a href="/tags/block-stream/" style="font-size: 10.00px;">block-stream</a><a href="/tags/blockcopy/" style="font-size: 12.50px;">blockcopy</a><a href="/tags/cache/" style="font-size: 10.00px;">cache</a><a href="/tags/css/" style="font-size: 12.50px;">css</a><a href="/tags/dataplane/" style="font-size: 10.00px;">dataplane</a><a href="/tags/ervernote/" style="font-size: 10.00px;">ervernote</a><a href="/tags/etag/" style="font-size: 10.00px;">etag</a><a href="/tags/eval/" style="font-size: 10.00px;">eval</a><a href="/tags/fedora/" style="font-size: 10.00px;">fedora</a><a href="/tags/greasemonkey/" style="font-size: 10.00px;">greasemonkey</a><a href="/tags/http/" style="font-size: 12.50px;">http</a><a href="/tags/javascript/" style="font-size: 10.00px;">javascript</a><a href="/tags/libvirt/" style="font-size: 17.50px;">libvirt</a><a href="/tags/lighthttpd/" style="font-size: 10.00px;">lighthttpd</a><a href="/tags/lighttpd/" style="font-size: 10.00px;">lighttpd</a><a href="/tags/livecd/" style="font-size: 10.00px;">livecd</a><a href="/tags/mac/" style="font-size: 10.00px;">mac</a><a href="/tags/md5sum/" style="font-size: 10.00px;">md5sum</a><a href="/tags/mysql/" style="font-size: 12.50px;">mysql</a><a href="/tags/oVirt/" style="font-size: 12.50px;">oVirt</a><a href="/tags/pdo/" style="font-size: 10.00px;">pdo</a><a href="/tags/performance/" style="font-size: 12.50px;">performance</a><a href="/tags/permalink/" style="font-size: 10.00px;">permalink</a><a href="/tags/php/" style="font-size: 15.00px;">php</a><a href="/tags/post/" style="font-size: 10.00px;">post</a><a href="/tags/proxy/" style="font-size: 10.00px;">proxy</a><a href="/tags/qemu-img/" style="font-size: 10.00px;">qemu-img</a>
+  </div>
+</div>
+
+
+  <iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=2&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=0&uid=1644437791&verifier=c45a1931&dpc=1"></iframe>
+
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://blog.csdn.net/luo_brian" title="luo_brian">Luohao</a></li>
+<li><a href="http://blog.csdn.net/defeattroy" title="木马屠城">Defeattroy</a></li>
+<li><a href="http://www.smilgel.com/" title="听雨轩">MrSaxon</a></li>
+<li><a href="http://lanbolee.com/blog/" title="博之博">Rambolee</a></li>
+<li><a href="http://www.haoziyanwo.com/" title="耗子燕窝">浩子</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2014 leiqzhang
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+<script type="text/javascript">
+var disqus_shortname = 'leiqzhang';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+</body>
+</html>

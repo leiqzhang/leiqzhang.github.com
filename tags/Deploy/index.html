@@ -1,0 +1,518 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="baidu-site-verification" content="kZ3lZdC9wn" />
+  
+  <title>Deploy | Technology &amp; Life</title>
+  <meta name="author" content="leiqzhang">
+  
+  <meta name="description" content="Virtualization Related Technologies">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+  <meta property="og:site_name" content="Technology &amp; Life"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico">
+  <link rel="alternate" href="/atom.xml" title="Technology &amp; Life" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
+  
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-40319520-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+  <script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3F6f62dffd0688838f0bc52fc65fd62af4' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">Technology &amp; Life</a></h1>
+  <h2><a href="/">blog of leiqzhang</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about">About</a></li>
+    
+      <li><a href="/atom.xml">RSS</a></li>
+    
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper">
+<h2 class="archive-title tag">Deploy</h2>
+
+
+  
+    <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2014-01-09T14:40:31.000Z"><a href="/2014/01/2014-01-09-nova-api-service-initialization/">Jan 9 2014</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2014/01/2014-01-09-nova-api-service-initialization/">NOVA API Service Initialization Process</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <h1 id="NOVA-API-670d-52a1-542f-52a8-6d41-7a0b-">NOVA-API服务启动流程</h1>
+<p><strong>前提</strong></p>
+<ol>
+<li>对Nova的整体结构已经有所理解</li>
+<li>基于stable/havana分支</li>
+<li>基于Redhat的RDO库进行的环境安装，基于CentOS 6.4</li>
+</ol>
+<p><strong>内容</strong></p>
+<ol>
+<li>openstack-nova-api服务启动流程</li>
+<li>Paste、Deploy、WSGI等相关知识</li>
+</ol>
+<h2 id="-6267-884c-7ed3-679c-">执行结果</h2>
+<p>启动API服务时的命令为：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre><span class="comment">service</span> <span class="comment">openstack</span><span class="literal">-</span><span class="comment">nova</span><span class="literal">-</span><span class="comment">api</span> <span class="comment">start</span>
+</pre></td></tr></table></figure>
+
+<p>启动成功后，查看系统进程，发现实际执行结果为一个nova-api父进程，同时其有三个nova-api子进程：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+</pre></td><td class="code"><pre>nova <span class="number">3438</span> S <span class="number">0</span>:<span class="number">07</span> <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>python <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>nova<span class="attribute">-api</span> <span class="subst">--</span>logfile <span class="subst">/</span><span class="built_in">var</span><span class="subst">/</span><span class="keyword">log</span><span class="subst">/</span>nova<span class="subst">/</span>api<span class="built_in">.</span><span class="keyword">log</span>
+nova <span class="number">3446</span> S <span class="number">0</span>:<span class="number">00</span> <span class="subst">\</span>_ <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>python <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>nova<span class="attribute">-api</span> <span class="subst">--</span>logfile <span class="subst">/</span><span class="built_in">var</span><span class="subst">/</span><span class="keyword">log</span><span class="subst">/</span>nova<span class="subst">/</span>api<span class="built_in">.</span><span class="keyword">log</span>
+nova <span class="number">3447</span> S <span class="number">0</span>:<span class="number">00</span> <span class="subst">\</span>_ <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>python <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>nova<span class="attribute">-api</span> <span class="subst">--</span>logfile <span class="subst">/</span><span class="built_in">var</span><span class="subst">/</span><span class="keyword">log</span><span class="subst">/</span>nova<span class="subst">/</span>api<span class="built_in">.</span><span class="keyword">log</span>
+nova <span class="number">3448</span> S <span class="number">0</span>:<span class="number">00</span> <span class="subst">\</span>_ <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>python <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>nova<span class="attribute">-api</span> <span class="subst">--</span>logfile <span class="subst">/</span><span class="built_in">var</span><span class="subst">/</span><span class="keyword">log</span><span class="subst">/</span>nova<span class="subst">/</span>api<span class="built_in">.</span><span class="keyword">log</span>
+</pre></td></tr></table></figure>
+
+<p>查看监听的端口，发现父进程nova-api同时监听了三个端口：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+</pre></td><td class="code"><pre><span class="title">tcp</span>        <span class="number">0</span>      <span class="number">0</span> <span class="number">0.0.0.0:8773</span>                <span class="number">0.0.0.0</span>:*                   LISTEN      <span class="number">3438</span>/python         
+tcp        <span class="number">0</span>      <span class="number">0</span> <span class="number">0.0.0.0:8774</span>                <span class="number">0.0.0.0</span>:*                   LISTEN      <span class="number">3438</span>/python         
+tcp        <span class="number">0</span>      <span class="number">0</span> <span class="number">0.0.0.0:8775</span>                <span class="number">0.0.0.0</span>:*                   LISTEN      <span class="number">3438</span>/python
+</pre></td></tr></table></figure>
+
+<h2 id="-4ee3-7801-8def-5f84-">代码路径</h2>
+<h3 id="-4e3b-8981-8def-5f84-">主要路径</h3>
+<p>服务启动脚本为/etc/init.d/openstack-nova-api，查看此脚本发现在启动服务时实际执行的是/usr/bin/nova-api,而/usr/bin/nova-api是一个python脚本，实际执行的是nova.cmd.api.main</p>
+<p>nova.cmd.api.main的主要代码如下：</p>
+<figure class="highlight lang-python"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+</pre></td><td class="code"><pre>    launcher = service.process_launcher()
+    <span class="keyword">for</span> api <span class="keyword">in</span> CONF.enabled_apis:
+        should_use_ssl = api <span class="keyword">in</span> CONF.enabled_ssl_apis
+        <span class="keyword">if</span> api == <span class="string">'ec2'</span>:
+            server = service.WSGIService(api, use_ssl=should_use_ssl,
+                                         max_url_len=<span class="number">16384</span>)
+        <span class="keyword">else</span>:
+            server = service.WSGIService(api, use_ssl=should_use_ssl)
+        launcher.launch_service(server, workers=server.workers <span class="keyword">or</span> <span class="number">1</span>)
+    launcher.wait()
+</pre></td></tr></table></figure>
+
+<p>首先生成一个nova.common.service.Processlauncher类型的launcher, 接着会根据配置中的enabled_apis列表值，依次生成相应的WSGIService:</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre>server = service.WSGIService(<span class="keyword">...</span>)
+</pre></td></tr></table></figure>
+
+<p>然后通过launcher的launch_service方法，将上述的WSGIService和workers数量作为参数传入。</p>
+<p>在luanch_service方法中，会根据传入的workers参数fork出相应个数的子进程，并在各个子进程中调用对应WSGIService的start方法，开始对外服务。</p>
+<h3 id="-6d89-53ca-7684-914d-7f6e-">涉及的配置</h3>
+<p>根据上述的主要执行路径，查看配置文件/etc/nova/nova.conf中的相关配置如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+</pre></td><td class="code"><pre># a <span class="built_in">list</span> <span class="keyword">of</span> APIs <span class="keyword">to</span> enable by default (<span class="built_in">list</span> <span class="keyword">value</span>)
+#enabled_apis=ec2,osapi_compute,metadata
+</pre></td></tr></table></figure>
+
+<p>以及后面依次的ec2、osapi_compute和metadata相应的如下几项配置：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+</pre></td><td class="code"><pre><span class="preprocessor"># IP address for EC2 API to listen (string value)</span>
+<span class="preprocessor">#ec2_listen=0.0.0.0</span>
+
+<span class="preprocessor"># port for ec2 api to listen (integer value)</span>
+<span class="preprocessor">#ec2_listen_port=8773</span>
+
+<span class="preprocessor"># Number of workers for EC2 API service (integer value)</span>
+<span class="preprocessor">#ec2_workers=&lt;None&gt;</span>
+</pre></td></tr></table></figure>
+
+<p>由此可见，在启动nova-api服务时，会同时启动ec2、osapi_compute和metadata三个API服务，各服务均有相应的监听地址和监听端口以及workers数量配置。</p>
+<p>结合执行结果中看到的端口监听中看到的三个端口均为父进程进行监听，应该是父进程会对请求进行转发，由于nova-api是无状态的，当具有多个worker时（也就会被launcher派生出多个子进程），父进程应该还会有LB的逻辑，这一点可后续再深究和验证。</p>
+<p>从日志文件/var/log/nova/api.log中，也可以对上述过程进行验证：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+</pre></td><td class="code"><pre><span class="literal">-</span><span class="literal">-</span>
+<span class="comment">2014</span><span class="literal">-</span><span class="comment">01</span><span class="literal">-</span><span class="comment">08</span> <span class="comment">18:41:18</span><span class="string">.</span><span class="comment">091</span> <span class="comment">3438</span> <span class="comment">INFO</span> <span class="comment">nova</span><span class="string">.</span><span class="comment">wsgi</span> <span class="title">[</span><span class="literal">-</span><span class="title">]</span> <span class="comment">ec2</span> <span class="comment">listening</span> <span class="comment">on</span> <span class="comment">0</span><span class="string">.</span><span class="comment">0</span><span class="string">.</span><span class="comment">0</span><span class="string">.</span><span class="comment">0:8773</span>
+<span class="comment">2014</span><span class="literal">-</span><span class="comment">01</span><span class="literal">-</span><span class="comment">08</span> <span class="comment">18:41:18</span><span class="string">.</span><span class="comment">091</span> <span class="comment">3438</span> <span class="comment">INFO</span> <span class="comment">nova</span><span class="string">.</span><span class="comment">openstack</span><span class="string">.</span><span class="comment">common</span><span class="string">.</span><span class="comment">service</span> <span class="title">[</span><span class="literal">-</span><span class="title">]</span> <span class="comment">Starting</span> <span class="comment">1</span> <span class="comment">workers</span>
+<span class="comment">2014</span><span class="literal">-</span><span class="comment">01</span><span class="literal">-</span><span class="comment">08</span> <span class="comment">18:41:18</span><span class="string">.</span><span class="comment">093</span> <span class="comment">3438</span> <span class="comment">INFO</span> <span class="comment">nova</span><span class="string">.</span><span class="comment">openstack</span><span class="string">.</span><span class="comment">common</span><span class="string">.</span><span class="comment">service</span> <span class="title">[</span><span class="literal">-</span><span class="title">]</span> <span class="comment">Started</span> <span class="comment">child</span> <span class="comment">3446</span>
+<span class="literal">-</span><span class="literal">-</span>
+<span class="comment">2014</span><span class="literal">-</span><span class="comment">01</span><span class="literal">-</span><span class="comment">08</span> <span class="comment">18:41:18</span><span class="string">.</span><span class="comment">793</span> <span class="comment">3438</span> <span class="comment">INFO</span> <span class="comment">nova</span><span class="string">.</span><span class="comment">wsgi</span> <span class="title">[</span><span class="literal">-</span><span class="title">]</span> <span class="comment">osapi_compute</span> <span class="comment">listening</span> <span class="comment">on</span> <span class="comment">0</span><span class="string">.</span><span class="comment">0</span><span class="string">.</span><span class="comment">0</span><span class="string">.</span><span class="comment">0:8774</span>
+<span class="comment">2014</span><span class="literal">-</span><span class="comment">01</span><span class="literal">-</span><span class="comment">08</span> <span class="comment">18:41:18</span><span class="string">.</span><span class="comment">793</span> <span class="comment">3438</span> <span class="comment">INFO</span> <span class="comment">nova</span><span class="string">.</span><span class="comment">openstack</span><span class="string">.</span><span class="comment">common</span><span class="string">.</span><span class="comment">service</span> <span class="title">[</span><span class="literal">-</span><span class="title">]</span> <span class="comment">Starting</span> <span class="comment">1</span> <span class="comment">workers</span>
+<span class="comment">2014</span><span class="literal">-</span><span class="comment">01</span><span class="literal">-</span><span class="comment">08</span> <span class="comment">18:41:18</span><span class="string">.</span><span class="comment">795</span> <span class="comment">3438</span> <span class="comment">INFO</span> <span class="comment">nova</span><span class="string">.</span><span class="comment">openstack</span><span class="string">.</span><span class="comment">common</span><span class="string">.</span><span class="comment">service</span> <span class="title">[</span><span class="literal">-</span><span class="title">]</span> <span class="comment">Started</span> <span class="comment">child</span> <span class="comment">3447</span>
+<span class="literal">-</span><span class="literal">-</span>
+<span class="comment">2014</span><span class="literal">-</span><span class="comment">01</span><span class="literal">-</span><span class="comment">08</span> <span class="comment">18:41:18</span><span class="string">.</span><span class="comment">802</span> <span class="comment">3438</span> <span class="comment">INFO</span> <span class="comment">nova</span><span class="string">.</span><span class="comment">wsgi</span> <span class="title">[</span><span class="literal">-</span><span class="title">]</span> <span class="comment">metadata</span> <span class="comment">listening</span> <span class="comment">on</span> <span class="comment">0</span><span class="string">.</span><span class="comment">0</span><span class="string">.</span><span class="comment">0</span><span class="string">.</span><span class="comment">0:8775</span>
+<span class="comment">2014</span><span class="literal">-</span><span class="comment">01</span><span class="literal">-</span><span class="comment">08</span> <span class="comment">18:41:18</span><span class="string">.</span><span class="comment">802</span> <span class="comment">3438</span> <span class="comment">INFO</span> <span class="comment">nova</span><span class="string">.</span><span class="comment">openstack</span><span class="string">.</span><span class="comment">common</span><span class="string">.</span><span class="comment">service</span> <span class="title">[</span><span class="literal">-</span><span class="title">]</span> <span class="comment">Starting</span> <span class="comment">1</span> <span class="comment">workers</span>
+<span class="comment">2014</span><span class="literal">-</span><span class="comment">01</span><span class="literal">-</span><span class="comment">08</span> <span class="comment">18:41:18</span><span class="string">.</span><span class="comment">804</span> <span class="comment">3438</span> <span class="comment">INFO</span> <span class="comment">nova</span><span class="string">.</span><span class="comment">openstack</span><span class="string">.</span><span class="comment">common</span><span class="string">.</span><span class="comment">service</span> <span class="title">[</span><span class="literal">-</span><span class="title">]</span> <span class="comment">Started</span> <span class="comment">child</span> <span class="comment">3448</span>
+</pre></td></tr></table></figure>
+
+<h3 id="WSGIService">WSGIService</h3>
+<p>所谓的WSGI，可参考<strong>参考资料</strong>中的内容。</p>
+<p>简单来说就是分为Server和APP两层，Server负责接受Request，设置相应的Environment，并转发到相应的APP进行处理，并返回Response。</p>
+<p>如前所述，在服务启动过程中，主要涉及WSGIService的初始化(<strong>init</strong>)和启动(start)方法，下面分别进行分析。</p>
+<p><strong><strong>init</strong>方法</strong></p>
+<p>方法主体如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+</pre></td><td class="code"><pre><span class="keyword">self</span>.name = name
+        <span class="keyword">self</span>.manager = <span class="keyword">self</span>._get_manager()
+        <span class="keyword">self</span>.loader = loader <span class="keyword">or</span> wsgi.<span class="constant">Loader</span>()
+        <span class="keyword">self</span>.app = <span class="keyword">self</span>.loader.load_app(name)
+        <span class="keyword">self</span>.host = getattr(<span class="constant">CONF</span>, <span class="string">'%s_listen'</span> % name, <span class="string">"0.0.0.0"</span>)
+        <span class="keyword">self</span>.port = getattr(<span class="constant">CONF</span>, <span class="string">'%s_listen_port'</span> % name, <span class="number">0</span>)
+        <span class="keyword">self</span>.workers = getattr(<span class="constant">CONF</span>, <span class="string">'%s_workers'</span> % name, <span class="constant">None</span>)
+        <span class="keyword">self</span>.use_ssl = use_ssl
+        <span class="keyword">self</span>.server = wsgi.<span class="constant">Server</span>(name,
+                                  <span class="keyword">self</span>.app,
+                                  host=<span class="keyword">self</span>.host,
+                                  port=<span class="keyword">self</span>.port,
+                                  use_ssl=<span class="keyword">self</span>.use_ssl,
+                                  max_url_len=max_url_len)
+        <span class="comment"># Pull back actual port used</span>
+        <span class="keyword">self</span>.port = <span class="keyword">self</span>.server.port
+        <span class="keyword">self</span>.backdoor_port = <span class="constant">None</span>
+</pre></td></tr></table></figure>
+
+<p>其中name就是前文提到的api_name,也即ec2、osapi_compute或metadata。</p>
+<p>第2行的_get_manager方法，会从配置中寻找{self.name}_manager对应的类，并加载进来。关于OpenStack Nova中划分的Manager的角色和作用可参考 <a href="http://docs.openstack.org/developer/nova/devref/services.html" target="_blank">这里</a></p>
+<p>查看nova配置文件(/etc/nova/nova.conf)，对于ec2、osapi_compute和metadata，默认情况下只有metadata_manager:</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+</pre></td><td class="code"><pre><span class="preprocessor"># OpenStack metadata service manager (string value)</span>
+<span class="preprocessor">#metadata_manager=nova.api.manager.MetadataManager</span>
+</pre></td></tr></table></figure>
+
+<p>后面的逻辑，首先会通过wsgiLoader来load_app，这里涉及到Paste和Deploy的相关处理。参考最后一节。</p>
+<p>最后会使用相应的参数初始化一个wsgiServer, 此Server对应的app就是上面使用wsgiLoader加载进来的APP。</p>
+<p><strong>start方法</strong></p>
+<p>主要逻辑是调用了上述wsgiServer的start方法，开始对外服务。对于metadata API来说，还需要其manager介入在start前后进行相应的处理。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+</pre></td><td class="code"><pre><span class="keyword">if</span> <span class="transposed_variable">self.</span>manager:
+            <span class="transposed_variable">self.</span><span class="transposed_variable">manager.</span>init_host()
+            <span class="transposed_variable">self.</span><span class="transposed_variable">manager.</span>pre_start_hook()
+        <span class="keyword">if</span> <span class="transposed_variable">self.</span>backdoor_port is not None:
+            <span class="transposed_variable">self.</span><span class="transposed_variable">manager.</span>backdoor_port = <span class="transposed_variable">self.</span>backdoor_port
+        <span class="transposed_variable">self.</span><span class="transposed_variable">server.</span>start()
+        <span class="keyword">if</span> <span class="transposed_variable">self.</span>manager:
+            <span class="transposed_variable">self.</span><span class="transposed_variable">manager.</span>post_start_hook()
+</pre></td></tr></table></figure>
+
+<h3 id="Paste_-26-amp-3b-_Deploy">Paste &amp; Deploy</h3>
+<p>关于Paste和Deploy可查看<strong>参考资料</strong>部分中相应的内容。</p>
+<p>简单来说，Paste主要提供的是WSGI middleware，各middleware对WSGI的server来说是一个APP，但对于WSGI的APP来说是一个Server，且可以将多个middleware叠加，从而可实现类似Linux中pipeline的效果。在pipeline中，可以实现诸如压缩、解压缩、加密、解密、鉴权等各种预处理和后处理操作。Deploy是根据paste配置文件来发现和加载WSGI APP和Middleware的模块。</p>
+<p>这里针对上节中的wsgiLoader进行详细分析</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+</pre></td><td class="code"><pre>        self<span class="preprocessor">.loader</span> = loader <span class="keyword">or</span> wsgi<span class="preprocessor">.Loader</span>()
+        self<span class="preprocessor">.app</span> = self<span class="preprocessor">.loader</span><span class="preprocessor">.load</span>_app(name)
+</pre></td></tr></table></figure>
+
+<p>第一行初始化Loader，期间会根据配置项api_paste_config来locate到相应的paste配置文件，默认是/etc/nova/api-paste.ini。 </p>
+<p>第二行的load_app(name),最终会使用Deploy模块加载name对应的APP，这里的name就是上述的ec2、osapi_compute或metadata。</p>
+<p>在/etc/nova/api-paste.ini中，针对上述的三种name，均会有对应的[composite:{name}] section，并根据Paste的规则，配置相应的pipeline。其中osapi_compute的部分默认配置如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+</pre></td><td class="code"><pre>[<span class="method">composite:</span>osapi_compute]
+use = <span class="method">call:</span>nova.api.openstack.<span class="method">urlmap:</span>urlmap_factory
+/: oscomputeversions
+/v1<span class="number">.1</span>: openstack_compute_api_v2
+/<span class="method">v2:</span> openstack_compute_api_v2
+/<span class="method">v3:</span> openstack_compute_api_v3
+
+[<span class="method">composite:</span>openstack_compute_api_v2]
+use = <span class="method">call:</span>nova.api.<span class="method">auth:</span>pipeline_factory
+noauth = faultwrap sizelimit noauth ratelimit osapi_compute_app_v2
+keystone = faultwrap sizelimit authtoken keystonecontext ratelimit osapi_compute_app_v2
+keystone_nolimit = faultwrap sizelimit authtoken keystonecontext osapi_compute_app_v2
+
+[<span class="method">composite:</span>openstack_compute_api_v3]
+use = <span class="method">call:</span>nova.api.<span class="method">auth:</span>pipeline_factory
+noauth = faultwrap sizelimit noauth_v3 ratelimit_v3 osapi_compute_app_v3
+keystone = faultwrap sizelimit authtoken keystonecontext ratelimit_v3 osapi_compute_app_v3
+keystone_nolimit = faultwrap sizelimit authtoken keystonecontext osapi_compute_app_v3
+
+[<span class="method">filter:</span>faultwrap]
+paste.filter_factory = nova.api.<span class="method">openstack:</span><span class="class">FaultWrapper</span>.factory
+
+[<span class="method">filter:</span>noauth]
+...
+</pre></td></tr></table></figure>
+
+<p>在配置OpenStack环境时，我们一般均会修改此paste配置文件，增加或修改如下authtoken的filter的内容。如上述composite:osapi_compute的内容，各API的keystone argument中指定的filter列表中均包含了下面的keystonecontext和authtoken。这样就将keystone的认证过程通过filter的方式附加到了API请求处理的pipeline中了。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+</pre></td><td class="code"><pre>[filter:keystonecontext]
+paste.filter_factory = nova.api.auth:NovaKeystoneContext.factory
+
+[filter:authtoken]
+paste.filter_factory = keystoneclient.middleware.auth_token:filter_factory
+auth_host = controller
+auth_port = <span class="number">35357</span>
+auth_protocol = http
+auth_uri = http://controller:<span class="number">5000</span>/v2.0
+admin_user = nova
+admin_tenant_name = service
+admin_password = nova
+    <span class="keyword">...</span>
+</pre></td></tr></table></figure>
+
+<h2 id="-53c2-8003-8d44-6599-">参考资料</h2>
+<ul>
+<li><a href="http://docs.openstack.org/developer/nova/devref/services.html" target="_blank">Nova的Service、Manager和Driver</a></li>
+<li><a href="http://en.wikipedia.org/wiki/Python_Paste" target="_blank">Python Paste: WSGI middle and pipeline</a></li>
+<li><a href="http://docs.pylonsproject.org/projects/pyramid/en/1.1-branch/narr/startup.html" target="_blank">Python Deploy: Sample Project’s Explannation</a></li>
+<li><a href="http://pythonpaste.org/deploy/" target="_blank">Python Deploy: Offical Document</a></li>
+<li><a href="http://blog.csdn.net/sonicatnoc/article/details/6539716" target="_blank">Python Deploy: Related Document</a></li>
+<li><a href="http://docs.webob.org" target="_blank">Python WebOb</a></li>
+</ul>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  
+
+  <nav id="pagination">
+  
+  
+  <div class="clearfix"></div>
+</nav>
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:leiqzhang.com">
+  </form>
+</div>
+
+  
+<div class="widget tag">
+  <h3 class="title">Categories</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/Linux/">Linux</a><small>3</small></li>
+  
+    <li><a href="/categories/OpenStack/">OpenStack</a><small>2</small></li>
+  
+    <li><a href="/categories/VIM/">VIM</a><small>3</small></li>
+  
+    <li><a href="/categories/Virtualization/">Virtualization</a><small>13</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>2</small></li>
+  
+    <li><a href="/categories/miscellaneous/">miscellaneous</a><small>1</small></li>
+  
+    <li><a href="/categories/web_dev/">web_dev</a><small>8</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tagcloud">
+  <h3 class="title">Tag Cloud</h3>
+  <div class="entry">
+    <a href="/tags/CIM/" style="font-size: 10.00px;">CIM</a><a href="/tags/CORS/" style="font-size: 10.00px;">CORS</a><a href="/tags/DBPM/" style="font-size: 10.00px;">DBPM</a><a href="/tags/Deploy/" style="font-size: 10.00px;">Deploy</a><a href="/tags/ELI/" style="font-size: 10.00px;">ELI</a><a href="/tags/NUMA/" style="font-size: 10.00px;">NUMA</a><a href="/tags/Nova/" style="font-size: 12.50px;">Nova</a><a href="/tags/OPTIONS/" style="font-size: 10.00px;">OPTIONS</a><a href="/tags/Paste/" style="font-size: 10.00px;">Paste</a><a href="/tags/QEMU/" style="font-size: 20.00px;">QEMU</a><a href="/tags/RabbitMQ/" style="font-size: 10.00px;">RabbitMQ</a><a href="/tags/WSGI/" style="font-size: 10.00px;">WSGI</a><a href="/tags/bfc/" style="font-size: 10.00px;">bfc</a><a href="/tags/block-stream/" style="font-size: 10.00px;">block-stream</a><a href="/tags/blockcopy/" style="font-size: 12.50px;">blockcopy</a><a href="/tags/cache/" style="font-size: 10.00px;">cache</a><a href="/tags/css/" style="font-size: 12.50px;">css</a><a href="/tags/dataplane/" style="font-size: 10.00px;">dataplane</a><a href="/tags/ervernote/" style="font-size: 10.00px;">ervernote</a><a href="/tags/etag/" style="font-size: 10.00px;">etag</a><a href="/tags/eval/" style="font-size: 10.00px;">eval</a><a href="/tags/fedora/" style="font-size: 10.00px;">fedora</a><a href="/tags/greasemonkey/" style="font-size: 10.00px;">greasemonkey</a><a href="/tags/http/" style="font-size: 12.50px;">http</a><a href="/tags/javascript/" style="font-size: 10.00px;">javascript</a><a href="/tags/libvirt/" style="font-size: 17.50px;">libvirt</a><a href="/tags/lighthttpd/" style="font-size: 10.00px;">lighthttpd</a><a href="/tags/lighttpd/" style="font-size: 10.00px;">lighttpd</a><a href="/tags/livecd/" style="font-size: 10.00px;">livecd</a><a href="/tags/mac/" style="font-size: 10.00px;">mac</a><a href="/tags/md5sum/" style="font-size: 10.00px;">md5sum</a><a href="/tags/mysql/" style="font-size: 12.50px;">mysql</a><a href="/tags/oVirt/" style="font-size: 12.50px;">oVirt</a><a href="/tags/pdo/" style="font-size: 10.00px;">pdo</a><a href="/tags/performance/" style="font-size: 12.50px;">performance</a><a href="/tags/permalink/" style="font-size: 10.00px;">permalink</a><a href="/tags/php/" style="font-size: 15.00px;">php</a><a href="/tags/post/" style="font-size: 10.00px;">post</a><a href="/tags/proxy/" style="font-size: 10.00px;">proxy</a><a href="/tags/qemu-img/" style="font-size: 10.00px;">qemu-img</a>
+  </div>
+</div>
+
+
+  <iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=2&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=0&uid=1644437791&verifier=c45a1931&dpc=1"></iframe>
+
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://blog.csdn.net/luo_brian" title="luo_brian">Luohao</a></li>
+<li><a href="http://blog.csdn.net/defeattroy" title="木马屠城">Defeattroy</a></li>
+<li><a href="http://www.smilgel.com/" title="听雨轩">MrSaxon</a></li>
+<li><a href="http://lanbolee.com/blog/" title="博之博">Rambolee</a></li>
+<li><a href="http://www.haoziyanwo.com/" title="耗子燕窝">浩子</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2014 leiqzhang
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+<script type="text/javascript">
+var disqus_shortname = 'leiqzhang';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+</body>
+</html>

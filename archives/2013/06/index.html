@@ -1,0 +1,361 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="baidu-site-verification" content="kZ3lZdC9wn" />
+  
+  <title>Archives: 2013/6 | Technology &amp; Life</title>
+  <meta name="author" content="leiqzhang">
+  
+  <meta name="description" content="Virtualization Related Technologies">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+  <meta property="og:site_name" content="Technology &amp; Life"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico">
+  <link rel="alternate" href="/atom.xml" title="Technology &amp; Life" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
+  
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-40319520-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+  <script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3F6f62dffd0688838f0bc52fc65fd62af4' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">Technology &amp; Life</a></h1>
+  <h2><a href="/">blog of leiqzhang</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about">About</a></li>
+    
+      <li><a href="/atom.xml">RSS</a></li>
+    
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper">
+<h2 class="archive-title">2013/6</h2>
+
+
+  
+    <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-06-18T12:40:31.000Z"><a href="/2013/06/2013-06-18-virtualization-performance-considerations/">Jun 18 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/06/2013-06-18-virtualization-performance-considerations/">Virtualization performance considerations</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>今天看了云计算大会2013上EMC/Vmware的一片关于虚拟化性能的文章，结合之前看过的一些材料对其进行了汇总和总结。主要站在全云计算堆栈的整体视角上看各个组件或特性对性能的影响。</p>
+<p>需要注意的是性能会包括好多指标，这些指标往往是互相矛盾的，如实时性（低延迟）和CPU利用率、电源利用率等等。本文也会结合之前vmware的文档归纳下如何尽可能地提高虚拟化场景下的实时性。</p>
+<h2 id="CPU_-26-amp-3b-_Memory">CPU &amp; Memory</h2>
+<ol>
+<li><p>NUMA</p>
+<p> <strong>Respect boundaries, rightsize, use like topologies.</strong></p>
+<p> Hypervisor的调度器需要尽可能将同一个VM的所有vCPU调度到同一个NUMA节点上，同时此VM相关的内存需要分配到此节点的本地物理内存中。</p>
+<p> Vmware ESX 5.0及之后的版本支持一种叫做<strong>vNUMA</strong>的特性，它将Host的NUMA特征暴露给了Guest OS，从而使得Guest OS可以根据NUMA特征进行更高性能的调度。</p>
+</li>
+<li><p>CPU相关的一些指标和新特性</p>
+<ul>
+<li>Processor Clock Frequency</li>
+<li>Dual or Quad Socket</li>
+<li>Hyper-threading (=Enabled)</li>
+<li>Support <strong>EPT</strong>(Intel) or <strong>RVI</strong>(AMD), eg. Hwmmu</li>
+</ul>
+</li>
+<li><p>BIOS相关</p>
+<p> 主要是指BIOS中对电源管理方式的设置。<br> 
+      
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/2013/06/2013-06-18-virtualization-performance-considerations/#more" class="more-link">Read More</a>
+          </div>
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  
+    <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-06-17T12:40:31.000Z"><a href="/2013/06/2013-06-17-ovirt-node-realted-infos/">Jun 17 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/06/2013-06-17-ovirt-node-realted-infos/">Ovirt Node Related Infomation</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <h2 id="-7b80-4ecb-">简介</h2>
+<p>ovirt-node 是开源虚拟化管理平台 oVirt 的客户端部分，它是一个经过定制的最小化 fedora 系统，充当虚拟机管理器（Hypervisor）host 的角色，与管理端 overt-engine 组成一个虚拟化管理平台。ovirt-node 以其小巧，灵活的特点，可以很方便地进行开发与定制。</p>
+<p>ovirt-node提供的镜像中包含libvirt/vdsm（Virtual Desktop Server Manager)、KVM等虚拟化服务，使用libvirt/vdsm管理KVM虚拟机。</p>
+<p>ovirt-node提供的镜像所需资源很小，可以将更多的资源保留给VM使用。</p>
+<p>综合来说，ovirt-node的特点包括：</p>
+<ul>
+<li>Dedicated hypervisor</li>
+<li>JEOS</li>
+<li>livecd</li>
+<li>Built on Fedora</li>
+<li>Firmware</li>
+<li>Small Footprint (&lt;200MB)</li>
+</ul>
+<h2 id="-4f18-7f3a-70b9-">优缺点</h2>
+
+      
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/2013/06/2013-06-17-ovirt-node-realted-infos/#more" class="more-link">Read More</a>
+          </div>
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  
+    <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-06-13T12:40:31.000Z"><a href="/2013/06/2013-06-13-webpy-cors-problem/">Jun 13 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/06/2013-06-13-webpy-cors-problem/">HTTP access control (CORS) of Web.py</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <h2 id="-95ee-9898-63cf-8ff0-">问题描述</h2>
+<p>由于想使用gevent，当前请求结构为browser-&gt;lighttpd(portal)-&gt;web.py，其中lighttpd和web.py运行在同一台服务器上并监听不同的端口。portal上一些请求会直接发送给web.py，即web.py直接用作了REST的Gateway。</p>
+<p>但当使用FF/Chrome在通过和web.py不同的domain向其发起POST请求返回一个JSON数据后，web.py收到的请求Method为<strong>OPTIONS</strong>而非<strong>POST</strong>，由于OPTIONS非web.py支持的Method,故会返回405，Method Not Found. Chrome/FF的Console中会有如下形式的错误：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+</pre></td><td class="code"><pre>
+XMLHttpRequest Cannot load <span class="attribute">http</span>:<span class="regexp">//</span><span class="attribute">server</span>:webpy_port/path. Origin <span class="keyword">is</span> <span class="keyword">not</span> allowed <span class="keyword">by</span> Access-Control-Allow-Origin
+</pre></td></tr></table></figure>
+
+
+
+      
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/2013/06/2013-06-13-webpy-cors-problem/#more" class="more-link">Read More</a>
+          </div>
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  
+
+  <nav id="pagination">
+  
+  
+  <div class="clearfix"></div>
+</nav>
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:leiqzhang.com">
+  </form>
+</div>
+
+  
+<div class="widget tag">
+  <h3 class="title">Categories</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/Linux/">Linux</a><small>3</small></li>
+  
+    <li><a href="/categories/OpenStack/">OpenStack</a><small>2</small></li>
+  
+    <li><a href="/categories/VIM/">VIM</a><small>3</small></li>
+  
+    <li><a href="/categories/Virtualization/">Virtualization</a><small>13</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>2</small></li>
+  
+    <li><a href="/categories/miscellaneous/">miscellaneous</a><small>1</small></li>
+  
+    <li><a href="/categories/web_dev/">web_dev</a><small>8</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tagcloud">
+  <h3 class="title">Tag Cloud</h3>
+  <div class="entry">
+    <a href="/tags/CIM/" style="font-size: 10.00px;">CIM</a><a href="/tags/CORS/" style="font-size: 10.00px;">CORS</a><a href="/tags/DBPM/" style="font-size: 10.00px;">DBPM</a><a href="/tags/Deploy/" style="font-size: 10.00px;">Deploy</a><a href="/tags/ELI/" style="font-size: 10.00px;">ELI</a><a href="/tags/NUMA/" style="font-size: 10.00px;">NUMA</a><a href="/tags/Nova/" style="font-size: 12.50px;">Nova</a><a href="/tags/OPTIONS/" style="font-size: 10.00px;">OPTIONS</a><a href="/tags/Paste/" style="font-size: 10.00px;">Paste</a><a href="/tags/QEMU/" style="font-size: 20.00px;">QEMU</a><a href="/tags/RabbitMQ/" style="font-size: 10.00px;">RabbitMQ</a><a href="/tags/WSGI/" style="font-size: 10.00px;">WSGI</a><a href="/tags/bfc/" style="font-size: 10.00px;">bfc</a><a href="/tags/block-stream/" style="font-size: 10.00px;">block-stream</a><a href="/tags/blockcopy/" style="font-size: 12.50px;">blockcopy</a><a href="/tags/cache/" style="font-size: 10.00px;">cache</a><a href="/tags/css/" style="font-size: 12.50px;">css</a><a href="/tags/dataplane/" style="font-size: 10.00px;">dataplane</a><a href="/tags/ervernote/" style="font-size: 10.00px;">ervernote</a><a href="/tags/etag/" style="font-size: 10.00px;">etag</a><a href="/tags/eval/" style="font-size: 10.00px;">eval</a><a href="/tags/fedora/" style="font-size: 10.00px;">fedora</a><a href="/tags/greasemonkey/" style="font-size: 10.00px;">greasemonkey</a><a href="/tags/http/" style="font-size: 12.50px;">http</a><a href="/tags/javascript/" style="font-size: 10.00px;">javascript</a><a href="/tags/libvirt/" style="font-size: 17.50px;">libvirt</a><a href="/tags/lighthttpd/" style="font-size: 10.00px;">lighthttpd</a><a href="/tags/lighttpd/" style="font-size: 10.00px;">lighttpd</a><a href="/tags/livecd/" style="font-size: 10.00px;">livecd</a><a href="/tags/mac/" style="font-size: 10.00px;">mac</a><a href="/tags/md5sum/" style="font-size: 10.00px;">md5sum</a><a href="/tags/mysql/" style="font-size: 12.50px;">mysql</a><a href="/tags/oVirt/" style="font-size: 12.50px;">oVirt</a><a href="/tags/pdo/" style="font-size: 10.00px;">pdo</a><a href="/tags/performance/" style="font-size: 12.50px;">performance</a><a href="/tags/permalink/" style="font-size: 10.00px;">permalink</a><a href="/tags/php/" style="font-size: 15.00px;">php</a><a href="/tags/post/" style="font-size: 10.00px;">post</a><a href="/tags/proxy/" style="font-size: 10.00px;">proxy</a><a href="/tags/qemu-img/" style="font-size: 10.00px;">qemu-img</a>
+  </div>
+</div>
+
+
+  <iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=2&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=0&uid=1644437791&verifier=c45a1931&dpc=1"></iframe>
+
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://blog.csdn.net/luo_brian" title="luo_brian">Luohao</a></li>
+<li><a href="http://blog.csdn.net/defeattroy" title="木马屠城">Defeattroy</a></li>
+<li><a href="http://www.smilgel.com/" title="听雨轩">MrSaxon</a></li>
+<li><a href="http://lanbolee.com/blog/" title="博之博">Rambolee</a></li>
+<li><a href="http://www.haoziyanwo.com/" title="耗子燕窝">浩子</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2014 leiqzhang
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+<script type="text/javascript">
+var disqus_shortname = 'leiqzhang';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,240 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="baidu-site-verification" content="kZ3lZdC9wn" />
+  
+  <title>greasemonkey | Technology &amp; Life</title>
+  <meta name="author" content="leiqzhang">
+  
+  <meta name="description" content="Virtualization Related Technologies">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+  <meta property="og:site_name" content="Technology &amp; Life"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico">
+  <link rel="alternate" href="/atom.xml" title="Technology &amp; Life" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
+  
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-40319520-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+  <script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3F6f62dffd0688838f0bc52fc65fd62af4' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">Technology &amp; Life</a></h1>
+  <h2><a href="/">blog of leiqzhang</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about">About</a></li>
+    
+      <li><a href="/atom.xml">RSS</a></li>
+    
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper">
+<h2 class="archive-title tag">greasemonkey</h2>
+
+
+  
+    <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2010-11-14T17:12:11.000Z"><a href="/2010/11/2010-11-15-greasemonkey-baidu-space/">Nov 15 2010</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2010/11/2010-11-15-greasemonkey-baidu-space/">百度空间插入代码段和HTML代码片段的GreaseMonkey脚本</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>现在百度空间写日志时，在IE/firefox下的文本编辑器是不能直接查看和编辑日志的HTML代码的，应该是基于安全考虑。目前在chrome下，百度空间的兼容性不好，写新日志或者编辑日志时，直接是提供的一个文本框，可以直接敲入HTML代码（当然了，写入<script>是会被过滤掉的)。</p>
+<p>如果空间可以支持直接插入代码片段（语法高亮、缩进等等），则空间用来写技术文档就更方便了。最近刚好发现VIM的TOhtml命令非常强大，可以直接把编辑器中文本按照其颜色、缩进等生成相应的HTML片段，如果空间可以直接插入一段HTML代码的话，代码片段的插入也就不成问题了。</p>
+<p>之前在<a href="http://www.laruence.com/" target="_blank">雪候鸟</a>的博客上看到了<a href="http://www.laruence.com/2010/03/31/1377.html" target="_blank">东方时尚约车脚本</a>相关的内容，联想我的需求，参考其东方时尚约车脚本写了一个简单的Greasemonkey脚本，主要在以下两方面对空间的编辑器进行了扩展：</p>
+<ol>
+<li>支持查看当前日志的HTML代码，以便进行简单的修改，和粘贴来自VIM的代码片段</li>
+<li>支持直接插入一段来自VIM的代码段，该代码段可以具有一定的样式，如常见的有边框包围，字体更清晰等等</li>
+</ol>
+<p><strong>安装方法:</strong></p>
+<ol>
+<li>需要firefox</li>
+<li>firefox需要安装greaseMonkey插件, 插件地址: <a href="https://addons.mozilla.org/en-US/firefox/addon/748" target="_blank"><a href="https://addons.mozilla.org/en-US/firefox/addon/748">https://addons.mozilla.org/en-US/firefox/addon/748</a></a></li>
+<li>用firefox浏览本页, 并<a href="http://userscripts.org/scripts/show/78912" target="_blank">点此</a>下载安装</li>
+</ol>
+<p><strong>使用方法：</strong></p>
+<p>安装后打开自己的空间，“新建文章”或者“编辑”已发布的日志时，在标题的右侧会出现“插入代码段“和”HTML视图“两个按钮，如下图：</p>
+<p><img src="http://leivli.duapp.com/wp-content/uploads/1.png" alt=""></p>
+<p>其中”<strong>插入代码段</strong>“可以直接插入一段代码段，如我们VIM中TOhtml一个php脚本文件的结果，然后复制到”代码段“中：</p>
+<p><img src="http://leivli.duapp.com/wp-content/uploads/2.png" alt=""></p>
+<p>以下是结果：</p>
+<p>1 &lt;?php<br>2 <strong>$</strong>file <strong>=</strong> file(“harddisk.txt”);<br>3 <strong>foreach</strong>(<strong>$</strong>file <strong>as</strong> <strong>$</strong>line){<br>4  <strong>$</strong>line <strong>=</strong> trim(<strong>$</strong>line);<br>5  <strong>$</strong>s <strong>=</strong> preg_match_all(“/(?:\d)+[GTM]/i”,<strong>$</strong>line,<strong>$</strong>matches,PREG_PATTERN_ORDER);<br>6  <strong>if</strong>(<strong>!**</strong>$<strong>s){<br>7  echo “error parse.. “</strong>.<strong>**$</strong>line<strong>.</strong>“\n”;<br>8  }<br>9  <strong>else</strong> <strong>if</strong>(<strong>$</strong>s <strong>&gt;</strong> 1){<br>10  echo “multi match .. “<strong>.**</strong>$<strong>line</strong>.<strong>“: \n”;<br>11  </strong>foreach<strong>(</strong>$<strong>matches[0] </strong>as<strong> </strong>$<strong>match){<br>12  echo “</strong>$<strong>match\n”;<br>13  }<br>14  }<br>15  </strong>else<strong>{<br>16  echo “find..”</strong>.<strong>**$</strong>line<strong>.</strong>“: \n”;<br>17  echo <strong>$</strong>matches[0][0]<strong>.</strong>“\n”;<br>18  }<br>19 }<br>20 ?&gt;</p>
+<p>代码段插入后，双击代码段可以进行<strong>编辑</strong>。</p>
+<p>”<strong>HTML视图</strong>“则显示当前日志的HTML代码，可以直接编辑：</p>
+<p><img src="http://leivli.duapp.com/wp-content/uploads/3.png" alt=""><br>该对话框上面的”更新“按钮可以将改动写回空间的编辑器，而”加载“则是可以再次加载空间编辑器中的内容</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  
+
+  <nav id="pagination">
+  
+  
+  <div class="clearfix"></div>
+</nav>
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:leiqzhang.com">
+  </form>
+</div>
+
+  
+<div class="widget tag">
+  <h3 class="title">Categories</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/Linux/">Linux</a><small>3</small></li>
+  
+    <li><a href="/categories/OpenStack/">OpenStack</a><small>2</small></li>
+  
+    <li><a href="/categories/VIM/">VIM</a><small>3</small></li>
+  
+    <li><a href="/categories/Virtualization/">Virtualization</a><small>13</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>2</small></li>
+  
+    <li><a href="/categories/miscellaneous/">miscellaneous</a><small>1</small></li>
+  
+    <li><a href="/categories/web_dev/">web_dev</a><small>8</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tagcloud">
+  <h3 class="title">Tag Cloud</h3>
+  <div class="entry">
+    <a href="/tags/CIM/" style="font-size: 10.00px;">CIM</a><a href="/tags/CORS/" style="font-size: 10.00px;">CORS</a><a href="/tags/DBPM/" style="font-size: 10.00px;">DBPM</a><a href="/tags/Deploy/" style="font-size: 10.00px;">Deploy</a><a href="/tags/ELI/" style="font-size: 10.00px;">ELI</a><a href="/tags/NUMA/" style="font-size: 10.00px;">NUMA</a><a href="/tags/Nova/" style="font-size: 12.50px;">Nova</a><a href="/tags/OPTIONS/" style="font-size: 10.00px;">OPTIONS</a><a href="/tags/Paste/" style="font-size: 10.00px;">Paste</a><a href="/tags/QEMU/" style="font-size: 20.00px;">QEMU</a><a href="/tags/RabbitMQ/" style="font-size: 10.00px;">RabbitMQ</a><a href="/tags/WSGI/" style="font-size: 10.00px;">WSGI</a><a href="/tags/bfc/" style="font-size: 10.00px;">bfc</a><a href="/tags/block-stream/" style="font-size: 10.00px;">block-stream</a><a href="/tags/blockcopy/" style="font-size: 12.50px;">blockcopy</a><a href="/tags/cache/" style="font-size: 10.00px;">cache</a><a href="/tags/css/" style="font-size: 12.50px;">css</a><a href="/tags/dataplane/" style="font-size: 10.00px;">dataplane</a><a href="/tags/ervernote/" style="font-size: 10.00px;">ervernote</a><a href="/tags/etag/" style="font-size: 10.00px;">etag</a><a href="/tags/eval/" style="font-size: 10.00px;">eval</a><a href="/tags/fedora/" style="font-size: 10.00px;">fedora</a><a href="/tags/greasemonkey/" style="font-size: 10.00px;">greasemonkey</a><a href="/tags/http/" style="font-size: 12.50px;">http</a><a href="/tags/javascript/" style="font-size: 10.00px;">javascript</a><a href="/tags/libvirt/" style="font-size: 17.50px;">libvirt</a><a href="/tags/lighthttpd/" style="font-size: 10.00px;">lighthttpd</a><a href="/tags/lighttpd/" style="font-size: 10.00px;">lighttpd</a><a href="/tags/livecd/" style="font-size: 10.00px;">livecd</a><a href="/tags/mac/" style="font-size: 10.00px;">mac</a><a href="/tags/md5sum/" style="font-size: 10.00px;">md5sum</a><a href="/tags/mysql/" style="font-size: 12.50px;">mysql</a><a href="/tags/oVirt/" style="font-size: 12.50px;">oVirt</a><a href="/tags/pdo/" style="font-size: 10.00px;">pdo</a><a href="/tags/performance/" style="font-size: 12.50px;">performance</a><a href="/tags/permalink/" style="font-size: 10.00px;">permalink</a><a href="/tags/php/" style="font-size: 15.00px;">php</a><a href="/tags/post/" style="font-size: 10.00px;">post</a><a href="/tags/proxy/" style="font-size: 10.00px;">proxy</a><a href="/tags/qemu-img/" style="font-size: 10.00px;">qemu-img</a>
+  </div>
+</div>
+
+
+  <iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=2&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=0&uid=1644437791&verifier=c45a1931&dpc=1"></iframe>
+
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://blog.csdn.net/luo_brian" title="luo_brian">Luohao</a></li>
+<li><a href="http://blog.csdn.net/defeattroy" title="木马屠城">Defeattroy</a></li>
+<li><a href="http://www.smilgel.com/" title="听雨轩">MrSaxon</a></li>
+<li><a href="http://lanbolee.com/blog/" title="博之博">Rambolee</a></li>
+<li><a href="http://www.haoziyanwo.com/" title="耗子燕窝">浩子</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2014 leiqzhang
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+<script type="text/javascript">
+var disqus_shortname = 'leiqzhang';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+</body>
+</html>

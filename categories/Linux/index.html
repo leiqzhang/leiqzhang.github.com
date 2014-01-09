@@ -1,0 +1,359 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="baidu-site-verification" content="kZ3lZdC9wn" />
+  
+  <title>Linux | Technology &amp; Life</title>
+  <meta name="author" content="leiqzhang">
+  
+  <meta name="description" content="Virtualization Related Technologies">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+  <meta property="og:site_name" content="Technology &amp; Life"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico">
+  <link rel="alternate" href="/atom.xml" title="Technology &amp; Life" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
+  
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-40319520-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+  <script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3F6f62dffd0688838f0bc52fc65fd62af4' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">Technology &amp; Life</a></h1>
+  <h2><a href="/">blog of leiqzhang</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about">About</a></li>
+    
+      <li><a href="/atom.xml">RSS</a></li>
+    
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper">
+<h2 class="archive-title category">Linux</h2>
+
+
+  
+    <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2011-01-05T13:58:32.000Z"><a href="/2011/01/2011-01-05-md5sum-check-with-file/">Jan 5 2011</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2011/01/2011-01-05-md5sum-check-with-file/">md5sum的--check用法</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>项目开发过程中，有时会批量更新替换一系列其他人提供的文件，文件提供者会给出各文件的路径和md5，在将文件替换后，也需要对md5进行校验。此时可以使用md5sum的—check参数进行批量验证：</p>
+<p>用法是</p>
+<p>[code]</p>
+<p>md5sum —check ~/data_md5</p>
+<p>[/code]</p>
+<p>其中data_md5文件的内容如下：</p>
+<p>[code]</p>
+<p>MD5值[空格][空格]文件1路径<br>MD5值[空格][空格]文件2路径<br>…</p>
+<p>[/code]</p>
+<p>需要注意的是，每一行中的MD5值和路径之间必须是两个空格，否则md5sum会报文件不存在之类的错误。</p>
+<p>检测的输出结果的格式如下：</p>
+<p>[code]</p>
+<p>文件1路径： OK<br>文件2路径： FAILED</p>
+<p>[/code]</p>
+<p>其中OK表示验证通过（文件md5和文件中给定的md5一直），FAILED表示验证失败</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  
+    <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2010-11-29T12:37:07.000Z"><a href="/2010/11/2010-11-29-diff_svn_tree_conflict/">Nov 29 2010</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2010/11/2010-11-29-diff_svn_tree_conflict/">整体diff比较SVN的tree conflict文件</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>通过svn merge合并代码时经常会报树冲突(tree conflict)，而对于每个树冲突不能简单的忽略了事，需要和待merge版本相应的文件进行diff才可以。</p>
+<p>目前我们组的并行项目很多，svn merge时，树冲突往往非常多，一个一个手动去diff是一个很繁琐的过程，下午大概写了一个shell方法对所有树冲突的文件进行diff，可以将以下代码加入~/.bash_profile文件：</p>
+<p>[shell]</p>
+<h1 id="-8bbe-5b9a-9879-76ee-6240-5728-76ee-5f55-">设定项目所在目录</h1>
+<p>export PRJ=/home/work/var/www/htdocs</p>
+<h1 id="-6839-636e-svn_info-83b7-53d6-5f53-524d-76ee-5f55-5c42-6b21-ff0c-5e76-6784-9020-76f8-5e94-7684-diff-76ee-7684-6587-4ef6-8def-5f84-">根据svn info获取当前目录层次，并构造相应的diff目的文件路径</h1>
+<h1 id="-5982-5f53-524d-5728-24-PRJ-2f-pro_merge-2f-protected-2f-modules-2f-operations-4e0b-">如当前在$PRJ/pro_merge/protected/modules/operations下</h1>
+<h1 id="-5219-201d-getDir_-24-PRJ-2f-pro-201d-7684-7ed3-679c-662f-24-PRJ-2f-pro-2f-protected-2f-modules-2f-operations">则”getDir $PRJ/pro”的结果是$PRJ/pro/protected/modules/operations</h1>
+<h1 id="-5f53-7136-524d-63d0-662f-svn_info-4e2d-7684-URL-884c-5bf9-5e94-7684-683c-5f0f-662f-3c-a_href-3d-22-https-3a-2f-2f-2a-2f-2a-_BRANCH-2f-protected-2f-modules-2f-operations-6216-https-3a-2f-2f-2a-2f-2a-_PD_BL-2f-protected-2f-modules-2f-operations-22-3e-https-3a-2f-2f-2a-2f-2a-_BRANCH-2f-protected-2f-modules-2f-operations-6216-https-3a-2f-2f-2a-2f-2a-_PD_BL-2f-protected-2f-modules-2f-operations-3c-2f-a-3e-">当然前提是svn info中的URL行对应的格式是<a href="https://*/*_BRANCH/protected/modules/operations或https://*/*_PD_BL/protected/modules/operations" target="_blank">https://*/*_BRANCH/protected/modules/operations或https://*/*_PD_BL/protected/modules/operations</a></h1>
+<h1 id="-53ef-6839-636e-5b9e-9645-60c5-51b5-8fdb-884c-4fee-6539-">可根据实际情况进行修改</h1>
+<p>function getDir() { DIR=<code>echo $1 | sed &#39;s/\//\\\\\//g&#39;</code>; svn info | grep “^URL” | awk ‘{print $2}’ | sed “s/^https:.*(_BRANCH|_PD_BL)/$DIR/g”; }</p>
+<h1 id="-901a-8fc7-svn_st-548c-awk-83b7-53d6-6240-6709-6811-51b2-7a81-6587-4ef6-76f8-5bf9-8def-5f84-">通过svn st和awk获取所有树冲突文件相对路径</h1>
+<h1 id="-4f9d-6b21-548c-6307-5b9a-7684-76ee-6807-6587-4ef6-8fdb-884c-diff-2c-5176-4e2d-5ffd-7565-4e86-5bf9-png_-gif-7b49-7c7b-578b-6587-4ef6-7684-5904-7406-">依次和指定的目标文件进行diff,其中忽略了对.png .gif等类型文件的处理</h1>
+<p>function td() { svn st | grep “^[[:space:]]+C” | awk ‘$2!~/(.<em>.png)|(.</em>.gif)/ {print $2}’ | xargs -t -i diff -u —exclude=”.svn” {} “<code>getDir $1</code>/{}”; }<br>[/shell]</p>
+<p>假设合并代码后的目录是$PRJ/pro_merge,而合入的版本代码在$PRJ/pro_src,则可以在$PRJ/pro_merge的任意子目录下执行如下命令：</p>
+<p>[shell]<br>td $PRJ/pro_src<br>[/shell]</p>
+<p>即可输出当前目录下所有子目录的树冲突文件和带合并文件的diff情况</p>
+<p>+++++++2010年12月6日更新++++++++++</p>
+<p>该方法可以进一步扩展，将diff出来的没有不同的文件直接”svn resolved“了，因此写了一个简单的shell脚本：</p>
+<p>[bash]</p>
+<h1 id="-21-_-2f-bin-2f-sh">! /bin/sh</h1>
+<p>function getDir() { DIR=<code>echo $1 | sed &#39;s/\//\\\\\//g&#39;</code>; svn info | grep “^URL” | awk ‘{print $2}’ | sed “s/^https:.*(_BRANC<br>H|_PD_BL)/$DIR/g”; }</p>
+<p>files=<code>svn st | grep &quot;^[[:space:]]\+C&quot; | awk &#39;$2!~/(.*\.png)|(.*\.gif)/ {print $2}&#39;</code><br>dir=<code>getDir $1</code><br>for file in $files<br>do<br>    echo “$file”<br>    out=<code>diff -ur --exclude=&quot;\.svn&quot; &quot;$file&quot; &quot;$dir/$file&quot; 2&gt;&amp;1</code><br>    if [ $? -eq “0” ]<br>    then<br>        echo will svn resolved $file<br>        svn resolved $file<br>    else<br>        echo “$out”<br>    fi<br>done</p>
+<p>[/bash] </p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  
+    <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2010-11-12T06:44:38.000Z"><a href="/2010/11/2010-11-12-wget-mirror/">Nov 12 2010</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2010/11/2010-11-12-wget-mirror/">wget下载整个网站的镜像</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p><span style="background-color: #ffff00;">$ wget —mirror -p —convert-links -P ./LOCAL-DIR WEBSITE-URL</span></p>
+<ul>
+<li>–mirror : 下载镜像</li>
+</ul>
+<ul>
+<li>-p : 下载gif等显示html必须的资源</li>
+</ul>
+<ul>
+<li>–convert-links : 下载后，将文档中所有的链接进行转换，以支持本地查看</li>
+</ul>
+<ul>
+<li>-P ./LOCAL-DIR : 需要保存下载文档的目录</li>
+</ul>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  
+
+  <nav id="pagination">
+  
+  
+  <div class="clearfix"></div>
+</nav>
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:leiqzhang.com">
+  </form>
+</div>
+
+  
+<div class="widget tag">
+  <h3 class="title">Categories</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/Linux/">Linux</a><small>3</small></li>
+  
+    <li><a href="/categories/OpenStack/">OpenStack</a><small>2</small></li>
+  
+    <li><a href="/categories/VIM/">VIM</a><small>3</small></li>
+  
+    <li><a href="/categories/Virtualization/">Virtualization</a><small>13</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>2</small></li>
+  
+    <li><a href="/categories/miscellaneous/">miscellaneous</a><small>1</small></li>
+  
+    <li><a href="/categories/web_dev/">web_dev</a><small>8</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tagcloud">
+  <h3 class="title">Tag Cloud</h3>
+  <div class="entry">
+    <a href="/tags/CIM/" style="font-size: 10.00px;">CIM</a><a href="/tags/CORS/" style="font-size: 10.00px;">CORS</a><a href="/tags/DBPM/" style="font-size: 10.00px;">DBPM</a><a href="/tags/Deploy/" style="font-size: 10.00px;">Deploy</a><a href="/tags/ELI/" style="font-size: 10.00px;">ELI</a><a href="/tags/NUMA/" style="font-size: 10.00px;">NUMA</a><a href="/tags/Nova/" style="font-size: 12.50px;">Nova</a><a href="/tags/OPTIONS/" style="font-size: 10.00px;">OPTIONS</a><a href="/tags/Paste/" style="font-size: 10.00px;">Paste</a><a href="/tags/QEMU/" style="font-size: 20.00px;">QEMU</a><a href="/tags/RabbitMQ/" style="font-size: 10.00px;">RabbitMQ</a><a href="/tags/WSGI/" style="font-size: 10.00px;">WSGI</a><a href="/tags/bfc/" style="font-size: 10.00px;">bfc</a><a href="/tags/block-stream/" style="font-size: 10.00px;">block-stream</a><a href="/tags/blockcopy/" style="font-size: 12.50px;">blockcopy</a><a href="/tags/cache/" style="font-size: 10.00px;">cache</a><a href="/tags/css/" style="font-size: 12.50px;">css</a><a href="/tags/dataplane/" style="font-size: 10.00px;">dataplane</a><a href="/tags/ervernote/" style="font-size: 10.00px;">ervernote</a><a href="/tags/etag/" style="font-size: 10.00px;">etag</a><a href="/tags/eval/" style="font-size: 10.00px;">eval</a><a href="/tags/fedora/" style="font-size: 10.00px;">fedora</a><a href="/tags/greasemonkey/" style="font-size: 10.00px;">greasemonkey</a><a href="/tags/http/" style="font-size: 12.50px;">http</a><a href="/tags/javascript/" style="font-size: 10.00px;">javascript</a><a href="/tags/libvirt/" style="font-size: 17.50px;">libvirt</a><a href="/tags/lighthttpd/" style="font-size: 10.00px;">lighthttpd</a><a href="/tags/lighttpd/" style="font-size: 10.00px;">lighttpd</a><a href="/tags/livecd/" style="font-size: 10.00px;">livecd</a><a href="/tags/mac/" style="font-size: 10.00px;">mac</a><a href="/tags/md5sum/" style="font-size: 10.00px;">md5sum</a><a href="/tags/mysql/" style="font-size: 12.50px;">mysql</a><a href="/tags/oVirt/" style="font-size: 12.50px;">oVirt</a><a href="/tags/pdo/" style="font-size: 10.00px;">pdo</a><a href="/tags/performance/" style="font-size: 12.50px;">performance</a><a href="/tags/permalink/" style="font-size: 10.00px;">permalink</a><a href="/tags/php/" style="font-size: 15.00px;">php</a><a href="/tags/post/" style="font-size: 10.00px;">post</a><a href="/tags/proxy/" style="font-size: 10.00px;">proxy</a><a href="/tags/qemu-img/" style="font-size: 10.00px;">qemu-img</a>
+  </div>
+</div>
+
+
+  <iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=2&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=0&uid=1644437791&verifier=c45a1931&dpc=1"></iframe>
+
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://blog.csdn.net/luo_brian" title="luo_brian">Luohao</a></li>
+<li><a href="http://blog.csdn.net/defeattroy" title="木马屠城">Defeattroy</a></li>
+<li><a href="http://www.smilgel.com/" title="听雨轩">MrSaxon</a></li>
+<li><a href="http://lanbolee.com/blog/" title="博之博">Rambolee</a></li>
+<li><a href="http://www.haoziyanwo.com/" title="耗子燕窝">浩子</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2014 leiqzhang
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+<script type="text/javascript">
+var disqus_shortname = 'leiqzhang';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+</body>
+</html>

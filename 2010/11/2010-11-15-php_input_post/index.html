@@ -1,0 +1,274 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="baidu-site-verification" content="kZ3lZdC9wn" />
+  
+  <title>php://input和$_POST | Technology &amp; Life</title>
+  <meta name="author" content="leiqzhang">
+  
+  <meta name="description" content="Virtualization Related Technologies">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="php://input和$_POST"/>
+  <meta property="og:site_name" content="Technology &amp; Life"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico">
+  <link rel="alternate" href="/atom.xml" title="Technology &amp; Life" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
+  
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-40319520-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+  <script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3F6f62dffd0688838f0bc52fc65fd62af4' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">Technology &amp; Life</a></h1>
+  <h2><a href="/">blog of leiqzhang</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about">About</a></li>
+    
+      <li><a href="/atom.xml">RSS</a></li>
+    
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2010-11-15T09:17:35.000Z"><a href="/2010/11/2010-11-15-php_input_post/">Nov 15 2010</a></time>
+      
+      
+  
+    <h1 class="title">php://input和$_POST</h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>一个soap_server的实现框架代码如下：</p>
+<p>[php]<br>$wsdlFile = realpath(dirname(<strong>FILE</strong>).’/../wsdl/service.wsdl’);<br>$actor = new soapServer($wsdlFile); //初始化soapServer<br>$actor-&gt;setClass(‘ServiceInterface’);//导入方法<br>$actor-&gt;handle(file_get_contents(‘php://input’)); //注意：这里使用了php://input<br>[/php]</p>
+<p><strong>一个soap调用的数据是通过POST的方式发送给服务器的，那么上面的处理中为什么要使用php://input,是否可以使用$_POST？
+</strong></p>
+<p>一个典型的soap调用框架代码如下：</p>
+<p>[php]<br>$client = new SoapClient(SOAP_SERVICEURL,array(‘trace’=&gt;true));<br>//使用trace选项，可以保证后面的<strong>getLastRequest、</strong>getLastResponse等方法可以读取到相应的请求/响应<br>$ret = $client-&gt;getServiceName(‘serviceStr’);<br>echo htmlspecialchars($client-&gt;<strong>getLastRequestHeaders());<br> echo “<br/>“;<br> echo htmlspecialchars($client-&gt;</strong>getLastRequest());<br> echo “<br/>“;<br> var_dump($ret);<br> echo “<br/>“;<br> echo htmlspecialchars($client-&gt;<strong>getLastResponseHeaders());<br> echo “<br/>“;<br> echo htmlspecialchars($client-&gt;</strong>getLastResponse());<br> echo “<br/>“;<br>[/php]</p>
+<p>以下是运行这段client后的输出：</p>
+<p>[code]<br>POST <strong><strong> HTTP/1.1 Host: [*</strong></strong>] Connection: Keep-Alive User-Agent: PHP-SOAP/5.2.10 Content-Type: text/xml;<br>charset=utf-8 SOAPAction: “urn:<strong><em>*</em></strong>#getServiceName” Content-Length: <em>*</em></p>
+<p>&lt;?xml version=”1.0” encoding=”UTF-8”?&gt; <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ns1="urn:****" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"></p>
+<p><SOAP-ENV:Body><ns1:getServiceName><servicename xsi:type="xsd:string">serviceStr</servicename></ns1:getServiceName></SOAP-ENV:Body><br></SOAP-ENV:Envelope></p>
+<p>NULL</p>
+<p>HTTP/1.1 200 OK Date: Mon, 15 Nov 2010 08:19:16 GMT Server: Apache/2.0.63 (Unix) PHP/5.2.10<br>X-Powered-By: PHP/5.2.10 Set-Cookie: <strong>*</strong>; path=/; domain=<em>*</em> Expires: Thu, 19 Nov 1981 08:52:00 GMT<br>Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0 Pragma: no-cache Content-Length: 521<br>Keep-Alive: timeout=15, max=100 Connection: Keep-Alive Content-Type: text/xml; charset=utf-8</p>
+<p>&lt;?xml version=”1.0” encoding=”UTF-8”?&gt; <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:ns1="urn:AmsInterfaceswsdl" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><SOAP-ENV:Body></p>
+<p><ns1:getServiceNameResponse><return xsi:nil="true"/></ns1:getServiceNameResponse></SOAP-ENV:Body></SOAP-ENV:Envelope><br>[/code]</p>
+<p>由请求header可以看到，soap虽然使用的post的方式传输请求串，但是传递的数据是一个xml，content-type也是“text/xml”，而对于php://input,<a href="http://php.net/manual/en/wrappers.php.php" target="_blank">官方文档</a>给的是这样的说明:</p>
+<p>php://input allows you to read raw data from the request body. In case of POST requests, it preferrable to <a href="http://www.php.net/manual/en/reserved.variables.httprawpostdata.php" target="_blank">$HTTP_RAW_POST_DATA</a> as it does not depend on special php.ini directives. Moreover, for those cases where <a href="http://www.php.net/manual/en/reserved.variables.httprawpostdata.php" target="_blank">$HTTP_RAW_POST_DATA</a> is not populated by default, it is a potentially less memory intensive alternative to activating <a href="http://www.php.net/manual/en/ini.core.php#ini.always-populate-raw-post-data" target="_blank">always_populate_raw_post_data</a>. php://input is not available with <em>enctype=”multipart/form-data”</em>.</p>
+<blockquote>
+<p><strong>Note</strong>:  A stream opened with php://input can only be read once; the stream does not support seek operations. However, depending on the SAPI implementation, it may be possible to open another php://input stream and restart reading. This is only possible if the request body data has been saved. Typically, this is the case for POST requests, but not other request methods, such as PUT or PROPFIND. </p>
+</blockquote>
+<p>也就是说php://input可以用来读取http post的raw request data。对于一般的表单post，http头中设置的contentType是’application/x-form-www-urlencoded’(无文件上传)或’multipart/form-data’(一般用于文件上传),这两种情况下，post的数据会被设置到$_POST中（第一种情况下，php://input也会被设置，第二种情况下，php://input则不会被设置），而对于text/xml这种类型，post数据并不会被设置到$_POST中，具体的post、get和php://input的实验可参考这篇<a href="http://tuzwu.javaeye.com/blog/798978" target="_blank">博文</a>。</p>
+<p>这里只摘抄其测试结论：</p>
+<p>1，Coentent-Type仅在取值为application/x-www-data-urlencoded和multipart/form-data两种情况下，PHP才会将http请求数据包中相应的数据填入全局变量$_POST<br>2，PHP不能识别的Content-Type类型的时候，会将http请求包中相应的数据填入变量$HTTP_RAW_POST_DATA<br>3,  只有Coentent-Type不为multipart/form-data的时候，PHP不会将http请求数据包中的相应数据填入php://input，否则其它情况都会。填入的长度，由Coentent-Length指定。<br>4，只有Content-Type为application/x-www-data-urlencoded时，php://input数据才跟$_POST数据相一致。<br>5，php://input数据总是跟$HTTP_RAW_POST_DATA相同，但是php://input比$HTTP_RAW_POST_DATA更凑效，且不需要特殊设置php.ini<br>6，PHP会将PATH字段的query_path部分，填入全局变量$_GET。通常情况下，GET方法提交的http请求，body为空。</p>
+
+      
+    </div>
+    <footer>
+      
+        
+  
+  <div class="categories">
+    <a href="/categories/web_dev/">web_dev</a>
+  </div>
+
+        
+  
+  <div class="tags">
+    <a href="/tags/php/">php</a>, <a href="/tags/post/">post</a>, <a href="/tags/soap/">soap</a>
+  </div>
+
+        <!-- Baidu Button BEGIN -->
+<div id="bdshare" class="bdshare_t bds_tools get-codes-bdshare">
+<span class="bds_more">分享到：</span>
+<a class="bds_qzone"></a>
+<a class="bds_tsina"></a>
+<a class="bds_tqq"></a>
+<a class="bds_renren"></a>
+<a class="bds_t163"></a>
+<a class="shareCount"></a>
+</div>
+<script type="text/javascript" id="bdshare_js" data="type=tools&amp;uid=17824" ></script>
+<script type="text/javascript" id="bdshell_js"></script>
+<script type="text/javascript">
+document.getElementById("bdshell_js").src = "http://bdimg.share.baidu.com/static/js/shell_v2.js?cdnversion=" + Math.ceil(new Date()/3600000)
+</script>
+<!-- Baidu Button END -->
+
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+<section id="comment">
+<!-- Duoshuo Comment BEGIN -->
+    <div class="ds-thread" data-thread-key="/2010/11/2010-11-15-php_input_post/" data-author-key="leiqzhang" data-title="php://input和$_POST"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"leiqzhang"};
+    (function() {
+        var ds = document.createElement('script');
+        ds.type = 'text/javascript';ds.async = true;
+        ds.src = 'http://static.duoshuo.com/embed.js';
+        ds.charset = 'UTF-8';
+        (document.getElementsByTagName('head')[0] 
+        || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+    </script>
+<!-- Duoshuo Comment END -->
+</section>
+
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:leiqzhang.com">
+  </form>
+</div>
+
+  
+<div class="widget tag">
+  <h3 class="title">Categories</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/Linux/">Linux</a><small>3</small></li>
+  
+    <li><a href="/categories/OpenStack/">OpenStack</a><small>2</small></li>
+  
+    <li><a href="/categories/VIM/">VIM</a><small>3</small></li>
+  
+    <li><a href="/categories/Virtualization/">Virtualization</a><small>13</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>2</small></li>
+  
+    <li><a href="/categories/miscellaneous/">miscellaneous</a><small>1</small></li>
+  
+    <li><a href="/categories/web_dev/">web_dev</a><small>8</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tagcloud">
+  <h3 class="title">Tag Cloud</h3>
+  <div class="entry">
+    <a href="/tags/CIM/" style="font-size: 10.00px;">CIM</a><a href="/tags/CORS/" style="font-size: 10.00px;">CORS</a><a href="/tags/DBPM/" style="font-size: 10.00px;">DBPM</a><a href="/tags/Deploy/" style="font-size: 10.00px;">Deploy</a><a href="/tags/ELI/" style="font-size: 10.00px;">ELI</a><a href="/tags/NUMA/" style="font-size: 10.00px;">NUMA</a><a href="/tags/Nova/" style="font-size: 12.50px;">Nova</a><a href="/tags/OPTIONS/" style="font-size: 10.00px;">OPTIONS</a><a href="/tags/Paste/" style="font-size: 10.00px;">Paste</a><a href="/tags/QEMU/" style="font-size: 20.00px;">QEMU</a><a href="/tags/RabbitMQ/" style="font-size: 10.00px;">RabbitMQ</a><a href="/tags/WSGI/" style="font-size: 10.00px;">WSGI</a><a href="/tags/bfc/" style="font-size: 10.00px;">bfc</a><a href="/tags/block-stream/" style="font-size: 10.00px;">block-stream</a><a href="/tags/blockcopy/" style="font-size: 12.50px;">blockcopy</a><a href="/tags/cache/" style="font-size: 10.00px;">cache</a><a href="/tags/css/" style="font-size: 12.50px;">css</a><a href="/tags/dataplane/" style="font-size: 10.00px;">dataplane</a><a href="/tags/ervernote/" style="font-size: 10.00px;">ervernote</a><a href="/tags/etag/" style="font-size: 10.00px;">etag</a><a href="/tags/eval/" style="font-size: 10.00px;">eval</a><a href="/tags/fedora/" style="font-size: 10.00px;">fedora</a><a href="/tags/greasemonkey/" style="font-size: 10.00px;">greasemonkey</a><a href="/tags/http/" style="font-size: 12.50px;">http</a><a href="/tags/javascript/" style="font-size: 10.00px;">javascript</a><a href="/tags/libvirt/" style="font-size: 17.50px;">libvirt</a><a href="/tags/lighthttpd/" style="font-size: 10.00px;">lighthttpd</a><a href="/tags/lighttpd/" style="font-size: 10.00px;">lighttpd</a><a href="/tags/livecd/" style="font-size: 10.00px;">livecd</a><a href="/tags/mac/" style="font-size: 10.00px;">mac</a><a href="/tags/md5sum/" style="font-size: 10.00px;">md5sum</a><a href="/tags/mysql/" style="font-size: 12.50px;">mysql</a><a href="/tags/oVirt/" style="font-size: 12.50px;">oVirt</a><a href="/tags/pdo/" style="font-size: 10.00px;">pdo</a><a href="/tags/performance/" style="font-size: 12.50px;">performance</a><a href="/tags/permalink/" style="font-size: 10.00px;">permalink</a><a href="/tags/php/" style="font-size: 15.00px;">php</a><a href="/tags/post/" style="font-size: 10.00px;">post</a><a href="/tags/proxy/" style="font-size: 10.00px;">proxy</a><a href="/tags/qemu-img/" style="font-size: 10.00px;">qemu-img</a>
+  </div>
+</div>
+
+
+  <iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=2&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=0&uid=1644437791&verifier=c45a1931&dpc=1"></iframe>
+
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://blog.csdn.net/luo_brian" title="luo_brian">Luohao</a></li>
+<li><a href="http://blog.csdn.net/defeattroy" title="木马屠城">Defeattroy</a></li>
+<li><a href="http://www.smilgel.com/" title="听雨轩">MrSaxon</a></li>
+<li><a href="http://lanbolee.com/blog/" title="博之博">Rambolee</a></li>
+<li><a href="http://www.haoziyanwo.com/" title="耗子燕窝">浩子</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2014 leiqzhang
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+<script type="text/javascript">
+var disqus_shortname = 'leiqzhang';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,363 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="baidu-site-verification" content="kZ3lZdC9wn" />
+  
+  <title>Virtualization performance considerations | Technology &amp; Life</title>
+  <meta name="author" content="leiqzhang">
+  
+  <meta name="description" content="Virtualization Related Technologies">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="Virtualization performance considerations"/>
+  <meta property="og:site_name" content="Technology &amp; Life"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico">
+  <link rel="alternate" href="/atom.xml" title="Technology &amp; Life" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
+  
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-40319520-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+  <script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3F6f62dffd0688838f0bc52fc65fd62af4' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">Technology &amp; Life</a></h1>
+  <h2><a href="/">blog of leiqzhang</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about">About</a></li>
+    
+      <li><a href="/atom.xml">RSS</a></li>
+    
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-06-18T12:40:31.000Z"><a href="/2013/06/2013-06-18-virtualization-performance-considerations/">Jun 18 2013</a></time>
+      
+      
+  
+    <h1 class="title">Virtualization performance considerations</h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>今天看了云计算大会2013上EMC/Vmware的一片关于虚拟化性能的文章，结合之前看过的一些材料对其进行了汇总和总结。主要站在全云计算堆栈的整体视角上看各个组件或特性对性能的影响。</p>
+<p>需要注意的是性能会包括好多指标，这些指标往往是互相矛盾的，如实时性（低延迟）和CPU利用率、电源利用率等等。本文也会结合之前vmware的文档归纳下如何尽可能地提高虚拟化场景下的实时性。</p>
+<h2 id="CPU_-26-amp-3b-_Memory">CPU &amp; Memory</h2>
+<ol>
+<li><p>NUMA</p>
+<p> <strong>Respect boundaries, rightsize, use like topologies.</strong></p>
+<p> Hypervisor的调度器需要尽可能将同一个VM的所有vCPU调度到同一个NUMA节点上，同时此VM相关的内存需要分配到此节点的本地物理内存中。</p>
+<p> Vmware ESX 5.0及之后的版本支持一种叫做<strong>vNUMA</strong>的特性，它将Host的NUMA特征暴露给了Guest OS，从而使得Guest OS可以根据NUMA特征进行更高性能的调度。</p>
+</li>
+<li><p>CPU相关的一些指标和新特性</p>
+<ul>
+<li>Processor Clock Frequency</li>
+<li>Dual or Quad Socket</li>
+<li>Hyper-threading (=Enabled)</li>
+<li>Support <strong>EPT</strong>(Intel) or <strong>RVI</strong>(AMD), eg. Hwmmu</li>
+</ul>
+</li>
+<li><p>BIOS相关</p>
+<p> 主要是指BIOS中对电源管理方式的设置。<br> <a id="more"></a><br> 目前主流的BIOS电源管理支持<strong>DBPM</strong>(demand-based power management), 主要是指BIOS可以选择暴露部分或全部的P State到OS，由OS来根据负载情况管理电源的使用。如Dell 11G服务器支持如下几种电源管理方式：</p>
+<ol>
+<li>Static Max Performance：完全禁用掉DBPM</li>
+<li>OS Control：完全由OS控制</li>
+<li>Active Power Controller: Dellsystem DBPM, OS部分控制</li>
+<li>Custom<br>对于虚拟化场景下的性能来说，如果Hypersior有能力，则最好是将电源管理设置为OS Control，交由Hypersior来管理。当然，对于实时性要求很高的应用，则令当别论，会在后面单独一节详述。</li>
+</ol>
+</li>
+<li><p>Memory</p>
+<p> 内存方面主要需要关注的是内存的实际速度，同时需要记住如下一句话：<br> <strong>Memory is Cheap Performance</strong></p>
+</li>
+</ol>
+<h2 id="Network">Network</h2>
+<p>网络方面当前的了解程度还不够，这里只是汇总下Vmware的观点</p>
+<ol>
+<li>Use Distributed Virtual Switches</li>
+<li>Route based on phy NIC</li>
+<li>NetIOC</li>
+<li>Gb vs 10Gb</li>
+<li>Jumbo Frames for 10Gb (especially NFS, iSCSI)</li>
+</ol>
+<h2 id="Storage">Storage</h2>
+<p>存储方面主要需要考虑如下几方面</p>
+<ol>
+<li><p>The Protocol War</p>
+<p> 即使用NFS、iSCSI还是FC</p>
+</li>
+<li><p>存储使用方式</p>
+<p> RDM（Passthru)或者集群文件系统(VMFS等)上得VirtualDisk(VMDK, VHD, etc)</p>
+</li>
+<li><p>存储类型： 是否瘦分配</p>
+</li>
+<li><p>Array Integration &amp; Configuration</p>
+<p> 即Vmware一直推崇的VAAI，即存储卸载。当前在VAAI的基础上进一步演进，已经退出vVol、vFlash、vSSD等概念，并正在进行实现。</p>
+</li>
+</ol>
+<h2 id="Guest">Guest</h2>
+<p>主要是应用层面的考虑了，和非虚拟化场景下的一般考虑因素基本一样。</p>
+<ol>
+<li><p>Right sizing</p>
+</li>
+<li><p>Use a Modern OS</p>
+</li>
+<li><p>Install VMware Tools (vEthernet Adapters/vSCSI Controller)</p>
+<p> 对于其余的Hypervisor，主要是指需要在Guest中安装相应的半虚驱动(ParDriver),如Xen下的PVDriver、KVM下的Virtio等等</p>
+</li>
+<li><p>VM Disk Layout</p>
+</li>
+<li><p>Limit Snapshots Use</p>
+<p> 无论是COW快照还是ROW快照，均会影响到VM的IO性能。</p>
+</li>
+<li><p>Disk Alignment</p>
+</li>
+</ol>
+<h2 id="-5b9e-65f6-6027-8003-8651-">实时性考虑</h2>
+<p>这里讨论的场景是需要尽可能降低IO延迟，而可以容忍高的CPU利用率和电源损耗。</p>
+<p>基本上需要考虑的方面就是本文上面几节中列出的各个因素，并加以权衡。</p>
+<ol>
+<li><p>BIOS</p>
+<p> 当启用<strong>DBPM</strong>时，不可避免的CPU需要参与到电源管理中去，必然会增加IO处理的延迟，故可以考虑将电源管理设置为“Static High”模式。</p>
+<p> 对于更新一些的CPU(Intel Nehalem class), CPU还提供了C-states和更高级的C1E两种电源管理选项，为了追求低延迟，此俩选项也许禁用。</p>
+</li>
+<li><p>NUMA</p>
+<p> 参考上文中的描述，主要依赖于Hypervisor的NUMA感知的调度能力，并提供的类似于<strong>vNUMA</strong>的能力。</p>
+</li>
+<li><p>Guest</p>
+<p> 首先是使用更新版本的Guest OS。</p>
+</li>
+<li><p>物理网卡</p>
+<p> 当前的NIC一般均会默认启用一些尽可能减少对CPU中断次数的技术，以避免CPU被频繁中断，这些技术即<strong>interrupt moderation</strong>或者<strong>interrupt throttling</strong>，它们会对部分中断进行合并后再中断CPU。</p>
+<p> 如果考虑低延迟，则需要通过ethtool等工具将上面的特性关闭掉。当然关闭此特性会影响到LRO(Large Receive Offloads)特性。</p>
+</li>
+<li><p>虚拟网卡</p>
+<p> VMware是建议使用其最新版本的VMXNET3.</p>
+</li>
+<li><p>VM配置</p>
+<p> 如果应用是计算密集型的则给VM配置更多地vCPU，如果是存储密集型的，给VM配置更多的内存。当然需要避免vCPU和内存的overcommit。</p>
+<p> 如果Hypersior支持，可设置不允许Hypersior在VM的vcpu空闲时将其调度出去。</p>
+</li>
+<li><p>其它</p>
+<p> 考虑开发支持Poll机制的设备驱动，对于IO的执行不依赖于设备返回中断而是直接通过poll方式等待IO的完成。因为设备中断返回到VM中，会引发VM的几次退出。</p>
+<p> PS，关于如何避免中断引起VM的退出，QEMU社区已经有了方案（ELI/PV-EOI），可参考：</p>
+<ul>
+<li>原始论文：<a href="http://www.mulix.org/pubs/eli/eli.pdf" target="_blank">http://www.mulix.org/pubs/eli/eli.pdf</a></li>
+<li><a href="http://blog.csdn.net/luo_brian/article/details/8686717" target="_blank">http://blog.csdn.net/luo_brian/article/details/8686717</a></li>
+<li><p><a href="http://blog.csdn.net/luo_brian/article/details/8744025" target="_blank">http://blog.csdn.net/luo_brian/article/details/8744025</a></p>
+<p>再PS，在下一代的Intel Haswell处理器中，已经通过硬件实现了所谓的vAPIC，可有效避免中断引起的VM退出。故QEMU社区的软件方案未能进入到Kernel中，期待一下Intel的新处理器中的此新特性吧。</p>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="References">References</h2>
+<ol>
+<li><a href="https://www.emcworldonline.com/2013/connect/sessionDetail.ww?SESSION_ID=1496" target="_blank">https://www.emcworldonline.com/2013/connect/sessionDetail.ww?SESSION_ID=1496</a></li>
+<li><a href="http://en.community.dell.com/techcenter/power-cooling/w/wiki/best-practices-in-power-management.aspx" target="_blank">http://en.community.dell.com/techcenter/power-cooling/w/wiki/best-practices-in-power-management.aspx</a></li>
+<li><a href="http://www.vmware.com/files/pdf/techpaper/VMW-Tuning-Latency-Sensitive-Workloads.pdf" target="_blank">http://www.vmware.com/files/pdf/techpaper/VMW-Tuning-Latency-Sensitive-Workloads.pdf</a></li>
+</ol>
+
+      
+    </div>
+    <footer>
+      
+        
+  
+  <div class="categories">
+    <a href="/categories/Virtualization/">Virtualization</a>
+  </div>
+
+        
+  
+  <div class="tags">
+    <a href="/tags/NUMA/">NUMA</a>, <a href="/tags/DBPM/">DBPM</a>, <a href="/tags/ELI/">ELI</a>, <a href="/tags/performance/">performance</a>
+  </div>
+
+        <!-- Baidu Button BEGIN -->
+<div id="bdshare" class="bdshare_t bds_tools get-codes-bdshare">
+<span class="bds_more">分享到：</span>
+<a class="bds_qzone"></a>
+<a class="bds_tsina"></a>
+<a class="bds_tqq"></a>
+<a class="bds_renren"></a>
+<a class="bds_t163"></a>
+<a class="shareCount"></a>
+</div>
+<script type="text/javascript" id="bdshare_js" data="type=tools&amp;uid=17824" ></script>
+<script type="text/javascript" id="bdshell_js"></script>
+<script type="text/javascript">
+document.getElementById("bdshell_js").src = "http://bdimg.share.baidu.com/static/js/shell_v2.js?cdnversion=" + Math.ceil(new Date()/3600000)
+</script>
+<!-- Baidu Button END -->
+
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+<section id="comment">
+<!-- Duoshuo Comment BEGIN -->
+    <div class="ds-thread" data-thread-key="/2013/06/2013-06-18-virtualization-performance-considerations/" data-author-key="leiqzhang" data-title="Virtualization performance considerations"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"leiqzhang"};
+    (function() {
+        var ds = document.createElement('script');
+        ds.type = 'text/javascript';ds.async = true;
+        ds.src = 'http://static.duoshuo.com/embed.js';
+        ds.charset = 'UTF-8';
+        (document.getElementsByTagName('head')[0] 
+        || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+    </script>
+<!-- Duoshuo Comment END -->
+</section>
+
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:leiqzhang.com">
+  </form>
+</div>
+
+  
+<div class="widget tag">
+  <h3 class="title">Categories</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/Linux/">Linux</a><small>3</small></li>
+  
+    <li><a href="/categories/OpenStack/">OpenStack</a><small>2</small></li>
+  
+    <li><a href="/categories/VIM/">VIM</a><small>3</small></li>
+  
+    <li><a href="/categories/Virtualization/">Virtualization</a><small>13</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>2</small></li>
+  
+    <li><a href="/categories/miscellaneous/">miscellaneous</a><small>1</small></li>
+  
+    <li><a href="/categories/web_dev/">web_dev</a><small>8</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tagcloud">
+  <h3 class="title">Tag Cloud</h3>
+  <div class="entry">
+    <a href="/tags/CIM/" style="font-size: 10.00px;">CIM</a><a href="/tags/CORS/" style="font-size: 10.00px;">CORS</a><a href="/tags/DBPM/" style="font-size: 10.00px;">DBPM</a><a href="/tags/Deploy/" style="font-size: 10.00px;">Deploy</a><a href="/tags/ELI/" style="font-size: 10.00px;">ELI</a><a href="/tags/NUMA/" style="font-size: 10.00px;">NUMA</a><a href="/tags/Nova/" style="font-size: 12.50px;">Nova</a><a href="/tags/OPTIONS/" style="font-size: 10.00px;">OPTIONS</a><a href="/tags/Paste/" style="font-size: 10.00px;">Paste</a><a href="/tags/QEMU/" style="font-size: 20.00px;">QEMU</a><a href="/tags/RabbitMQ/" style="font-size: 10.00px;">RabbitMQ</a><a href="/tags/WSGI/" style="font-size: 10.00px;">WSGI</a><a href="/tags/bfc/" style="font-size: 10.00px;">bfc</a><a href="/tags/block-stream/" style="font-size: 10.00px;">block-stream</a><a href="/tags/blockcopy/" style="font-size: 12.50px;">blockcopy</a><a href="/tags/cache/" style="font-size: 10.00px;">cache</a><a href="/tags/css/" style="font-size: 12.50px;">css</a><a href="/tags/dataplane/" style="font-size: 10.00px;">dataplane</a><a href="/tags/ervernote/" style="font-size: 10.00px;">ervernote</a><a href="/tags/etag/" style="font-size: 10.00px;">etag</a><a href="/tags/eval/" style="font-size: 10.00px;">eval</a><a href="/tags/fedora/" style="font-size: 10.00px;">fedora</a><a href="/tags/greasemonkey/" style="font-size: 10.00px;">greasemonkey</a><a href="/tags/http/" style="font-size: 12.50px;">http</a><a href="/tags/javascript/" style="font-size: 10.00px;">javascript</a><a href="/tags/libvirt/" style="font-size: 17.50px;">libvirt</a><a href="/tags/lighthttpd/" style="font-size: 10.00px;">lighthttpd</a><a href="/tags/lighttpd/" style="font-size: 10.00px;">lighttpd</a><a href="/tags/livecd/" style="font-size: 10.00px;">livecd</a><a href="/tags/mac/" style="font-size: 10.00px;">mac</a><a href="/tags/md5sum/" style="font-size: 10.00px;">md5sum</a><a href="/tags/mysql/" style="font-size: 12.50px;">mysql</a><a href="/tags/oVirt/" style="font-size: 12.50px;">oVirt</a><a href="/tags/pdo/" style="font-size: 10.00px;">pdo</a><a href="/tags/performance/" style="font-size: 12.50px;">performance</a><a href="/tags/permalink/" style="font-size: 10.00px;">permalink</a><a href="/tags/php/" style="font-size: 15.00px;">php</a><a href="/tags/post/" style="font-size: 10.00px;">post</a><a href="/tags/proxy/" style="font-size: 10.00px;">proxy</a><a href="/tags/qemu-img/" style="font-size: 10.00px;">qemu-img</a>
+  </div>
+</div>
+
+
+  <iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=2&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=0&uid=1644437791&verifier=c45a1931&dpc=1"></iframe>
+
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://blog.csdn.net/luo_brian" title="luo_brian">Luohao</a></li>
+<li><a href="http://blog.csdn.net/defeattroy" title="木马屠城">Defeattroy</a></li>
+<li><a href="http://www.smilgel.com/" title="听雨轩">MrSaxon</a></li>
+<li><a href="http://lanbolee.com/blog/" title="博之博">Rambolee</a></li>
+<li><a href="http://www.haoziyanwo.com/" title="耗子燕窝">浩子</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2014 leiqzhang
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+<script type="text/javascript">
+var disqus_shortname = 'leiqzhang';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+</body>
+</html>

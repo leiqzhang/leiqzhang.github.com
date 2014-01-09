@@ -1,0 +1,1040 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="baidu-site-verification" content="kZ3lZdC9wn" />
+  
+  <title>Archives: 2013 | Technology &amp; Life</title>
+  <meta name="author" content="leiqzhang">
+  
+  <meta name="description" content="Virtualization Related Technologies">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+  <meta property="og:site_name" content="Technology &amp; Life"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico">
+  <link rel="alternate" href="/atom.xml" title="Technology &amp; Life" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
+  
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-40319520-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+  <script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3F6f62dffd0688838f0bc52fc65fd62af4' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">Technology &amp; Life</a></h1>
+  <h2><a href="/">blog of leiqzhang</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about">About</a></li>
+    
+      <li><a href="/atom.xml">RSS</a></li>
+    
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper">
+<h2 class="archive-title">2013</h2>
+
+
+  
+    <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-06-18T12:40:31.000Z"><a href="/2013/06/2013-06-18-virtualization-performance-considerations/">Jun 18 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/06/2013-06-18-virtualization-performance-considerations/">Virtualization performance considerations</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>今天看了云计算大会2013上EMC/Vmware的一片关于虚拟化性能的文章，结合之前看过的一些材料对其进行了汇总和总结。主要站在全云计算堆栈的整体视角上看各个组件或特性对性能的影响。</p>
+<p>需要注意的是性能会包括好多指标，这些指标往往是互相矛盾的，如实时性（低延迟）和CPU利用率、电源利用率等等。本文也会结合之前vmware的文档归纳下如何尽可能地提高虚拟化场景下的实时性。</p>
+<h2 id="CPU_-26-amp-3b-_Memory">CPU &amp; Memory</h2>
+<ol>
+<li><p>NUMA</p>
+<p> <strong>Respect boundaries, rightsize, use like topologies.</strong></p>
+<p> Hypervisor的调度器需要尽可能将同一个VM的所有vCPU调度到同一个NUMA节点上，同时此VM相关的内存需要分配到此节点的本地物理内存中。</p>
+<p> Vmware ESX 5.0及之后的版本支持一种叫做<strong>vNUMA</strong>的特性，它将Host的NUMA特征暴露给了Guest OS，从而使得Guest OS可以根据NUMA特征进行更高性能的调度。</p>
+</li>
+<li><p>CPU相关的一些指标和新特性</p>
+<ul>
+<li>Processor Clock Frequency</li>
+<li>Dual or Quad Socket</li>
+<li>Hyper-threading (=Enabled)</li>
+<li>Support <strong>EPT</strong>(Intel) or <strong>RVI</strong>(AMD), eg. Hwmmu</li>
+</ul>
+</li>
+<li><p>BIOS相关</p>
+<p> 主要是指BIOS中对电源管理方式的设置。<br> 
+      
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/2013/06/2013-06-18-virtualization-performance-considerations/#more" class="more-link">Read More</a>
+          </div>
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  
+    <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-06-17T12:40:31.000Z"><a href="/2013/06/2013-06-17-ovirt-node-realted-infos/">Jun 17 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/06/2013-06-17-ovirt-node-realted-infos/">Ovirt Node Related Infomation</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <h2 id="-7b80-4ecb-">简介</h2>
+<p>ovirt-node 是开源虚拟化管理平台 oVirt 的客户端部分，它是一个经过定制的最小化 fedora 系统，充当虚拟机管理器（Hypervisor）host 的角色，与管理端 overt-engine 组成一个虚拟化管理平台。ovirt-node 以其小巧，灵活的特点，可以很方便地进行开发与定制。</p>
+<p>ovirt-node提供的镜像中包含libvirt/vdsm（Virtual Desktop Server Manager)、KVM等虚拟化服务，使用libvirt/vdsm管理KVM虚拟机。</p>
+<p>ovirt-node提供的镜像所需资源很小，可以将更多的资源保留给VM使用。</p>
+<p>综合来说，ovirt-node的特点包括：</p>
+<ul>
+<li>Dedicated hypervisor</li>
+<li>JEOS</li>
+<li>livecd</li>
+<li>Built on Fedora</li>
+<li>Firmware</li>
+<li>Small Footprint (&lt;200MB)</li>
+</ul>
+<h2 id="-4f18-7f3a-70b9-">优缺点</h2>
+
+      
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/2013/06/2013-06-17-ovirt-node-realted-infos/#more" class="more-link">Read More</a>
+          </div>
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  
+    <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-06-13T12:40:31.000Z"><a href="/2013/06/2013-06-13-webpy-cors-problem/">Jun 13 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/06/2013-06-13-webpy-cors-problem/">HTTP access control (CORS) of Web.py</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <h2 id="-95ee-9898-63cf-8ff0-">问题描述</h2>
+<p>由于想使用gevent，当前请求结构为browser-&gt;lighttpd(portal)-&gt;web.py，其中lighttpd和web.py运行在同一台服务器上并监听不同的端口。portal上一些请求会直接发送给web.py，即web.py直接用作了REST的Gateway。</p>
+<p>但当使用FF/Chrome在通过和web.py不同的domain向其发起POST请求返回一个JSON数据后，web.py收到的请求Method为<strong>OPTIONS</strong>而非<strong>POST</strong>，由于OPTIONS非web.py支持的Method,故会返回405，Method Not Found. Chrome/FF的Console中会有如下形式的错误：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+</pre></td><td class="code"><pre>
+XMLHttpRequest Cannot load <span class="attribute">http</span>:<span class="regexp">//</span><span class="attribute">server</span>:webpy_port/path. Origin <span class="keyword">is</span> <span class="keyword">not</span> allowed <span class="keyword">by</span> Access-Control-Allow-Origin
+</pre></td></tr></table></figure>
+
+
+
+      
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/2013/06/2013-06-13-webpy-cors-problem/#more" class="more-link">Read More</a>
+          </div>
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  
+    <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-05-20T12:40:31.000Z"><a href="/2013/05/2013-05-20-qemu-virtio-refactoring/">May 20 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/05/2013-05-20-qemu-virtio-refactoring/">QEMU Fetures: Virtio Refactoring</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <h2 id="Background">Background</h2>
+<p>在研究QEMU的virtio-scsi时，发现了如下问题: 1.5的qemu相比1.2多了几种virtio及scsi相关的设备 </p>
+<figure class="highlight"><figcaption><span>qemu-1.2</span></figcaption><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+</pre></td><td class="code"><pre>
+    <span class="comment">qemu</span><span class="literal">-</span><span class="comment">kvm</span> <span class="literal">-</span><span class="comment">device</span> <span class="comment">?</span> <span class="comment">2</span>&gt;<span class="comment">&amp;1</span> <span class="comment">|</span> <span class="comment">grep</span> <span class="comment">"virtio\|scsi"</span>
+    
+    <span class="comment">name</span> <span class="comment">"scsi</span><span class="literal">-</span><span class="comment">hd"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">SCSI</span><span class="string">,</span> <span class="comment">desc</span> <span class="comment">"virtual</span> <span class="comment">SCSI</span> <span class="comment">disk"</span>
+    <span class="comment">name</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">blk</span><span class="literal">-</span><span class="comment">pci"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">PCI</span><span class="string">,</span> <span class="comment">alias</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">blk"</span>
+    <span class="comment">name</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">9p</span><span class="literal">-</span><span class="comment">pci"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">PCI</span>
+    <span class="comment">name</span> <span class="comment">"scsi</span><span class="literal">-</span><span class="comment">block"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">SCSI</span><span class="string">,</span> <span class="comment">desc</span> <span class="comment">"SCSI</span> <span class="comment">block</span> <span class="comment">device</span> <span class="comment">passthrough"</span>
+    <span class="comment">name</span> <span class="comment">"scsi</span><span class="literal">-</span><span class="comment">generic"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">SCSI</span><span class="string">,</span> <span class="comment">desc</span> <span class="comment">"pass</span> <span class="comment">through</span> <span class="comment">generic</span> <span class="comment">scsi</span> <span class="comment">device</span> <span class="comment">(/dev/sg*)"</span>
+    <span class="comment">name</span> <span class="comment">"scsi</span><span class="literal">-</span><span class="comment">disk"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">SCSI</span><span class="string">,</span> <span class="comment">desc</span> <span class="comment">"virtual</span> <span class="comment">SCSI</span> <span class="comment">disk</span> <span class="comment">or</span> <span class="comment">CD</span><span class="literal">-</span><span class="comment">ROM</span> <span class="comment">(legacy)"</span>
+    <span class="comment">name</span> <span class="comment">"virtserialport"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">virtio</span><span class="literal">-</span><span class="comment">serial</span><span class="literal">-</span><span class="comment">bus</span>
+    <span class="comment">name</span> <span class="comment">"scsi</span><span class="literal">-</span><span class="comment">cd"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">SCSI</span><span class="string">,</span> <span class="comment">desc</span> <span class="comment">"virtual</span> <span class="comment">SCSI</span> <span class="comment">CD</span><span class="literal">-</span><span class="comment">ROM"</span>
+    <span class="comment">name</span> <span class="comment">"virtconsole"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">virtio</span><span class="literal">-</span><span class="comment">serial</span><span class="literal">-</span><span class="comment">bus</span>
+    <span class="comment">name</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">serial</span><span class="literal">-</span><span class="comment">pci"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">PCI</span><span class="string">,</span> <span class="comment">alias</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">serial"</span>
+    <span class="comment">name</span> <span class="comment">"am53c974"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">PCI</span><span class="string">,</span> <span class="comment">desc</span> <span class="comment">"AMD</span> <span class="comment">Am53c974</span> <span class="comment">PCscsi</span><span class="literal">-</span><span class="comment">PCI</span> <span class="comment">SCSI</span> <span class="comment">adapter"</span>
+    <span class="comment">name</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">net</span><span class="literal">-</span><span class="comment">pci"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">PCI</span><span class="string">,</span> <span class="comment">alias</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">net"</span>
+    <span class="comment">name</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">balloon</span><span class="literal">-</span><span class="comment">pci"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">PCI</span><span class="string">,</span> <span class="comment">alias</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">balloon"</span>
+    <span class="comment">name</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">scsi</span><span class="literal">-</span><span class="comment">pci"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">PCI</span>
+</pre></td></tr></table></figure>
+
+
+<figure class="highlight"><figcaption><span>qemu-1.5</span></figcaption><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+</pre></td><td class="code"><pre>
+    <span class="string">.</span><span class="comment">/x86_64</span><span class="literal">-</span><span class="comment">softmmu/qemu</span><span class="literal">-</span><span class="comment">system</span><span class="literal">-</span><span class="comment">x86_64</span>  <span class="literal">-</span><span class="comment">device</span> <span class="comment">?</span> <span class="comment">2</span>&gt;<span class="comment">&amp;1</span> <span class="comment">|</span> <span class="comment">grep</span> <span class="comment">"virtio\|scsi"</span>
+
+    <span class="comment">name</span> <span class="comment">"scsi</span><span class="literal">-</span><span class="comment">hd"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">SCSI</span><span class="string">,</span> <span class="comment">desc</span> <span class="comment">"virtual</span> <span class="comment">SCSI</span> <span class="comment">disk"</span>
+    <span class="comment">name</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">blk</span><span class="literal">-</span><span class="comment">pci"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">PCI</span><span class="string">,</span> <span class="comment">alias</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">blk"</span>
+    <span class="comment">name</span> <span class="comment">"vhost</span><span class="literal">-</span><span class="comment">scsi</span><span class="literal">-</span><span class="comment">pci"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">PCI</span>
+    <span class="comment">name</span> <span class="comment">"scsi</span><span class="literal">-</span><span class="comment">block"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">SCSI</span><span class="string">,</span> <span class="comment">desc</span> <span class="comment">"SCSI</span> <span class="comment">block</span> <span class="comment">device</span> <span class="comment">passthrough"</span>
+    <span class="comment">name</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">serial</span><span class="literal">-</span><span class="comment">device"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">virtio</span><span class="literal">-</span><span class="comment">bus</span>
+    <span class="comment">name</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">scsi</span><span class="literal">-</span><span class="comment">common"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">virtio</span><span class="literal">-</span><span class="comment">bus</span>
+    <span class="comment">name</span> <span class="comment">"scsi</span><span class="literal">-</span><span class="comment">generic"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">SCSI</span><span class="string">,</span> <span class="comment">desc</span> <span class="comment">"pass</span> <span class="comment">through</span> <span class="comment">generic</span> <span class="comment">scsi</span> <span class="comment">device</span> <span class="comment">(/dev/sg*)"</span>
+    <span class="comment">name</span> <span class="comment">"vhost</span><span class="literal">-</span><span class="comment">scsi"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">virtio</span><span class="literal">-</span><span class="comment">bus</span>
+    <span class="comment">name</span> <span class="comment">"scsi</span><span class="literal">-</span><span class="comment">disk"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">SCSI</span><span class="string">,</span> <span class="comment">desc</span> <span class="comment">"virtual</span> <span class="comment">SCSI</span> <span class="comment">disk</span> <span class="comment">or</span> <span class="comment">CD</span><span class="literal">-</span><span class="comment">ROM</span> <span class="comment">(legacy)"</span>
+    <span class="comment">name</span> <span class="comment">"virtserialport"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">virtio</span><span class="literal">-</span><span class="comment">serial</span><span class="literal">-</span><span class="comment">bus</span>
+    <span class="comment">name</span> <span class="comment">"scsi</span><span class="literal">-</span><span class="comment">cd"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">SCSI</span><span class="string">,</span> <span class="comment">desc</span> <span class="comment">"virtual</span> <span class="comment">SCSI</span> <span class="comment">CD</span><span class="literal">-</span><span class="comment">ROM"</span>
+    <span class="comment">name</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">net</span><span class="literal">-</span><span class="comment">device"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">virtio</span><span class="literal">-</span><span class="comment">bus</span>
+    <span class="comment">name</span> <span class="comment">"virtconsole"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">virtio</span><span class="literal">-</span><span class="comment">serial</span><span class="literal">-</span><span class="comment">bus</span>
+    <span class="comment">name</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">serial</span><span class="literal">-</span><span class="comment">pci"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">PCI</span><span class="string">,</span> <span class="comment">alias</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">serial"</span>
+    <span class="comment">name</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">balloon</span><span class="literal">-</span><span class="comment">device"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">virtio</span><span class="literal">-</span><span class="comment">bus</span>
+    <span class="comment">name</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">rng</span><span class="literal">-</span><span class="comment">pci"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">PCI</span>
+    <span class="comment">name</span> <span class="comment">"pvscsi"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">PCI</span>
+    <span class="comment">name</span> <span class="comment">"am53c974"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">PCI</span><span class="string">,</span> <span class="comment">desc</span> <span class="comment">"AMD</span> <span class="comment">Am53c974</span> <span class="comment">PCscsi</span><span class="literal">-</span><span class="comment">PCI</span> <span class="comment">SCSI</span> <span class="comment">adapter"</span>
+    <span class="comment">name</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">balloon</span><span class="literal">-</span><span class="comment">pci"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">PCI</span><span class="string">,</span> <span class="comment">alias</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">balloon"</span>
+    <span class="comment">name</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">scsi</span><span class="literal">-</span><span class="comment">pci"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">PCI</span>
+    <span class="comment">name</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">blk</span><span class="literal">-</span><span class="comment">device"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">virtio</span><span class="literal">-</span><span class="comment">bus</span>
+    <span class="comment">name</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">scsi</span><span class="literal">-</span><span class="comment">device"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">virtio</span><span class="literal">-</span><span class="comment">bus</span>
+    <span class="comment">name</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">net</span><span class="literal">-</span><span class="comment">pci"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">PCI</span><span class="string">,</span> <span class="comment">alias</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">net"</span>
+</pre></td></tr></table></figure>
+
+
+<h2 id="Questions">Questions</h2>
+<ol>
+<li>What is virtio-bus?</li>
+<li>Which device can provide virtio-bus?</li>
+<li>How to use virtio-scsi-device or virtio-blk-device?</li>
+<li>What is virtio-scsi-common?</li>
+</ol>
+
+      
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/2013/05/2013-05-20-qemu-virtio-refactoring/#more" class="more-link">Read More</a>
+          </div>
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  
+    <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-05-06T08:56:31.000Z"><a href="/2013/05/2013-05-06-qemu-contribute-submit-patch-steps/">May 6 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/05/2013-05-06-qemu-contribute-submit-patch-steps/">QEMU Contribute: steps of submit a patch</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <ol>
+<li><p>邮件的收件人和抄送人</p>
+<ul>
+<li>收件人：qemu-devel@nongnu.org</li>
+<li>抄送人<ul>
+<li>参考代码库中的MAINTAINERS文件</li>
+<li>使用scripts/getmaintainer.pl来获取此文件的主要提交者</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>邮件的主题和内容的格式<br>
+      
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/2013/05/2013-05-06-qemu-contribute-submit-patch-steps/#more" class="more-link">Read More</a>
+          </div>
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  
+    <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-04-19T07:00:31.000Z"><a href="/2013/04/2013-04-19-qemu-block-features-live-blockcopy/">Apr 19 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/04/2013-04-19-qemu-block-features-live-blockcopy/">QEMU Block Fetures: live snapshot blockcopy</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <h2 id="Live_Block_Copy">Live Block Copy</h2>
+<ol>
+<li>Ref: <a href="http://wiki.qemu.org/Features/SnapshotsMultipleDevices#Application_to_live_block_copy" target="_blank">QEMU-Feature-SnapshotsMultipleDevices-LiveBlockCopy</a></li>
+<li>Ref: <a href="https://bugzilla.redhat.com/show_bug.cgi?id=888426" target="_blank">more blockcopy usages</a></li>
+<li>Process: snapshot; block-stream; drive-mirror; pivot (optional)</li>
+<li>Libvirt Supprot
+      
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/2013/04/2013-04-19-qemu-block-features-live-blockcopy/#more" class="more-link">Read More</a>
+          </div>
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  
+    <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-04-19T03:30:31.000Z"><a href="/2013/04/2013-04-19-qemu-block-features-libvirt-blockcopy-pivot/">Apr 19 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/04/2013-04-19-qemu-block-features-libvirt-blockcopy-pivot/">QEMU Block Fetures: libvirt blockcopy switch to dest when complete</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <h2 id="libvirt_blockcopy_switch_to_dest_when_complete">libvirt blockcopy switch to dest when complete</h2>
+<ol>
+<li><p>create vm</p>
+<figure class="highlight"><figcaption><span>create vm</span></figcaption><table><tr><td class="gutter"><pre>1
+2
+</pre></td><td class="code"><pre>
+<span class="title">virsh</span> create /pkgs/imgs/win2003.xml
+</pre></td></tr></table></figure>
+</li>
+<li><p>start blockcopy</p>
+<figure class="highlight"><figcaption><span>start blockcopy</span></figcaption><table><tr><td class="gutter"><pre>1
+2
+</pre></td><td class="code"><pre>
+<span class="comment">virsh</span> <span class="comment">blockcopy</span> <span class="comment">win2003</span> <span class="comment">/pkgs/imgs/win2003</span><span class="string">.</span><span class="comment">img</span> <span class="comment">/pkgs/imgs/t322</span><span class="string">.</span><span class="comment">img</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">pivot</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">wait</span>
+</pre></td></tr></table></figure>
+</li>
+<li><p>query blockcopy info<br>
+      
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/2013/04/2013-04-19-qemu-block-features-libvirt-blockcopy-pivot/#more" class="more-link">Read More</a>
+          </div>
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  
+    <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-04-18T05:00:31.000Z"><a href="/2013/04/2013-04-18-qemu-block-features-dataplane-perf/">Apr 18 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/04/2013-04-18-qemu-block-features-dataplane-perf/">QEMU Block Fetures: dataplane perf</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <h3 id="Dataplane_vs_Non-dataplane_Perf">Dataplane vs Non-dataplane Perf</h3>
+<ol>
+<li>Envrionment<ol>
+<li>Qemu 1.4 master branch</li>
+<li>kernel: 3.5.0-2.fc17.x86-64</li>
+<li>virtual disks location: the same local SATA harddisk with ext4 fs</li>
+<li>VM start cmd (os: win7/qed, disk1: raw/non-dataplane/10G/NTFS, disk2: raw/dataplane/10G/NTFS) :</li>
+</ol>
+</li>
+<li>Testing Tool And Testing Params:<ol>
+<li>Only IOMeter App Running in VM, and no other IO in Host (Dom0)</li>
+<li>Main Testing VM: 8 worker, 16K IO size, 0% Read,  100% Random,  and 50 outstanding IO </li>
+<li>Pression VM: 8 worker, 16K IO size, 25% Read, 100% Random,  and 50 outstanding IO</li>
+</ol>
+</li>
+<li><p>Testing Results:</p>
+<p> |                | IOPS | MBPS  |<br> |   :———:     | :———: | :——-:   |<br> |dataplane       |  230.956328  |   3.608693  |<br> |non-dataplane   |  178.324867  |   2.786326  |</p>
+</li>
+</ol>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  
+    <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-04-18T02:30:31.000Z"><a href="/2013/04/2013-04-17-qemu-block-features-block-streaming/">Apr 18 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/04/2013-04-17-qemu-block-features-block-streaming/">QEMU Block Fetures: live snapshot merge (block commit/block stream)</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <h3 id="Block_Streaming">Block Streaming</h3>
+<ol>
+<li>Ref: <a href="http://wiki.qemu.org/Features/Snapshots#Block_Streaming" target="_blank">QEMU-Feature-LiveSnapshotMerge-BlockStreaming</a></li>
+<li>Process: Take data from parent image(s), and copy (stream) the data to the active layer.</li>
+<li>QMP Steps<ol>
+<li>Into Qemu and Prepare, <a href="#qmp_prepare">ref</a></li>
+<li>[QMP_INPUT]<ul>
+<li>Run Block Stream:<pre><code>
+{ "execute": "block-stream",
+   "arguments": 
+   {"device":"drive0", "base": "win2003.qcow2", "speed": 20971520} 
+}</code></pre></li>
+</ul>
+</li>
+</ol>
+<ul>
+<li>CMD Args:<ul>
+<li>device: block device to stream</li>
+<li>base: base image, only sectors above this image are streamed. optional</li>
+<li>speed: speed throttling, in MB/s, of the stream opt. optional</li>
+</ul>
+</li>
+</ul>
+<ol>
+<li>[QMP_OUTPUT] After Job Completed, can see the QMP’s output:<pre><code>{"timestamp": {"seconds": 1366281580, "microseconds": 788190}, "event": "BLOCK_JOB_COMPLETED", "data": {"device": "drive0", "len": 8589934592, "offset": 8589934592, "speed": 2097152, "type": "stream"}}</code></pre></li>
+<li>Job Control / Job Query, <a href="#qmp_block_job_ctl">ref</a></li>
+</ol>
+</li>
+<li>HMP Steps <ol>
+<li>Into Qemu and Prepare, <a href="#hmp_prepare">ref</a></li>
+<li>[HMP_INPUT]</li>
+</ol>
+<ul>
+<li>Do the snapshot:<pre><code>snapshot_blkdev drive0 /pkgs/imgs/win.snap</code></pre></li>
+<li>Run Block Stream:<pre><code>block_stream drive0 10 # 10 MB/s</code></pre></li>
+</ul>
+<ol>
+<li>Job Control / Job Query, <a href="#hmp_block_job_ctl">ref</a></li>
+<li>concurrency-opts</li>
+</ol>
+<ul>
+<li>block_stream again when block_stream is not finished yet:<ul>
+<li>[HMP_OUTPUT]: <pre><code>Device ‘drive0’ is in use</code></pre></li>
+</ul>
+</li>
+<li>another block_job, eg. block_commit when block_stream is not finished yet:<ul>
+<li>[HMP_INPUT]: <pre><code>commit drive0</code></pre></li>
+<li>[HMP_OUTPUT]: <pre><code>‘commit’ error for ‘drive0’: Device or resource busy</code></pre></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Libvirt Supprot<ul>
+<li>@see [TASK] IO mirror</li>
+</ul>
+</li>
+</ol>
+<h3 id="-3c-a_id-3d-22-qmp_prepare-22-3e-3c-2f-a-3e-QMP_Prepare"><a id="qmp_prepare"></a>QMP Prepare</h3>
+<ol>
+<li>[CMD] qemu […] -qmp tcp:localhost:4444,server<ul>
+<li>Start QMP on a TCP socket, so that telnet can be used</li>
+<li>-qmp conflicts with “-monitor”</li>
+</ul>
+</li>
+<li>[CMD] telnet localhost 4444<ul>
+<li>Run telnet</li>
+<li>Should see the QMP’s greeting banner:  <pre><code>
+  {"QMP":{"version": {"qemu": {"micro": 50, "minor": 13, "major": 0}, "package": ""}, "capabilities": []}} </code></pre></li>
+</ul>
+</li>
+<li>[QMP_INPUT] <ul>
+<li>Make QMP enter command mode:  <pre><code>
+  {"execute": "qmp_capabilities"}</code></pre></li>
+</ul>
+</li>
+<li>[QMP_INPUT]<ul>
+<li>Query the device info:  <pre><code>
+  {"execute":"query-blockstats"} </code></pre>
+  or
+  <pre><code>
+  { "execute": "human-monitor-command", "arguments": { "command-line": "info block" } } </code></pre></li>
+<li>Get the device info from the output</li>
+</ul>
+</li>
+</ol>
+<h3 id="-3c-a_id-3d-22-hmp_prepare-22-3e-3c-2f-a-3e-_HMP_Prepare"><a id="hmp_prepare"></a> HMP Prepare</h3>
+<ol>
+<li>[CMD] qemu […] -monitor stdio</li>
+<li>[HMP_INPUT] Query the device info:<pre><code> <span class="tag">&lt;<span class="title">pre</span>&gt;</span><span class="tag">&lt;<span class="title">code</span>&gt;</span>info block<span class="tag">&lt;/<span class="title">code</span>&gt;</span><span class="tag">&lt;/<span class="title">pre</span>&gt;</span>
+</code></pre></li>
+</ol>
+<h3 id="-3c-a_id-3d-22-qmp_block_job_ctl-22-3e-3c-2f-a-3e-_QMP_Block_Job_Control"><a id="qmp_block_job_ctl"></a> QMP Block Job Control</h3>
+<ol>
+<li>[QMP_INPUT] query block info <pre><code>{ "execute": "query-block-jobs", "arguments": {} }</code></pre></li>
+<li>[QMP_INPUT] set block job speed <pre><code>{ "execute": "block-job-set-speed", "arguments": 
+     {"device":drive0,"speed":2097152} 
+ }</code></pre></li>
+<li>[QMP_INPUT] cancel block job <pre><code>{ "execute": "block-job-cancel", "arguments": 
+     {"device":drive0,"force":1} 
+ }</code></pre></li>
+<li>[QMP_INPUT] pause block job <pre><code>{ "execute": "block-job-pause", "arguments": 
+     {"device":drive0} 
+ }</code></pre></li>
+<li>[QMP_INPUT] resume block job <pre><code>{ "execute": "block-job-resume", "arguments": 
+     {"device":drive0} 
+ }</code></pre></li>
+<li>[QMP_INPUT] complete block job <pre><code>{ "execute": "block-job-complete", "arguments": 
+     {"device":drive0} 
+ }</code></pre>
+
+</li>
+</ol>
+<h3 id="-3c-a_id-3d-22-hmp_block_job_ctl-22-3e-3c-2f-a-3e-_HMP_Block_Job_Control"><a id="hmp_block_job_ctl"></a> HMP Block Job Control</h3>
+<ol>
+<li>[HMP_INPUT] query block info <pre><code>info block-jobs</code></pre></li>
+<li>[HMP_INPUT] set block job speed <pre><code>block_job_set_speed drive0 20</code></pre></li>
+<li>[HMP_INPUT] cancel block job <pre><code>block_job_cancel drive0</code></pre></li>
+<li>[HMP_INPUT] pause block job <pre><code>block_job_pause drive0</code></pre></li>
+<li>[HMP_INPUT] resume block job <pre><code>block_job_resume drive0</code></pre></li>
+<li>[HMP_INPUT] complete block job <pre><code>block_job_complete drive0</code></pre>
+</li>
+</ol>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  
+    <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-04-17T03:40:31.000Z"><a href="/2013/04/2013-04-17-configure-qemu-kvm-env-in-f18/">Apr 17 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/04/2013-04-17-configure-qemu-kvm-env-in-f18/">新的F18环境下KVM环境搭建</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <h1 id="-65b0-7684-F18-73af-5883-4e0b-KVM-73af-5883-642d-5efa-">新的F18环境下KVM环境搭建</h1>
+<ol>
+<li><p>更改hostname，从localhost改为有意义的名字</p>
+<blockquote>
+<p>hostnamectl set-hostname DESIRED_HOST_NAME</p>
+</blockquote>
+</li>
+<li><p>安装git: yum install git</p>
+</li>
+<li><p>clone KVM project</p>
+<blockquote>
+<p>git clone <a href="http://path/to/qemu.git" target="_blank">http://path/to/qemu.git</a></p>
+</blockquote>
+</li>
+<li><p>编译</p>
+<ol>
+<li>./configure ‘—enable-kvm’ ‘—target-list=x86_64-softmmu’ ‘—enable-virtio-blk-data-plane’ —disable-slirp</li>
+<li>根据prefix的结果yum install缺失的包，几个主要的包：<ul>
+<li>data-plane: libaio-devel</li>
+</ul>
+</li>
+</ol>
+<ul>
+<li>根据configure的结果和已有环境的结果进行比对，对于未正常启用的安装相应的包<ul>
+<li>SDL support： yum install SDL-devel</li>
+<li>curses support：yum install ncurses-devel</li>
+<li>curl support：yum install libcurl-devel</li>
+<li>VNC<ul>
+<li>VNC TLS support：gnutls-devel</li>
+<li>VNC SASL support：cyrus-sasl-devel</li>
+<li>VNC JPEG support：libjpeg-turbo-devel</li>
+<li>VNC PNG support：libpng-devel</li>
+<li>VNC WS support：gnutls-devel</li>
+</ul>
+</li>
+<li>Documention: pod2man/makeinfo, yum install texinfo</li>
+<li>fdt support:  libfdt-devel</li>
+<li>uuid support: libuuid-devel</li>
+<li>spice support: yum install spice-protocol spice-server spice-server-devel</li>
+<li>seccomp support: libseccomp-devel</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>防火墙</p>
+<ol>
+<li>systemctl stop firewalld.service; </li>
+<li>systemctl disable firewalld.service</li>
+</ol>
+</li>
+<li><p>libvirt：</p>
+<ol>
+<li>virsh: libvirt-client</li>
+<li>libvirtd: libvirt-daemon</li>
+<li>libvirtd start related error</li>
+</ol>
+<ul>
+<li>virsh list<ul>
+<li>error: Failed to reconnect to the hypervisorerror: no valid connectionerror: Failed to connect socket to ‘/var/run/libvirt/libvirt-sock’: No such file or directory<ul>
+<li>libvirtd -l ; 并观察错误输出，可找到所缺失的so文件，进而找到缺失的rpm包</li>
+<li>yum install libvirt-daemon-driver-*</li>
+</ul>
+</li>
+<li>error: libvirtd start error: Cannot read CA certificate ‘/etc/pki/CA/cacert.pem’: No such file or directory<ul>
+<li>configuration:  /etc/libvirt/libvirtd.conf; uncomment the line: “listen_tls=0”</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  
+
+  <nav id="pagination">
+  
+  
+    <a href="/archives/2013/page/2/" class="alignright next">Next</a>
+  
+  <div class="clearfix"></div>
+</nav>
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:leiqzhang.com">
+  </form>
+</div>
+
+  
+<div class="widget tag">
+  <h3 class="title">Categories</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/Linux/">Linux</a><small>3</small></li>
+  
+    <li><a href="/categories/OpenStack/">OpenStack</a><small>2</small></li>
+  
+    <li><a href="/categories/VIM/">VIM</a><small>3</small></li>
+  
+    <li><a href="/categories/Virtualization/">Virtualization</a><small>13</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>2</small></li>
+  
+    <li><a href="/categories/miscellaneous/">miscellaneous</a><small>1</small></li>
+  
+    <li><a href="/categories/web_dev/">web_dev</a><small>8</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tagcloud">
+  <h3 class="title">Tag Cloud</h3>
+  <div class="entry">
+    <a href="/tags/CIM/" style="font-size: 10.00px;">CIM</a><a href="/tags/CORS/" style="font-size: 10.00px;">CORS</a><a href="/tags/DBPM/" style="font-size: 10.00px;">DBPM</a><a href="/tags/Deploy/" style="font-size: 10.00px;">Deploy</a><a href="/tags/ELI/" style="font-size: 10.00px;">ELI</a><a href="/tags/NUMA/" style="font-size: 10.00px;">NUMA</a><a href="/tags/Nova/" style="font-size: 12.50px;">Nova</a><a href="/tags/OPTIONS/" style="font-size: 10.00px;">OPTIONS</a><a href="/tags/Paste/" style="font-size: 10.00px;">Paste</a><a href="/tags/QEMU/" style="font-size: 20.00px;">QEMU</a><a href="/tags/RabbitMQ/" style="font-size: 10.00px;">RabbitMQ</a><a href="/tags/WSGI/" style="font-size: 10.00px;">WSGI</a><a href="/tags/bfc/" style="font-size: 10.00px;">bfc</a><a href="/tags/block-stream/" style="font-size: 10.00px;">block-stream</a><a href="/tags/blockcopy/" style="font-size: 12.50px;">blockcopy</a><a href="/tags/cache/" style="font-size: 10.00px;">cache</a><a href="/tags/css/" style="font-size: 12.50px;">css</a><a href="/tags/dataplane/" style="font-size: 10.00px;">dataplane</a><a href="/tags/ervernote/" style="font-size: 10.00px;">ervernote</a><a href="/tags/etag/" style="font-size: 10.00px;">etag</a><a href="/tags/eval/" style="font-size: 10.00px;">eval</a><a href="/tags/fedora/" style="font-size: 10.00px;">fedora</a><a href="/tags/greasemonkey/" style="font-size: 10.00px;">greasemonkey</a><a href="/tags/http/" style="font-size: 12.50px;">http</a><a href="/tags/javascript/" style="font-size: 10.00px;">javascript</a><a href="/tags/libvirt/" style="font-size: 17.50px;">libvirt</a><a href="/tags/lighthttpd/" style="font-size: 10.00px;">lighthttpd</a><a href="/tags/lighttpd/" style="font-size: 10.00px;">lighttpd</a><a href="/tags/livecd/" style="font-size: 10.00px;">livecd</a><a href="/tags/mac/" style="font-size: 10.00px;">mac</a><a href="/tags/md5sum/" style="font-size: 10.00px;">md5sum</a><a href="/tags/mysql/" style="font-size: 12.50px;">mysql</a><a href="/tags/oVirt/" style="font-size: 12.50px;">oVirt</a><a href="/tags/pdo/" style="font-size: 10.00px;">pdo</a><a href="/tags/performance/" style="font-size: 12.50px;">performance</a><a href="/tags/permalink/" style="font-size: 10.00px;">permalink</a><a href="/tags/php/" style="font-size: 15.00px;">php</a><a href="/tags/post/" style="font-size: 10.00px;">post</a><a href="/tags/proxy/" style="font-size: 10.00px;">proxy</a><a href="/tags/qemu-img/" style="font-size: 10.00px;">qemu-img</a>
+  </div>
+</div>
+
+
+  <iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=2&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=0&uid=1644437791&verifier=c45a1931&dpc=1"></iframe>
+
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://blog.csdn.net/luo_brian" title="luo_brian">Luohao</a></li>
+<li><a href="http://blog.csdn.net/defeattroy" title="木马屠城">Defeattroy</a></li>
+<li><a href="http://www.smilgel.com/" title="听雨轩">MrSaxon</a></li>
+<li><a href="http://lanbolee.com/blog/" title="博之博">Rambolee</a></li>
+<li><a href="http://www.haoziyanwo.com/" title="耗子燕窝">浩子</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2014 leiqzhang
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+<script type="text/javascript">
+var disqus_shortname = 'leiqzhang';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+</body>
+</html>

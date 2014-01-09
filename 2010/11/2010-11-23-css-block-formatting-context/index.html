@@ -1,0 +1,459 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="baidu-site-verification" content="kZ3lZdC9wn" />
+  
+  <title>CSS的block formatting context | Technology &amp; Life</title>
+  <meta name="author" content="leiqzhang">
+  
+  <meta name="description" content="Virtualization Related Technologies">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="CSS的block formatting context"/>
+  <meta property="og:site_name" content="Technology &amp; Life"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico">
+  <link rel="alternate" href="/atom.xml" title="Technology &amp; Life" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
+  
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-40319520-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+  <script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3F6f62dffd0688838f0bc52fc65fd62af4' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">Technology &amp; Life</a></h1>
+  <h2><a href="/">blog of leiqzhang</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about">About</a></li>
+    
+      <li><a href="/atom.xml">RSS</a></li>
+    
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2010-11-22T16:35:16.000Z"><a href="/2010/11/2010-11-23-css-block-formatting-context/">Nov 23 2010</a></time>
+      
+      
+  
+    <h1 class="title">CSS的block formatting context</h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p><strong>什么是块格式化内容：Block Formatting Context （BFC）</strong><br>网页布局的时候，BFC会在常规流(与之并列的是浮动和绝对定位)中进行布局。BFC提供了一个环境，使得html元素在该环境内按照一定规则进行布局，而不会影响其它环境中的布局</p>
+<p><strong>什么情况下生成BFC</strong></p>
+<p>当一个元素满足以下条件时，它的包含块将会形成一个BFC：</p>
+<ul>
+<li>浮动(float属性非none)</li>
+</ul>
+<ul>
+<li>overflow属性的计算值不是visible</li>
+</ul>
+<ul>
+<li>display属性是table-cell、table-caption或着inline-block</li>
+</ul>
+<ul>
+<li>绝对定位(position非static且非relative)</li>
+</ul>
+<p>需要注意的是，disaply属性为table时并不会建立一个BFC。但是由于display为table时，元素将会生成一个匿名框，这些框会具有display:table-cell属性，故会建立新的BFC。也就是说，建立BFC的是这个display为table-cell的匿名框而非table。所以在display:table和display:table-cell的元素上使用clear属性的效果是不一样的（见最后一小节示例）。<br><strong>BFC的影响</strong></p>
+<ol>
+<li>rule 1. 在bfc内部，垂直相邻的框的margin将会折叠(collapse)</li>
+</ol>
+<ol>
+<li>rule 2. 在同一个bfc内部，所有框的左外边均挨着包含块(bfc)的左侧(rtl时,是右外边挨着包含块的右侧)。即使该bfc中包含float元素也是如此，除非该bfc内部另外一个元素形成了一个新的bfc，这种情况下，该元素的框将会挨着float元素排列，宽度可能会由于float元素的存在而变窄</li>
+</ol>
+<ol>
+<li>rule 3. 一个BFC的border-box不能和与其在同一个BFC的float元素的margin-box相互重叠。这就意味着，浏览器会在BFC上生成不可见的margin来避免它和float元素的margin-box相互重叠。所以，在紧接着float元素的BFC上设置负的margin是没有作用的。而且BFC的margin还是可以和float元素重叠的，不能重叠的只是border-box。</li>
+</ol>
+<ol>
+<li>rule 4.  clear只能清除处于同一个bfc的元素</li>
+</ol>
+<p><strong>Rule 1 BFC and margin collapse</strong><br>从rule 1可知，垂直相邻的框的margin发生collapse的情况只会发生在这两个相邻框在同一个bfc的情形下，而如果两个垂直相邻的框分属于不同的bfc,则不会发生折叠。<br>如下例:</p>
+<p>[html]</p>
+<h3>margin collapse in the same BFC:</h3>
+
+ <div style="background-color:skyBlue"><br>     <p style="margin-bottom:20px;border:1px solid red"><br>        this is text 1 with style: <br/> {margin-bottom:20px;border:1px solid red}<br>     </p><br> </div><br> <div style="background-color:skyBlue"><br>     <p style="margin-top:10px;border:1px solid black"><br>        this is text 2 with style: <br/> {margin-top:10px;border:1px solid black”}<br>     </p><br> </div>
+
+ <h3>margin not collapse in different BFCs</h3><br> <div style="background-color:skyBlue"><br>     <p style="margin-bottom:20px;border:1px solid red"><br>        this is text 3 with style: <br/> {margin-bottom:20px;border:1px solid red}<br>     </p><br> </div><br> <div style="background-color:skyBlue;overflow:hidden"><br>     <p style="margin-top:10px;border:1px solid black"><br>        this is text 4 with style: <br/> {margin-top:10px;border:1px solid black”} <br/><br>        <b>but the containing div has property: “overflow:hidden”, make this div establish a new BFC</b><br>     </p><br> </div><br>[/html]<br><br>效果如下图所示，前两个段落中间的margin发生了collapse，变为了较大的20px，而下面两个段落并未发生collapse，总共是30px<br><img src="http://leivli.duapp.com/wp-content/uploads/2010/11/12-1024x286.png" alt=""><br><br>因此在需要避免margin collapse时，可以通过构建BFC来实现，这也是为什么浮动的元素和绝对定位的元素不会发生margin collapse的原因了<br><br><strong>Rule 2 float in the BFC</strong><br><br>如果一个无top/bottom border、无top/bottom padding且不形成bfc的div内部包含多个float元素，由于float元素是脱离文档流的，所以即使该div具有margin，也会由于margin相邻而会发生collapse，从而形成一个零高度的div。如果多个这样的div相邻，如果水平空间允许，那么这些div中的float元素将会排列在同一行上，这可能并非预期的效果。如本意要布局一个两行两列div的如下代码片段:<br><br>[html]<br> <h3>float in zero height divs of the same BFC</h3>
+
+ <div style="margin:20px"><br>      <div style="float:left;border:1px solid green;background-color:red">float div r1c1</div><br>      <div style="float:left;border:1px solid green;background-color:blue">float div r1c2</div><br> </div>
+
+ <div style="margin:20px"><br>      <div style="float:left;border:1px solid green;background-color:gray">float div r2c1</div><br>      <div style="float:left;border:1px solid green;background-color:yellow">float div r2c2</div><br> </div><br>[/html]<br><br>将生成下列效果的页面,四个浮动框会排列在一行上，而非预期的两行两列布局:<br><br><img src="http://leivli.duapp.com/wp-content/uploads/2010/11/2.png" alt=""><br><br>由rule 2可知，在同一个BFC内部，所有框的左外边会挨着左侧排列，即使包含float元素也是如此。因此，如果将上例中的两个div各自均改为BFC，就会达到预期的目的。由于bfc内部两个float元素均会各自生成一个bfc，这两个bfc就会并排排列（如果bfc宽度足够的话，如果不够，由于都是float，第二个float会下移)。而这两个不同BFC又处于初始包含块的BFC中，将会按照常规流进行布局，即第二个BFC排在第一个BFC下面，形成2行2列的样式：<br><br><br>    <span style="text-decoration: line-through;"><br>    <h3>float in zero height divs of the same BFC</h3><br><br>     <div style="margin:20px"><br>    <div style="float:left;border:1px solid green;background-color:red">float div r1c1</div><br>    <div style="float:left;border:1px solid green;background-color:blue">float div r1c2</div><br>     </div>
+
+<pre><code> &lt;div style=<span class="string">"margin:20px"</span>&gt;
+&lt;div style=<span class="string">"float:left;border:1px solid green;background-color:gray"</span>&gt;float div r2c1&lt;/div&gt;
+&lt;div style=<span class="string">"float:left;border:1px solid green;background-color:yellow"</span>&gt;float div r2c2&lt;/div&gt;
+ &lt;/div&gt;&lt;/span&gt;
+[html]
+&lt;h3&gt;float <span class="keyword">in</span> zero height divs of different BFCs&lt;/h3&gt;
+ &lt;div style=<span class="string">"margin:20px;overflow:hidden"</span>&gt;
+      &lt;div style=<span class="string">"float:left;border:1px solid green;background-color:red"</span>&gt;float div r1c1&lt;/div&gt;
+      &lt;div style=<span class="string">"float:left;border:1px solid green;background-color:blue"</span>&gt;float div r1c2&lt;/div&gt;
+ &lt;/div&gt;
+ &lt;div style=<span class="string">"margin:20px;overflow:hidden"</span>&gt;
+      &lt;div style=<span class="string">"float:left;border:1px solid green;background-color:gray"</span>&gt;float div r2c1&lt;/div&gt;
+      &lt;div style=<span class="string">"float:left;border:1px solid green;background-color:yellow"</span>&gt;float div r2c2&lt;/div&gt;
+ &lt;/div&gt;
+
+[/html]
+
+
+
+实际布局效果如下图：
+
+&lt;img src=<span class="string">"http://leivli.duapp.com/wp-content/uploads/2010/11/3.png"</span> title=<span class="string">"float_in_bfc"</span> height=<span class="string">"131"</span> width=<span class="string">"519"</span> alt=<span class="string">""</span> <span class="class"><span class="keyword">class</span>="<span class="title">aligncenter</span> <span class="title">size</span>-<span class="title">full</span> <span class="title">wp</span>-<span class="title">image</span>-92"&gt;&lt;/<span class="title">img</span>&gt;
+
+&lt;<span class="title">strong</span>&gt;<span class="title">Rule</span> 3 <span class="title">BFC</span>  <span class="title">adjoin</span> <span class="title">float</span>&lt;/<span class="title">strong</span>&gt;
+
+一个普通的<span class="title">div</span>元素(未生成新的<span class="title">BFC</span>)是会被相邻的<span class="title">float</span>元素覆盖的，而一个生成<span class="title">BFC</span>的<span class="title">div</span>元素的<span class="title">border</span>-<span class="title">box</span>是不会被相邻的<span class="title">float</span>元素覆盖的，但是其<span class="title">margin</span>可以被覆盖。如下面的代码：
+ [<span class="title">html</span>]
+
+&lt;<span class="title">h3</span>&gt;<span class="title">float</span> <span class="title">and</span> <span class="title">normal</span> <span class="title">div</span> <span class="title">overlap</span>&lt;/<span class="title">h3</span>&gt;
+ &lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">float</span>:<span class="title">left</span>;<span class="title">background</span>-<span class="title">color</span>:<span class="title">gray</span>"&gt;<span class="title">float</span> <span class="title">div</span>&lt;/<span class="title">div</span>&gt;
+ &lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">background</span>-<span class="title">color</span>:<span class="title">yellow</span>;<span class="title">border</span>:1<span class="title">px</span> <span class="title">solid</span> <span class="title">red</span>"&gt; <span class="title">normal</span> <span class="title">div</span> &lt;/<span class="title">div</span>&gt;
+
+ &lt;<span class="title">h3</span>&gt;<span class="title">float</span> <span class="title">and</span> <span class="title">bfc</span> <span class="title">div</span> <span class="title">no</span> <span class="title">overlap</span>&lt;/<span class="title">h3</span>&gt;
+ &lt;<span class="title">p</span>&gt;<span class="title">both</span> <span class="title">divs</span> <span class="title">have</span> <span class="title">no</span> <span class="title">margin</span>&lt;/<span class="title">p</span>&gt;
+ &lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">float</span>:<span class="title">left</span>;<span class="title">background</span>-<span class="title">color</span>:<span class="title">gray</span>"&gt;<span class="title">float</span> <span class="title">div</span>&lt;/<span class="title">div</span>&gt;
+ &lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">background</span>-<span class="title">color</span>:<span class="title">yellow</span>;<span class="title">border</span>:1<span class="title">px</span> <span class="title">solid</span> <span class="title">red</span>;<span class="title">overflow</span>:<span class="title">hidden</span>"&gt; <span class="title">bfc</span> <span class="title">div</span> &lt;/<span class="title">div</span>&gt;
+
+ &lt;<span class="title">p</span>&gt;<span class="title">bfc</span> <span class="title">div</span> <span class="title">has</span> <span class="title">margin</span>&lt;/<span class="title">p</span>&gt;
+ &lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">float</span>:<span class="title">left</span>;<span class="title">background</span>-<span class="title">color</span>:<span class="title">gray</span>"&gt;<span class="title">float</span> <span class="title">div</span>&lt;/<span class="title">div</span>&gt;
+ &lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">background</span>-<span class="title">color</span>:<span class="title">yellow</span>;<span class="title">border</span>:1<span class="title">px</span> <span class="title">solid</span> <span class="title">red</span>;<span class="title">overflow</span>:<span class="title">hidden</span>;<span class="title">margin</span>-<span class="title">left</span>:10<span class="title">px</span>"&gt; <span class="title">bfc</span> <span class="title">div</span> &lt;/<span class="title">div</span>&gt;
+
+ &lt;<span class="title">p</span>&gt;<span class="title">float</span> <span class="title">div</span> <span class="title">has</span> <span class="title">margin</span>&lt;/<span class="title">p</span>&gt;
+ &lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">float</span>:<span class="title">left</span>;<span class="title">background</span>-<span class="title">color</span>:<span class="title">gray</span>;<span class="title">margin</span>-<span class="title">right</span>:10<span class="title">px</span>;<span class="title">margin</span>-<span class="title">right</span>:10<span class="title">px</span>"&gt;<span class="title">float</span> <span class="title">div</span>&lt;/<span class="title">div</span>&gt;
+ &lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">background</span>-<span class="title">color</span>:<span class="title">yellow</span>;<span class="title">border</span>:1<span class="title">px</span> <span class="title">solid</span> <span class="title">red</span>;<span class="title">overflow</span>:<span class="title">hidden</span>"&gt; <span class="title">bfc</span> <span class="title">div</span> &lt;/<span class="title">div</span>&gt;
+
+[/<span class="title">html</span>]
+
+
+
+生成的效果如下图：
+
+&lt;<span class="title">img</span> <span class="title">src</span>="<span class="title">http</span>://<span class="title">leivli</span>.<span class="title">duapp</span>.<span class="title">com</span>/<span class="title">wp</span>-<span class="title">content</span>/<span class="title">uploads</span>/2010/11/4-1024<span class="title">x209</span>.<span class="title">png</span>" <span class="title">title</span>="<span class="title">float_adjoin_bfc</span>" <span class="title">height</span>="209" <span class="title">width</span>="1024" <span class="title">alt</span>="" <span class="title">class</span>="<span class="title">aligncenter</span> <span class="title">size</span>-<span class="title">large</span> <span class="title">wp</span>-<span class="title">image</span>-93"&gt;&lt;/<span class="title">img</span>&gt;如图所示，前两个<span class="title">div</span>中，<span class="title">float</span>的<span class="title">div</span>会和另一个<span class="title">div</span>发生重叠，而后面三个示例可以看出，<span class="title">float</span>框不会和相邻的<span class="title">bfc</span>的<span class="title">border</span> <span class="title">box</span>发生重叠。正如<span class="title">rule</span> 3所述，<span class="title">float</span>和<span class="title">bfc</span>的<span class="title">border</span> <span class="title">box</span>不会发生重叠：
+当<span class="title">float</span>和<span class="title">bfc</span>都没有<span class="title">margin</span>时，两者紧邻；当<span class="title">bfc</span>有<span class="title">left</span> <span class="title">margin</span>时，该<span class="title">left</span> <span class="title">margin</span>可以被<span class="title">float</span>框覆盖，两者还是紧邻；当<span class="title">float</span>框有<span class="title">right</span> <span class="title">margin</span>时，<span class="title">bfc</span>并不能将其覆盖。
+
+再看另外一个例子，不多说，贴代码:
+ [<span class="title">html</span>]
+
+&lt;<span class="title">h3</span>&gt;<span class="title">float</span> <span class="title">and</span> <span class="title">bfc</span> <span class="title">div</span> <span class="title">no</span> <span class="title">overlap</span>: <span class="title">another</span> <span class="title">example</span>&lt;/<span class="title">h3</span>&gt;
+
+ &lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">overflow</span>:<span class="title">hidden</span>"&gt;
+&lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">float</span>:<span class="title">left</span>;<span class="title">background</span>-<span class="title">color</span>:<span class="title">red</span>;<span class="title">width</span>:200<span class="title">px</span>"&gt;<span class="title">first</span>: <span class="title">left</span> <span class="title">float</span> <span class="title">div</span>&lt;/<span class="title">div</span>&gt;
+&lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">float</span>:<span class="title">right</span>;<span class="title">background</span>-<span class="title">color</span>:<span class="title">green</span>;<span class="title">width</span>:200<span class="title">px</span>"&gt;<span class="title">second</span>: <span class="title">right</span> <span class="title">float</span> <span class="title">div</span>&lt;/<span class="title">div</span>&gt;
+&lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">overflow</span>:<span class="title">hidden</span>;<span class="title">background</span>-<span class="title">color</span>:<span class="title">yellow</span>"&gt;<span class="title">third</span>: <span class="title">bfc</span> <span class="title">div</span>&lt;/<span class="title">div</span>&gt;
+ &lt;/<span class="title">div</span>&gt;
+
+ &lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">overflow</span>:<span class="title">hidden</span>"&gt;
+&lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">float</span>:<span class="title">left</span>;<span class="title">background</span>-<span class="title">color</span>:<span class="title">red</span>;<span class="title">margin</span>-<span class="title">right</span>:20<span class="title">px</span>;<span class="title">width</span>:200<span class="title">px</span>"&gt;<span class="title">first</span>: <span class="title">left</span> <span class="title">float</span> <span class="title">div</span>&lt;/<span class="title">div</span>&gt;
+&lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">float</span>:<span class="title">right</span>;<span class="title">background</span>-<span class="title">color</span>:<span class="title">green</span>;<span class="title">margin</span>-<span class="title">left</span>:20<span class="title">px</span>;<span class="title">width</span>:200<span class="title">px</span>"&gt;<span class="title">second</span>: <span class="title">right</span> <span class="title">float</span> <span class="title">div</span>&lt;/<span class="title">div</span>&gt;
+&lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">overflow</span>:<span class="title">hidden</span>;<span class="title">background</span>-<span class="title">color</span>:<span class="title">yellow</span>"&gt;<span class="title">third</span>: <span class="title">bfc</span> <span class="title">div</span>&lt;/<span class="title">div</span>&gt;
+ &lt;/<span class="title">div</span>&gt;
+
+ &lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">overflow</span>:<span class="title">hidden</span>"&gt;
+&lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">float</span>:<span class="title">left</span>;<span class="title">background</span>-<span class="title">color</span>:<span class="title">red</span>;<span class="title">width</span>:200<span class="title">px</span>"&gt;<span class="title">first</span>: <span class="title">left</span> <span class="title">float</span> <span class="title">div</span>&lt;/<span class="title">div</span>&gt;
+&lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">float</span>:<span class="title">right</span>;<span class="title">background</span>-<span class="title">color</span>:<span class="title">green</span>;<span class="title">width</span>:200<span class="title">px</span>"&gt;<span class="title">second</span>: <span class="title">right</span> <span class="title">float</span> <span class="title">div</span>&lt;/<span class="title">div</span>&gt;
+&lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">overflow</span>:<span class="title">hidden</span>;<span class="title">background</span>-<span class="title">color</span>:<span class="title">yellow</span>;<span class="title">margin</span>:0 220<span class="title">px</span>"&gt;<span class="title">third</span>: <span class="title">bfc</span> <span class="title">div</span>&lt;/<span class="title">div</span>&gt;
+ &lt;/<span class="title">div</span>&gt;
+
+[/<span class="title">html</span>]
+
+
+
+实际运行效果图：
+
+&lt;<span class="title">img</span> <span class="title">src</span>="<span class="title">http</span>://<span class="title">leivli</span>.<span class="title">duapp</span>.<span class="title">com</span>/<span class="title">wp</span>-<span class="title">content</span>/<span class="title">uploads</span>/2010/11/5-1024<span class="title">x95</span>.<span class="title">png</span>" <span class="title">title</span>="<span class="title">float_adjoin_bfc_another</span>" <span class="title">height</span>="95" <span class="title">width</span>="1024" <span class="title">alt</span>="" <span class="title">class</span>="<span class="title">aligncenter</span> <span class="title">size</span>-<span class="title">large</span> <span class="title">wp</span>-<span class="title">image</span>-94"&gt;&lt;/<span class="title">img</span>&gt;
+
+该例子中有三组，各组均有三个<span class="title">div</span>，分别为<span class="title">float</span> <span class="title">left</span>（<span class="title">width</span>:200<span class="title">px</span>）、<span class="title">float</span> <span class="title">right</span>（<span class="title">width</span>:200<span class="title">px</span>）和无<span class="title">float</span>的<span class="title">third</span> <span class="title">div</span>（一个<span class="title">bfc</span>），每组的包含<span class="title">div</span>具有<span class="title">overflow</span>:<span class="title">hidden</span>，故会形成一个<span class="title">bfc</span>，
+即各组的三个<span class="title">div</span>均处于一个独立的<span class="title">BFC</span>中。
+
+第一组中，根据<span class="title">Rule3</span>， <span class="title">third</span> <span class="title">div</span>形成的<span class="title">bfc</span>不会和<span class="title">float</span> <span class="title">div</span>发生重叠，因此在水平空间足够的情况下，三个<span class="title">div</span>会排在一行，中间没有间隙。此时在<span class="title">third</span> <span class="title">div</span>上应用<span class="title">margin</span>并不会在<span class="title">third</span> <span class="title">div</span>的两边和<span class="title">float</span> <span class="title">div</span>
+交界处形成空隙。因为这种情况下，如果需要在中间框的左右两侧产生空隙，通过给该框添加<span class="title">margin</span>是无法做到的，但是可以采用以下两个方法做到：
+
+&lt;<span class="title">ul</span>&gt;
+
+    &lt;<span class="title">li</span>&gt; 在两边的<span class="title">float</span>上设置<span class="title">margin</span>，如上图第二组所示&lt;/<span class="title">li</span>&gt;
+
+
+    &lt;<span class="title">li</span>&gt; 给<span class="title">third</span> <span class="title">div</span>设置一个大于两边<span class="title">float</span>框宽度的<span class="title">margin</span>，如上图第三组所示&lt;/<span class="title">li</span>&gt;
+
+&lt;/<span class="title">ul</span>&gt;
+
+
+&lt;<span class="title">strong</span>&gt;<span class="title">Rule</span> 4 <span class="title">BFC</span> <span class="title">and</span> <span class="title">clear</span>&lt;/<span class="title">strong</span>&gt;
+ <span class="title">clear</span>只能清除处于同一个<span class="title">bfc</span>的<span class="title">float</span>元素，这里给出的例子说明了该点，同时也表示了第一段提到的在<span class="title">table</span>元素和<span class="title">table</span>-<span class="title">cell</span>元素上使用<span class="title">clear</span>的不同:
+ [<span class="title">html</span>]
+
+&lt;<span class="title">h3</span>&gt;<span class="title">BFC</span> &amp; <span class="title">clear</span> -- <span class="title">clear</span> <span class="title">on</span> <span class="title">display</span>:<span class="title">talbe</span> <span class="title">vs</span> <span class="title">clear</span> <span class="title">on</span> <span class="title">display</span>:<span class="title">table</span>-<span class="title">cell</span>&lt;/<span class="title">h3</span>&gt;
+
+ &lt;<span class="title">p</span> <span class="title">style</span>="<span class="title">clear</span>:<span class="title">left</span>"&gt;<span class="title">normal</span> <span class="title">div</span> <span class="title">after</span> <span class="title">float</span> <span class="title">div</span> <span class="title">without</span> <span class="title">clear</span>&lt;/<span class="title">p</span>&gt;
+ &lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">border</span>:1<span class="title">px</span> <span class="title">solid</span> <span class="title">red</span>"&gt;
+&lt;<span class="title">p</span> <span class="title">style</span>="<span class="title">float</span>:<span class="title">left</span>;<span class="title">background</span>-<span class="title">color</span>:<span class="title">gray</span>;<span class="title">color</span>:<span class="title">white</span>;<span class="title">border</span>:1<span class="title">px</span> <span class="title">solid</span> <span class="title">green</span>"&gt;
+<span class="title">line</span> 1&lt;<span class="title">br</span>/&gt;
+<span class="title">line</span> 2
+&lt;/<span class="title">p</span>&gt;
+&lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">border</span>:2<span class="title">px</span> <span class="title">solid</span> <span class="title">yellow</span>"&gt;<span class="title">div</span> <span class="title">content</span>&lt;/<span class="title">div</span>&gt;
+ &lt;/<span class="title">div</span>&gt;
+
+ &lt;<span class="title">p</span> <span class="title">style</span>="<span class="title">clear</span>:<span class="title">left</span>"&gt;<span class="title">normal</span> <span class="title">div</span> <span class="title">after</span> <span class="title">float</span> <span class="title">div</span> <span class="title">with</span> <span class="title">clear</span>&lt;/<span class="title">p</span>&gt;
+ &lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">border</span>:1<span class="title">px</span> <span class="title">solid</span> <span class="title">red</span>"&gt;
+&lt;<span class="title">p</span> <span class="title">style</span>="<span class="title">float</span>:<span class="title">left</span>;<span class="title">background</span>-<span class="title">color</span>:<span class="title">gray</span>;<span class="title">color</span>:<span class="title">white</span>;<span class="title">border</span>:1<span class="title">px</span> <span class="title">solid</span> <span class="title">green</span>"&gt;
+<span class="title">line</span> 1&lt;<span class="title">br</span>/&gt;
+<span class="title">line</span> 2
+&lt;/<span class="title">p</span>&gt;
+&lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">border</span>:2<span class="title">px</span> <span class="title">solid</span> <span class="title">yellow</span>;<span class="title">clear</span>:<span class="title">left</span>"&gt;<span class="title">div</span> <span class="title">content</span>&lt;/<span class="title">div</span>&gt;
+ &lt;/<span class="title">div</span>&gt;
+
+ &lt;<span class="title">p</span> <span class="title">style</span>="<span class="title">clear</span>:<span class="title">left</span>"&gt;<span class="title">display</span>:<span class="title">table</span> <span class="title">after</span> <span class="title">float</span> <span class="title">div</span> <span class="title">without</span> <span class="title">clear</span>&lt;/<span class="title">p</span>&gt;
+ &lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">border</span>:1<span class="title">px</span> <span class="title">solid</span> <span class="title">red</span>"&gt;
+&lt;<span class="title">p</span> <span class="title">style</span>="<span class="title">float</span>:<span class="title">left</span>;<span class="title">background</span>-<span class="title">color</span>:<span class="title">gray</span>;<span class="title">color</span>:<span class="title">white</span>;<span class="title">border</span>:1<span class="title">px</span> <span class="title">solid</span> <span class="title">green</span>"&gt;
+<span class="title">line</span> 1&lt;<span class="title">br</span>/&gt;
+<span class="title">line</span> 2
+&lt;/<span class="title">p</span>&gt;
+&lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">display</span>:<span class="title">table</span>;<span class="title">border</span>:2<span class="title">px</span> <span class="title">solid</span> <span class="title">yellow</span>"&gt;&lt;<span class="title">span</span>&gt;<span class="title">div</span> <span class="title">content</span>&lt;/<span class="title">span</span>&gt;&lt;/<span class="title">div</span>&gt;
+ &lt;/<span class="title">div</span>&gt;
+
+ &lt;<span class="title">p</span> <span class="title">style</span>="<span class="title">clear</span>:<span class="title">left</span>"&gt;<span class="title">display</span>:<span class="title">table</span> <span class="title">after</span> <span class="title">float</span> <span class="title">div</span> <span class="title">with</span> <span class="title">clear</span>&lt;/<span class="title">p</span>&gt;
+&lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">border</span>:1<span class="title">px</span> <span class="title">solid</span> <span class="title">red</span>"&gt;
+&lt;<span class="title">p</span> <span class="title">style</span>="<span class="title">float</span>:<span class="title">left</span>;<span class="title">background</span>-<span class="title">color</span>:<span class="title">gray</span>;<span class="title">color</span>:<span class="title">white</span>;<span class="title">border</span>:1<span class="title">px</span> <span class="title">solid</span> <span class="title">green</span>"&gt;
+<span class="title">line</span> 1&lt;<span class="title">br</span>/&gt;
+<span class="title">line</span> 2
+&lt;/<span class="title">p</span>&gt;
+&lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">display</span>:<span class="title">table</span>;<span class="title">clear</span>:<span class="title">left</span>;<span class="title">border</span>:2<span class="title">px</span> <span class="title">solid</span> <span class="title">yellow</span>"&gt;<span class="title">div</span> <span class="title">content</span>&lt;/<span class="title">div</span>&gt;
+ &lt;/<span class="title">div</span>&gt;
+
+ &lt;<span class="title">p</span> <span class="title">style</span>="<span class="title">clear</span>:<span class="title">left</span>"&gt;<span class="title">display</span>:<span class="title">table</span>-<span class="title">cell</span> <span class="title">after</span> <span class="title">float</span> <span class="title">div</span> <span class="title">without</span> <span class="title">clear</span>&lt;/<span class="title">p</span>&gt;
+ &lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">border</span>:1<span class="title">px</span> <span class="title">solid</span> <span class="title">red</span>"&gt;
+&lt;<span class="title">p</span> <span class="title">style</span>="<span class="title">float</span>:<span class="title">left</span>;<span class="title">background</span>-<span class="title">color</span>:<span class="title">gray</span>;<span class="title">color</span>:<span class="title">white</span>;<span class="title">border</span>:1<span class="title">px</span> <span class="title">solid</span> <span class="title">green</span>"&gt;
+<span class="title">line</span> 1&lt;<span class="title">br</span>/&gt;
+<span class="title">line</span> 2
+&lt;/<span class="title">p</span>&gt;
+&lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">display</span>:<span class="title">table</span>-<span class="title">cell</span>;<span class="title">border</span>:2<span class="title">px</span> <span class="title">solid</span> <span class="title">yellow</span>"&gt;<span class="title">div</span> <span class="title">content</span>&lt;/<span class="title">div</span>&gt;
+ &lt;/<span class="title">div</span>&gt;
+
+&lt;<span class="title">p</span> <span class="title">style</span>="<span class="title">clear</span>:<span class="title">left</span>"&gt;<span class="title">display</span>:<span class="title">table</span>-<span class="title">cell</span> <span class="title">after</span> <span class="title">float</span> <span class="title">div</span> <span class="title">with</span> <span class="title">clear</span>&lt;/<span class="title">p</span>&gt;
+ &lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">border</span>:1<span class="title">px</span> <span class="title">solid</span> <span class="title">red</span>"&gt;
+&lt;<span class="title">p</span> <span class="title">style</span>="<span class="title">float</span>:<span class="title">left</span>;<span class="title">background</span>-<span class="title">color</span>:<span class="title">gray</span>;<span class="title">color</span>:<span class="title">white</span>;<span class="title">border</span>:1<span class="title">px</span> <span class="title">solid</span> <span class="title">green</span>"&gt;
+<span class="title">line</span> 1&lt;<span class="title">br</span>/&gt;
+<span class="title">line</span> 2
+&lt;/<span class="title">p</span>&gt;
+&lt;<span class="title">div</span> <span class="title">style</span>="<span class="title">display</span>:<span class="title">table</span>-<span class="title">cell</span>;<span class="title">clear</span>:<span class="title">left</span>;<span class="title">border</span>:2<span class="title">px</span> <span class="title">solid</span> <span class="title">yellow</span>"&gt;<span class="title">div</span> <span class="title">content</span>&lt;/<span class="title">div</span>&gt;
+&lt;/<span class="title">div</span>&gt;
+[/<span class="title">html</span>]
+
+
+
+实际运行效果图：
+ &lt;<span class="title">img</span> <span class="title">src</span>="<span class="title">http</span>://<span class="title">leivli</span>.<span class="title">duapp</span>.<span class="title">com</span>/<span class="title">wp</span>-<span class="title">content</span>/<span class="title">uploads</span>/2010/11/6-1024<span class="title">x362</span>.<span class="title">png</span>" <span class="title">title</span>="<span class="title">bfc_and_clear</span>" <span class="title">height</span>="362" <span class="title">width</span>="1024" <span class="title">alt</span>="" <span class="title">class</span>="<span class="title">aligncenter</span> <span class="title">size</span>-<span class="title">large</span> <span class="title">wp</span>-<span class="title">image</span>-96"&gt;&lt;/<span class="title">img</span>&gt;第一组是一个<span class="title">float</span> <span class="title">div</span>后跟着一个普通的无设置<span class="title">clear</span>属性的<span class="title">div</span>（无<span class="title">display</span>属性）的情况，此时<span class="title">float</span> <span class="title">div</span>会覆盖后面的<span class="title">div</span>，从边框可以看到，后面的<span class="title">div</span>还是从包含<span class="title">div</span>的左侧开始的
+ 第二组和第一组一样，只是后面的<span class="title">div</span>设置了<span class="title">clear</span>:<span class="title">left</span>属性，这就使得后面的<span class="title">div</span>排列在了<span class="title">float</span> <span class="title">div</span>的下面
+ 第三组中后面的<span class="title">div</span>设置了<span class="title">display</span>:<span class="title">table</span>,但是没有设置<span class="title">clear</span>属性，与第一组相比，该<span class="title">div</span>的表现更像是一个ＢＦＣ，因为该<span class="title">div</span>没有从包含<span class="title">div</span>的左侧开始，而是从<span class="title">float</span> <span class="title">div</span>的右侧开始布局。
+ 这就是文章刚开始提到的，<span class="title">display</span>:<span class="title">table</span>本身不会新建一个<span class="title">bfc</span>，但是由于它会使得内部元素生成<span class="title">display</span>:<span class="title">talbe</span>-<span class="title">cell</span>的匿名框，而该匿名框会建立一个<span class="title">bfc</span>
+ 第四组可以看出第三组中的<span class="title">bfc</span>并不是<span class="title">display</span>:<span class="title">table</span>创建的，因为设置了<span class="title">clear</span>:<span class="title">left</span>后，该<span class="title">div</span>到了<span class="title">float</span> <span class="title">div</span>的下面。
+ 最后两组是<span class="title">display</span>:<span class="title">table</span>-<span class="title">cell</span>的情况，此时后面的<span class="title">div</span>会建立一个<span class="title">bfc</span>，由于和<span class="title">float</span>的<span class="title">div</span>分属不同的<span class="title">div</span>，<span class="title">clear</span>属性是不起作用的，这也就是为什么第五组设置了<span class="title">clear</span>属性后，表现和第四组一样的原因</span>
+</code></pre>
+      
+    </div>
+    <footer>
+      
+        
+  
+  <div class="categories">
+    <a href="/categories/web_dev/">web_dev</a>
+  </div>
+
+        
+  
+  <div class="tags">
+    <a href="/tags/bfc/">bfc</a>, <a href="/tags/css/">css</a>
+  </div>
+
+        <!-- Baidu Button BEGIN -->
+<div id="bdshare" class="bdshare_t bds_tools get-codes-bdshare">
+<span class="bds_more">分享到：</span>
+<a class="bds_qzone"></a>
+<a class="bds_tsina"></a>
+<a class="bds_tqq"></a>
+<a class="bds_renren"></a>
+<a class="bds_t163"></a>
+<a class="shareCount"></a>
+</div>
+<script type="text/javascript" id="bdshare_js" data="type=tools&amp;uid=17824" ></script>
+<script type="text/javascript" id="bdshell_js"></script>
+<script type="text/javascript">
+document.getElementById("bdshell_js").src = "http://bdimg.share.baidu.com/static/js/shell_v2.js?cdnversion=" + Math.ceil(new Date()/3600000)
+</script>
+<!-- Baidu Button END -->
+
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+<section id="comment">
+<!-- Duoshuo Comment BEGIN -->
+    <div class="ds-thread" data-thread-key="/2010/11/2010-11-23-css-block-formatting-context/" data-author-key="leiqzhang" data-title="CSS的block formatting context"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"leiqzhang"};
+    (function() {
+        var ds = document.createElement('script');
+        ds.type = 'text/javascript';ds.async = true;
+        ds.src = 'http://static.duoshuo.com/embed.js';
+        ds.charset = 'UTF-8';
+        (document.getElementsByTagName('head')[0] 
+        || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+    </script>
+<!-- Duoshuo Comment END -->
+</section>
+
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:leiqzhang.com">
+  </form>
+</div>
+
+  
+<div class="widget tag">
+  <h3 class="title">Categories</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/Linux/">Linux</a><small>3</small></li>
+  
+    <li><a href="/categories/OpenStack/">OpenStack</a><small>2</small></li>
+  
+    <li><a href="/categories/VIM/">VIM</a><small>3</small></li>
+  
+    <li><a href="/categories/Virtualization/">Virtualization</a><small>13</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>2</small></li>
+  
+    <li><a href="/categories/miscellaneous/">miscellaneous</a><small>1</small></li>
+  
+    <li><a href="/categories/web_dev/">web_dev</a><small>8</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tagcloud">
+  <h3 class="title">Tag Cloud</h3>
+  <div class="entry">
+    <a href="/tags/CIM/" style="font-size: 10.00px;">CIM</a><a href="/tags/CORS/" style="font-size: 10.00px;">CORS</a><a href="/tags/DBPM/" style="font-size: 10.00px;">DBPM</a><a href="/tags/Deploy/" style="font-size: 10.00px;">Deploy</a><a href="/tags/ELI/" style="font-size: 10.00px;">ELI</a><a href="/tags/NUMA/" style="font-size: 10.00px;">NUMA</a><a href="/tags/Nova/" style="font-size: 12.50px;">Nova</a><a href="/tags/OPTIONS/" style="font-size: 10.00px;">OPTIONS</a><a href="/tags/Paste/" style="font-size: 10.00px;">Paste</a><a href="/tags/QEMU/" style="font-size: 20.00px;">QEMU</a><a href="/tags/RabbitMQ/" style="font-size: 10.00px;">RabbitMQ</a><a href="/tags/WSGI/" style="font-size: 10.00px;">WSGI</a><a href="/tags/bfc/" style="font-size: 10.00px;">bfc</a><a href="/tags/block-stream/" style="font-size: 10.00px;">block-stream</a><a href="/tags/blockcopy/" style="font-size: 12.50px;">blockcopy</a><a href="/tags/cache/" style="font-size: 10.00px;">cache</a><a href="/tags/css/" style="font-size: 12.50px;">css</a><a href="/tags/dataplane/" style="font-size: 10.00px;">dataplane</a><a href="/tags/ervernote/" style="font-size: 10.00px;">ervernote</a><a href="/tags/etag/" style="font-size: 10.00px;">etag</a><a href="/tags/eval/" style="font-size: 10.00px;">eval</a><a href="/tags/fedora/" style="font-size: 10.00px;">fedora</a><a href="/tags/greasemonkey/" style="font-size: 10.00px;">greasemonkey</a><a href="/tags/http/" style="font-size: 12.50px;">http</a><a href="/tags/javascript/" style="font-size: 10.00px;">javascript</a><a href="/tags/libvirt/" style="font-size: 17.50px;">libvirt</a><a href="/tags/lighthttpd/" style="font-size: 10.00px;">lighthttpd</a><a href="/tags/lighttpd/" style="font-size: 10.00px;">lighttpd</a><a href="/tags/livecd/" style="font-size: 10.00px;">livecd</a><a href="/tags/mac/" style="font-size: 10.00px;">mac</a><a href="/tags/md5sum/" style="font-size: 10.00px;">md5sum</a><a href="/tags/mysql/" style="font-size: 12.50px;">mysql</a><a href="/tags/oVirt/" style="font-size: 12.50px;">oVirt</a><a href="/tags/pdo/" style="font-size: 10.00px;">pdo</a><a href="/tags/performance/" style="font-size: 12.50px;">performance</a><a href="/tags/permalink/" style="font-size: 10.00px;">permalink</a><a href="/tags/php/" style="font-size: 15.00px;">php</a><a href="/tags/post/" style="font-size: 10.00px;">post</a><a href="/tags/proxy/" style="font-size: 10.00px;">proxy</a><a href="/tags/qemu-img/" style="font-size: 10.00px;">qemu-img</a>
+  </div>
+</div>
+
+
+  <iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=2&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=0&uid=1644437791&verifier=c45a1931&dpc=1"></iframe>
+
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://blog.csdn.net/luo_brian" title="luo_brian">Luohao</a></li>
+<li><a href="http://blog.csdn.net/defeattroy" title="木马屠城">Defeattroy</a></li>
+<li><a href="http://www.smilgel.com/" title="听雨轩">MrSaxon</a></li>
+<li><a href="http://lanbolee.com/blog/" title="博之博">Rambolee</a></li>
+<li><a href="http://www.haoziyanwo.com/" title="耗子燕窝">浩子</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2014 leiqzhang
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+<script type="text/javascript">
+var disqus_shortname = 'leiqzhang';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+</body>
+</html>

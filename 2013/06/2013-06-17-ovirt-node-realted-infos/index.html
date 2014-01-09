@@ -1,0 +1,329 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="baidu-site-verification" content="kZ3lZdC9wn" />
+  
+  <title>Ovirt Node Related Infomation | Technology &amp; Life</title>
+  <meta name="author" content="leiqzhang">
+  
+  <meta name="description" content="Virtualization Related Technologies">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="Ovirt Node Related Infomation"/>
+  <meta property="og:site_name" content="Technology &amp; Life"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico">
+  <link rel="alternate" href="/atom.xml" title="Technology &amp; Life" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
+  
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-40319520-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+  <script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3F6f62dffd0688838f0bc52fc65fd62af4' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">Technology &amp; Life</a></h1>
+  <h2><a href="/">blog of leiqzhang</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about">About</a></li>
+    
+      <li><a href="/atom.xml">RSS</a></li>
+    
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-06-17T12:40:31.000Z"><a href="/2013/06/2013-06-17-ovirt-node-realted-infos/">Jun 17 2013</a></time>
+      
+      
+  
+    <h1 class="title">Ovirt Node Related Infomation</h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <h2 id="-7b80-4ecb-">简介</h2>
+<p>ovirt-node 是开源虚拟化管理平台 oVirt 的客户端部分，它是一个经过定制的最小化 fedora 系统，充当虚拟机管理器（Hypervisor）host 的角色，与管理端 overt-engine 组成一个虚拟化管理平台。ovirt-node 以其小巧，灵活的特点，可以很方便地进行开发与定制。</p>
+<p>ovirt-node提供的镜像中包含libvirt/vdsm（Virtual Desktop Server Manager)、KVM等虚拟化服务，使用libvirt/vdsm管理KVM虚拟机。</p>
+<p>ovirt-node提供的镜像所需资源很小，可以将更多的资源保留给VM使用。</p>
+<p>综合来说，ovirt-node的特点包括：</p>
+<ul>
+<li>Dedicated hypervisor</li>
+<li>JEOS</li>
+<li>livecd</li>
+<li>Built on Fedora</li>
+<li>Firmware</li>
+<li>Small Footprint (&lt;200MB)</li>
+</ul>
+<h2 id="-4f18-7f3a-70b9-">优缺点</h2>
+<a id="more"></a>
+
+<p>优点：</p>
+<ul>
+<li>Single Image</li>
+<li>Easy Upgrades</li>
+<li>No managing individual package updates</li>
+<li>Upgrade directly from management</li>
+</ul>
+<p>不足：</p>
+<ul>
+<li>Lack of Customization</li>
+<li>No easy shell access</li>
+<li>More difficult to debug problems</li>
+</ul>
+<h2 id="-67b6-6784-">架构</h2>
+<p>ovirt-node基本上是基于layered kickstarts，%post脚本可以用于处理默认的配置，同时提供有TUI界面来进行安装和安装后配置。</p>
+<p>安装包：</p>
+<ul>
+<li>ovirt-node：配置ISO</li>
+<li>ovirt-node-tools: working with ISO</li>
+<li>ovirt-node-recipe: building the ISO</li>
+<li>ovirt-node-iso: wrap the ISO</li>
+<li>ovirt-node-plugin-*: 插件</li>
+</ul>
+<p>关键技术：</p>
+<ul>
+<li>qemu-kvm</li>
+<li>libvirt</li>
+<li>spice</li>
+<li>device-mapper-multipath</li>
+<li>newt/snack</li>
+<li>Livecd-tools</li>
+</ul>
+<h2 id="-914d-7f6e-6301-4e45-5316-">配置持久化</h2>
+<p>默认其配置均是非持久化的。持久化的配置可以存放在/config，默认容量上限是8MB，同时ovirt-node提供了persist和unpersist命令来支持持久化操作</p>
+<h2 id="-5b89-88c5-548c-914d-7f6e-">安装和配置</h2>
+<p>ovirt-node的部署方式：</p>
+<ul>
+<li>CD/DVD/Virtual CD</li>
+<li>Flash Memory (USB/SD Card)</li>
+<li>Network (PXE)</li>
+</ul>
+<p>可以安装到disk上(HDD/Flash Disk)，可以自动部署或手动部署。其中自动部署通过自定义内核启动参数实现，手动部署使用TUI界面进行。</p>
+<p>安装后可使用admin账户登录进行配置。</p>
+<p>可以很方便的进行升级，可以自动进行（命令行）或通过TUI进行。升级通常指的就是从新image中启动：</p>
+<ul>
+<li>Update the PXE image</li>
+<li>Boot new CD/USB/SD</li>
+<li>In Place Upgrade<ul>
+<li>upload new image to running system</li>
+<li>Trigger upgrade logic</li>
+<li>Used by oVirt Engine</li>
+</ul>
+</li>
+</ul>
+<p>升级前会自动将原root备份到RootBackup，在升级失败后会进行回滚</p>
+<h2 id="-63d2-4ef6-673a-5236-">插件机制</h2>
+<p>ovirt-node的目标是提供一个最小化的通用性的base image，然后不同的应用场景（如Openstack、ovirt等等）通过plugin提供需要的包然后基于base image制作出相应的镜像(使用ovirt-node-tools)。</p>
+<p>目前官方的ovirt-node的镜像中包含有vdsm等，将来会移除出去</p>
+<h2 id="-65e0-72b6-6001-8fd0-884c-">无状态运行</h2>
+<p>ovirt-node支持stateless模式，通过内核启动参数可以激活此模式，在此模式下会忽略所有的本地存储</p>
+<h2 id="References">References</h2>
+<ul>
+<li><a href="http://www.ovirt.org/images/1/1e/Ovirt-node-2013-01-23.pdf" target="_blank">http://www.ovirt.org/images/1/1e/Ovirt-node-2013-01-23.pdf</a></li>
+<li><a href="http://www.ibm.com/developerworks/cn/linux/l-cn-ovirt/" target="_blank">http://www.ibm.com/developerworks/cn/linux/l-cn-ovirt/</a></li>
+</ul>
+
+      
+    </div>
+    <footer>
+      
+        
+  
+  <div class="categories">
+    <a href="/categories/Virtualization/">Virtualization</a>
+  </div>
+
+        
+  
+  <div class="tags">
+    <a href="/tags/oVirt/">oVirt</a>, <a href="/tags/livecd/">livecd</a>, <a href="/tags/CIM/">CIM</a>
+  </div>
+
+        <!-- Baidu Button BEGIN -->
+<div id="bdshare" class="bdshare_t bds_tools get-codes-bdshare">
+<span class="bds_more">分享到：</span>
+<a class="bds_qzone"></a>
+<a class="bds_tsina"></a>
+<a class="bds_tqq"></a>
+<a class="bds_renren"></a>
+<a class="bds_t163"></a>
+<a class="shareCount"></a>
+</div>
+<script type="text/javascript" id="bdshare_js" data="type=tools&amp;uid=17824" ></script>
+<script type="text/javascript" id="bdshell_js"></script>
+<script type="text/javascript">
+document.getElementById("bdshell_js").src = "http://bdimg.share.baidu.com/static/js/shell_v2.js?cdnversion=" + Math.ceil(new Date()/3600000)
+</script>
+<!-- Baidu Button END -->
+
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+<section id="comment">
+<!-- Duoshuo Comment BEGIN -->
+    <div class="ds-thread" data-thread-key="/2013/06/2013-06-17-ovirt-node-realted-infos/" data-author-key="leiqzhang" data-title="Ovirt Node Related Infomation"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"leiqzhang"};
+    (function() {
+        var ds = document.createElement('script');
+        ds.type = 'text/javascript';ds.async = true;
+        ds.src = 'http://static.duoshuo.com/embed.js';
+        ds.charset = 'UTF-8';
+        (document.getElementsByTagName('head')[0] 
+        || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+    </script>
+<!-- Duoshuo Comment END -->
+</section>
+
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:leiqzhang.com">
+  </form>
+</div>
+
+  
+<div class="widget tag">
+  <h3 class="title">Categories</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/Linux/">Linux</a><small>3</small></li>
+  
+    <li><a href="/categories/OpenStack/">OpenStack</a><small>2</small></li>
+  
+    <li><a href="/categories/VIM/">VIM</a><small>3</small></li>
+  
+    <li><a href="/categories/Virtualization/">Virtualization</a><small>13</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>2</small></li>
+  
+    <li><a href="/categories/miscellaneous/">miscellaneous</a><small>1</small></li>
+  
+    <li><a href="/categories/web_dev/">web_dev</a><small>8</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tagcloud">
+  <h3 class="title">Tag Cloud</h3>
+  <div class="entry">
+    <a href="/tags/CIM/" style="font-size: 10.00px;">CIM</a><a href="/tags/CORS/" style="font-size: 10.00px;">CORS</a><a href="/tags/DBPM/" style="font-size: 10.00px;">DBPM</a><a href="/tags/Deploy/" style="font-size: 10.00px;">Deploy</a><a href="/tags/ELI/" style="font-size: 10.00px;">ELI</a><a href="/tags/NUMA/" style="font-size: 10.00px;">NUMA</a><a href="/tags/Nova/" style="font-size: 12.50px;">Nova</a><a href="/tags/OPTIONS/" style="font-size: 10.00px;">OPTIONS</a><a href="/tags/Paste/" style="font-size: 10.00px;">Paste</a><a href="/tags/QEMU/" style="font-size: 20.00px;">QEMU</a><a href="/tags/RabbitMQ/" style="font-size: 10.00px;">RabbitMQ</a><a href="/tags/WSGI/" style="font-size: 10.00px;">WSGI</a><a href="/tags/bfc/" style="font-size: 10.00px;">bfc</a><a href="/tags/block-stream/" style="font-size: 10.00px;">block-stream</a><a href="/tags/blockcopy/" style="font-size: 12.50px;">blockcopy</a><a href="/tags/cache/" style="font-size: 10.00px;">cache</a><a href="/tags/css/" style="font-size: 12.50px;">css</a><a href="/tags/dataplane/" style="font-size: 10.00px;">dataplane</a><a href="/tags/ervernote/" style="font-size: 10.00px;">ervernote</a><a href="/tags/etag/" style="font-size: 10.00px;">etag</a><a href="/tags/eval/" style="font-size: 10.00px;">eval</a><a href="/tags/fedora/" style="font-size: 10.00px;">fedora</a><a href="/tags/greasemonkey/" style="font-size: 10.00px;">greasemonkey</a><a href="/tags/http/" style="font-size: 12.50px;">http</a><a href="/tags/javascript/" style="font-size: 10.00px;">javascript</a><a href="/tags/libvirt/" style="font-size: 17.50px;">libvirt</a><a href="/tags/lighthttpd/" style="font-size: 10.00px;">lighthttpd</a><a href="/tags/lighttpd/" style="font-size: 10.00px;">lighttpd</a><a href="/tags/livecd/" style="font-size: 10.00px;">livecd</a><a href="/tags/mac/" style="font-size: 10.00px;">mac</a><a href="/tags/md5sum/" style="font-size: 10.00px;">md5sum</a><a href="/tags/mysql/" style="font-size: 12.50px;">mysql</a><a href="/tags/oVirt/" style="font-size: 12.50px;">oVirt</a><a href="/tags/pdo/" style="font-size: 10.00px;">pdo</a><a href="/tags/performance/" style="font-size: 12.50px;">performance</a><a href="/tags/permalink/" style="font-size: 10.00px;">permalink</a><a href="/tags/php/" style="font-size: 15.00px;">php</a><a href="/tags/post/" style="font-size: 10.00px;">post</a><a href="/tags/proxy/" style="font-size: 10.00px;">proxy</a><a href="/tags/qemu-img/" style="font-size: 10.00px;">qemu-img</a>
+  </div>
+</div>
+
+
+  <iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=2&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=0&uid=1644437791&verifier=c45a1931&dpc=1"></iframe>
+
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://blog.csdn.net/luo_brian" title="luo_brian">Luohao</a></li>
+<li><a href="http://blog.csdn.net/defeattroy" title="木马屠城">Defeattroy</a></li>
+<li><a href="http://www.smilgel.com/" title="听雨轩">MrSaxon</a></li>
+<li><a href="http://lanbolee.com/blog/" title="博之博">Rambolee</a></li>
+<li><a href="http://www.haoziyanwo.com/" title="耗子燕窝">浩子</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2014 leiqzhang
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+<script type="text/javascript">
+var disqus_shortname = 'leiqzhang';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+</body>
+</html>
