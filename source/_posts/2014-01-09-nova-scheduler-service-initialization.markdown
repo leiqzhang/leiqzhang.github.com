@@ -61,7 +61,10 @@ tags:  [Nova, scheduler, RabbitMQ]
 
 由上可知，在Scheduler启动前，只有RabbitMQ-Server默认创建的一些exchange，而binding、connection、channel和consumer均为空。
 
+<!--more-->
+
 现在启动Scheduler服务：
+
 
 ```
 service openstack-nova-scheduler start

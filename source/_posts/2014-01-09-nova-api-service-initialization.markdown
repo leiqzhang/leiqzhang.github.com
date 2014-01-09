@@ -55,6 +55,7 @@ tcp        0      0 0.0.0.0:8775                0.0.0.0:*                   LIST
 
 nova.cmd.api.main的主要代码如下：
 
+
 ```python
     launcher = service.process_launcher()
     for api in CONF.enabled_apis:
@@ -79,6 +80,8 @@ server = service.WSGIService(...)
 在luanch_service方法中，会根据传入的workers参数fork出相应个数的子进程，并在各个子进程中调用对应WSGIService的start方法，开始对外服务。
 
 ### 涉及的配置 ###
+
+<!--more-->
 
 根据上述的主要执行路径，查看配置文件/etc/nova/nova.conf中的相关配置如下：
 
