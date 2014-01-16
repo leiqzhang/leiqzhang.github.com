@@ -90,66 +90,319 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
     <header>
       
         <div class="icon"></div>
-        <time datetime="2013-04-17T03:38:31.000Z"><a href="/2013/04/2013-04-17-qemu-block-features-image-format/">Apr 17 2013</a></time>
+        <time datetime="2013-04-18T05:00:31.000Z"><a href="/2013/04/2013-04-18-qemu-block-features-dataplane-perf/">Apr 18 2013</a></time>
       
       
   
-    <h1 class="title"><a href="/2013/04/2013-04-17-qemu-block-features-image-format/">QEMU Block Features: Image Formats</a></h1>
+    <h1 class="title"><a href="/2013/04/2013-04-18-qemu-block-features-dataplane-perf/">QEMU Block Fetures: dataplane perf</a></h1>
   
 
     </header>
     <div class="entry">
       
-        <h3 id="-955c-50cf-683c-5f0f-">镜像格式</h3>
+        <h3 id="Dataplane_vs_Non-dataplane_Perf">Dataplane vs Non-dataplane Perf</h3>
 <ol>
-<li><p>支持的格式</p>
+<li>Envrionment<ol>
+<li>Qemu 1.4 master branch</li>
+<li>kernel: 3.5.0-2.fc17.x86-64</li>
+<li>virtual disks location: the same local SATA harddisk with ext4 fs</li>
+<li>VM start cmd (os: win7/qed, disk1: raw/non-dataplane/10G/NTFS, disk2: raw/dataplane/10G/NTFS) :</li>
+</ol>
+</li>
+<li>Testing Tool And Testing Params:<ol>
+<li>Only IOMeter App Running in VM, and no other IO in Host (Dom0)</li>
+<li>Main Testing VM: 8 worker, 16K IO size, 0% Read,  100% Random,  and 50 outstanding IO </li>
+<li>Pression VM: 8 worker, 16K IO size, 25% Read, 100% Random,  and 50 outstanding IO</li>
+</ol>
+</li>
+<li><p>Testing Results:</p>
+<p> |                | IOPS | MBPS  |<br> |   :———:     | :———: | :——-:   |<br> |dataplane       |  230.956328  |   3.608693  |<br> |non-dataplane   |  178.324867  |   2.786326  |</p>
+</li>
+</ol>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  
+    <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-04-18T02:30:31.000Z"><a href="/2013/04/2013-04-17-qemu-block-features-block-streaming/">Apr 18 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/04/2013-04-17-qemu-block-features-block-streaming/">QEMU Block Fetures: live snapshot merge (block commit/block stream)</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <h3 id="Block_Streaming">Block Streaming</h3>
+<ol>
+<li>Ref: <a href="http://wiki.qemu.org/Features/Snapshots#Block_Streaming" target="_blank">QEMU-Feature-LiveSnapshotMerge-BlockStreaming</a></li>
+<li>Process: Take data from parent image(s), and copy (stream) the data to the active layer.</li>
+<li>QMP Steps<ol>
+<li>Into Qemu and Prepare, <a href="#qmp_prepare">ref</a></li>
+<li>[QMP_INPUT]<ul>
+<li>Run Block Stream:<pre><code>
+{ "execute": "block-stream",
+   "arguments": 
+   {"device":"drive0", "base": "win2003.qcow2", "speed": 20971520} 
+}</code></pre></li>
+</ul>
+</li>
+</ol>
+<ul>
+<li>CMD Args:<ul>
+<li>device: block device to stream</li>
+<li>base: base image, only sectors above this image are streamed. optional</li>
+<li>speed: speed throttling, in MB/s, of the stream opt. optional</li>
+</ul>
+</li>
+</ul>
+<ol>
+<li>[QMP_OUTPUT] After Job Completed, can see the QMP’s output:<pre><code>{"timestamp": {"seconds": 1366281580, "microseconds": 788190}, "event": "BLOCK_JOB_COMPLETED", "data": {"device": "drive0", "len": 8589934592, "offset": 8589934592, "speed": 2097152, "type": "stream"}}</code></pre></li>
+<li>Job Control / Job Query, <a href="#qmp_block_job_ctl">ref</a></li>
+</ol>
+</li>
+<li>HMP Steps <ol>
+<li>Into Qemu and Prepare, <a href="#hmp_prepare">ref</a></li>
+<li>[HMP_INPUT]</li>
+</ol>
+<ul>
+<li>Do the snapshot:<pre><code>snapshot_blkdev drive0 /pkgs/imgs/win.snap</code></pre></li>
+<li>Run Block Stream:<pre><code>block_stream drive0 10 # 10 MB/s</code></pre></li>
+</ul>
+<ol>
+<li>Job Control / Job Query, <a href="#hmp_block_job_ctl">ref</a></li>
+<li>concurrency-opts</li>
+</ol>
+<ul>
+<li>block_stream again when block_stream is not finished yet:<ul>
+<li>[HMP_OUTPUT]: <pre><code>Device ‘drive0’ is in use</code></pre></li>
+</ul>
+</li>
+<li>another block_job, eg. block_commit when block_stream is not finished yet:<ul>
+<li>[HMP_INPUT]: <pre><code>commit drive0</code></pre></li>
+<li>[HMP_OUTPUT]: <pre><code>‘commit’ error for ‘drive0’: Device or resource busy</code></pre></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Libvirt Supprot<ul>
+<li>@see [TASK] IO mirror</li>
+</ul>
+</li>
+</ol>
+<h3 id="-3c-a_id-3d-22-qmp_prepare-22-3e-3c-2f-a-3e-QMP_Prepare"><a id="qmp_prepare"></a>QMP Prepare</h3>
+<ol>
+<li>[CMD] qemu […] -qmp tcp:localhost:4444,server<ul>
+<li>Start QMP on a TCP socket, so that telnet can be used</li>
+<li>-qmp conflicts with “-monitor”</li>
+</ul>
+</li>
+<li>[CMD] telnet localhost 4444<ul>
+<li>Run telnet</li>
+<li>Should see the QMP’s greeting banner:  <pre><code>
+  {"QMP":{"version": {"qemu": {"micro": 50, "minor": 13, "major": 0}, "package": ""}, "capabilities": []}} </code></pre></li>
+</ul>
+</li>
+<li>[QMP_INPUT] <ul>
+<li>Make QMP enter command mode:  <pre><code>
+  {"execute": "qmp_capabilities"}</code></pre></li>
+</ul>
+</li>
+<li>[QMP_INPUT]<ul>
+<li>Query the device info:  <pre><code>
+  {"execute":"query-blockstats"} </code></pre>
+  or
+  <pre><code>
+  { "execute": "human-monitor-command", "arguments": { "command-line": "info block" } } </code></pre></li>
+<li>Get the device info from the output</li>
+</ul>
+</li>
+</ol>
+<h3 id="-3c-a_id-3d-22-hmp_prepare-22-3e-3c-2f-a-3e-_HMP_Prepare"><a id="hmp_prepare"></a> HMP Prepare</h3>
+<ol>
+<li>[CMD] qemu […] -monitor stdio</li>
+<li>[HMP_INPUT] Query the device info:<pre><code> <span class="tag">&lt;<span class="title">pre</span>&gt;</span><span class="tag">&lt;<span class="title">code</span>&gt;</span>info block<span class="tag">&lt;/<span class="title">code</span>&gt;</span><span class="tag">&lt;/<span class="title">pre</span>&gt;</span>
+</code></pre></li>
+</ol>
+<h3 id="-3c-a_id-3d-22-qmp_block_job_ctl-22-3e-3c-2f-a-3e-_QMP_Block_Job_Control"><a id="qmp_block_job_ctl"></a> QMP Block Job Control</h3>
+<ol>
+<li>[QMP_INPUT] query block info <pre><code>{ "execute": "query-block-jobs", "arguments": {} }</code></pre></li>
+<li>[QMP_INPUT] set block job speed <pre><code>{ "execute": "block-job-set-speed", "arguments": 
+     {"device":drive0,"speed":2097152} 
+ }</code></pre></li>
+<li>[QMP_INPUT] cancel block job <pre><code>{ "execute": "block-job-cancel", "arguments": 
+     {"device":drive0,"force":1} 
+ }</code></pre></li>
+<li>[QMP_INPUT] pause block job <pre><code>{ "execute": "block-job-pause", "arguments": 
+     {"device":drive0} 
+ }</code></pre></li>
+<li>[QMP_INPUT] resume block job <pre><code>{ "execute": "block-job-resume", "arguments": 
+     {"device":drive0} 
+ }</code></pre></li>
+<li>[QMP_INPUT] complete block job <pre><code>{ "execute": "block-job-complete", "arguments": 
+     {"device":drive0} 
+ }</code></pre>
+
+</li>
+</ol>
+<h3 id="-3c-a_id-3d-22-hmp_block_job_ctl-22-3e-3c-2f-a-3e-_HMP_Block_Job_Control"><a id="hmp_block_job_ctl"></a> HMP Block Job Control</h3>
+<ol>
+<li>[HMP_INPUT] query block info <pre><code>info block-jobs</code></pre></li>
+<li>[HMP_INPUT] set block job speed <pre><code>block_job_set_speed drive0 20</code></pre></li>
+<li>[HMP_INPUT] cancel block job <pre><code>block_job_cancel drive0</code></pre></li>
+<li>[HMP_INPUT] pause block job <pre><code>block_job_pause drive0</code></pre></li>
+<li>[HMP_INPUT] resume block job <pre><code>block_job_resume drive0</code></pre></li>
+<li>[HMP_INPUT] complete block job <pre><code>block_job_complete drive0</code></pre>
+</li>
+</ol>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  
+    <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-04-17T03:40:31.000Z"><a href="/2013/04/2013-04-17-configure-qemu-kvm-env-in-f18/">Apr 17 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/04/2013-04-17-configure-qemu-kvm-env-in-f18/">新的F18环境下KVM环境搭建</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <h1 id="-65b0-7684-F18-73af-5883-4e0b-KVM-73af-5883-642d-5efa-">新的F18环境下KVM环境搭建</h1>
+<ol>
+<li><p>更改hostname，从localhost改为有意义的名字</p>
 <blockquote>
-<p> Supported formats: vvfat <strong>vpc</strong> <strong>vmdk</strong> vdi sheepdog sheepdog sheepdog <strong>raw</strong> host_cdrom host_floppy host_device file <strong>qed</strong> <strong>qcow2</strong> qcow parallels nbd nbd nbd dmg tftp ftps ftp https http cow cloop bochs blkverify blkdebug </p>
+<p>hostnamectl set-hostname DESIRED_HOST_NAME</p>
 </blockquote>
 </li>
-<li>镜像创建<ul>
-<li>CMD: qemu-img</li>
-<li>USAGE: qemu-img create [-q] [-f fmt] [-o options] filename [size]</li>
+<li><p>安装git: yum install git</p>
+</li>
+<li><p>clone KVM project</p>
+<blockquote>
+<p>git clone <a href="http://path/to/qemu.git" target="_blank">http://path/to/qemu.git</a></p>
+</blockquote>
+</li>
+<li><p>编译</p>
+<ol>
+<li>./configure ‘—enable-kvm’ ‘—target-list=x86_64-softmmu’ ‘—enable-virtio-blk-data-plane’ —disable-slirp</li>
+<li>根据prefix的结果yum install缺失的包，几个主要的包：<ul>
+<li>data-plane: libaio-devel</li>
 </ul>
 </li>
-<li>qemu启动虚拟机<ul>
-<li>ARGS： -drive file=/path/to/img,if=none,format=<strong>FORMAT</strong>,cache=none,id=drive0</li>
-</ul>
-</li>
-<li>libvirt配置</li>
 </ol>
-<figure class="highlight"><table><tr><td class="gutter"><pre>1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-</pre></td><td class="code"><pre><span class="tag">&lt;<span class="title">disk</span> <span class="attribute">type</span>=<span class="value">"file"</span> <span class="attribute">device</span>=<span class="value">"disk"</span>&gt;</span>
-    <span class="tag">&lt;<span class="title">driver</span> <span class="attribute">name</span>=<span class="value">"qemu"</span> <span class="attribute">type</span>=<span class="value">"raw"</span>/&gt;</span> 
-    <span class="comment">&lt;!-- avaliable types when use the name "qemu": raw, bochs, qcow2 and qed --&gt;</span>
-    <span class="comment">&lt;!-- optional attributes: cache, io, ioeventfd, error_policy, event_idx, copy_on_read --&gt;</span>
-    <span class="comment">&lt;!-- cache attr: control the cache mechanism, possiable values are "default", "none", "writethrough", "writeback", "directsync" ( pass host page cache ) and "unsafe". --&gt;</span>
-    <span class="comment">&lt;!-- io attr: "thread" or "native" --&gt;</span>
-    <span class="comment">&lt;!-- ioeventfd attr: "on" or "off" --&gt;</span>
-    <span class="comment">&lt;!-- error_policy attr: "stop","report","ignore", and "enospace" --&gt;</span>
-    <span class="comment">&lt;!-- event_idx attr: "on" or "off", if "on", will reduce the number of interrupts and exits for the guest --&gt;</span>
-    <span class="comment">&lt;!-- copy_on_read attr: "on" or "off" --&gt;</span>
-    <span class="comment">&lt;!-- @see http://libvirt.org/formatdomain.html#elementsDevices --&gt;</span>
-    <span class="tag">&lt;<span class="title">source</span> <span class="attribute">file</span>=<span class="value">"/path/to/img"</span>/&gt;</span>
-    <span class="tag">&lt;<span class="title">target</span> <span class="attribute">dev</span>=<span class="value">"vda"</span> <span class="attribute">bus</span>=<span class="value">"virtio"</span>/&gt;</span>  
-    <span class="comment">&lt;!-- avaliable bus: ide, scsi, virtio, usb, sata, etc. if ommited, the bus type is inferred from the style of the device name (e.g. "sda" =&gt; "scsi"). --&gt;</span>
-<span class="tag">&lt;/<span class="title">disk</span>&gt;</span>
-</pre></td></tr></table></figure>
-
+<ul>
+<li>根据configure的结果和已有环境的结果进行比对，对于未正常启用的安装相应的包<ul>
+<li>SDL support： yum install SDL-devel</li>
+<li>curses support：yum install ncurses-devel</li>
+<li>curl support：yum install libcurl-devel</li>
+<li>VNC<ul>
+<li>VNC TLS support：gnutls-devel</li>
+<li>VNC SASL support：cyrus-sasl-devel</li>
+<li>VNC JPEG support：libjpeg-turbo-devel</li>
+<li>VNC PNG support：libpng-devel</li>
+<li>VNC WS support：gnutls-devel</li>
+</ul>
+</li>
+<li>Documention: pod2man/makeinfo, yum install texinfo</li>
+<li>fdt support:  libfdt-devel</li>
+<li>uuid support: libuuid-devel</li>
+<li>spice support: yum install spice-protocol spice-server spice-server-devel</li>
+<li>seccomp support: libseccomp-devel</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>防火墙</p>
+<ol>
+<li>systemctl stop firewalld.service; </li>
+<li>systemctl disable firewalld.service</li>
+</ol>
+</li>
+<li><p>libvirt：</p>
+<ol>
+<li>virsh: libvirt-client</li>
+<li>libvirtd: libvirt-daemon</li>
+<li>libvirtd start related error</li>
+</ol>
+<ul>
+<li>virsh list<ul>
+<li>error: Failed to reconnect to the hypervisorerror: no valid connectionerror: Failed to connect socket to ‘/var/run/libvirt/libvirt-sock’: No such file or directory<ul>
+<li>libvirtd -l ; 并观察错误输出，可找到所缺失的so文件，进而找到缺失的rpm包</li>
+<li>yum install libvirt-daemon-driver-*</li>
+</ul>
+</li>
+<li>error: libvirtd start error: Cannot read CA certificate ‘/etc/pki/CA/cacert.pem’: No such file or directory<ul>
+<li>configuration:  /etc/libvirt/libvirtd.conf; uncomment the line: “listen_tls=0”</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
 
       
     </div>
@@ -327,6 +580,101 @@ or
 
 
   
+    <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-04-17T03:38:31.000Z"><a href="/2013/04/2013-04-17-qemu-block-features-image-format/">Apr 17 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/04/2013-04-17-qemu-block-features-image-format/">QEMU Block Features: Image Formats</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <h3 id="-955c-50cf-683c-5f0f-">镜像格式</h3>
+<ol>
+<li><p>支持的格式</p>
+<blockquote>
+<p> Supported formats: vvfat <strong>vpc</strong> <strong>vmdk</strong> vdi sheepdog sheepdog sheepdog <strong>raw</strong> host_cdrom host_floppy host_device file <strong>qed</strong> <strong>qcow2</strong> qcow parallels nbd nbd nbd dmg tftp ftps ftp https http cow cloop bochs blkverify blkdebug </p>
+</blockquote>
+</li>
+<li>镜像创建<ul>
+<li>CMD: qemu-img</li>
+<li>USAGE: qemu-img create [-q] [-f fmt] [-o options] filename [size]</li>
+</ul>
+</li>
+<li>qemu启动虚拟机<ul>
+<li>ARGS： -drive file=/path/to/img,if=none,format=<strong>FORMAT</strong>,cache=none,id=drive0</li>
+</ul>
+</li>
+<li>libvirt配置</li>
+</ol>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+</pre></td><td class="code"><pre><span class="tag">&lt;<span class="title">disk</span> <span class="attribute">type</span>=<span class="value">"file"</span> <span class="attribute">device</span>=<span class="value">"disk"</span>&gt;</span>
+    <span class="tag">&lt;<span class="title">driver</span> <span class="attribute">name</span>=<span class="value">"qemu"</span> <span class="attribute">type</span>=<span class="value">"raw"</span>/&gt;</span> 
+    <span class="comment">&lt;!-- avaliable types when use the name "qemu": raw, bochs, qcow2 and qed --&gt;</span>
+    <span class="comment">&lt;!-- optional attributes: cache, io, ioeventfd, error_policy, event_idx, copy_on_read --&gt;</span>
+    <span class="comment">&lt;!-- cache attr: control the cache mechanism, possiable values are "default", "none", "writethrough", "writeback", "directsync" ( pass host page cache ) and "unsafe". --&gt;</span>
+    <span class="comment">&lt;!-- io attr: "thread" or "native" --&gt;</span>
+    <span class="comment">&lt;!-- ioeventfd attr: "on" or "off" --&gt;</span>
+    <span class="comment">&lt;!-- error_policy attr: "stop","report","ignore", and "enospace" --&gt;</span>
+    <span class="comment">&lt;!-- event_idx attr: "on" or "off", if "on", will reduce the number of interrupts and exits for the guest --&gt;</span>
+    <span class="comment">&lt;!-- copy_on_read attr: "on" or "off" --&gt;</span>
+    <span class="comment">&lt;!-- @see http://libvirt.org/formatdomain.html#elementsDevices --&gt;</span>
+    <span class="tag">&lt;<span class="title">source</span> <span class="attribute">file</span>=<span class="value">"/path/to/img"</span>/&gt;</span>
+    <span class="tag">&lt;<span class="title">target</span> <span class="attribute">dev</span>=<span class="value">"vda"</span> <span class="attribute">bus</span>=<span class="value">"virtio"</span>/&gt;</span>  
+    <span class="comment">&lt;!-- avaliable bus: ide, scsi, virtio, usb, sata, etc. if ommited, the bus type is inferred from the style of the device name (e.g. "sda" =&gt; "scsi"). --&gt;</span>
+<span class="tag">&lt;/<span class="title">disk</span>&gt;</span>
+</pre></td></tr></table></figure>
+
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  
 
   <nav id="pagination">
   
@@ -355,7 +703,7 @@ or
   
     <li><a href="/categories/VIM/">VIM</a><small>3</small></li>
   
-    <li><a href="/categories/Virtualization/">Virtualization</a><small>13</small></li>
+    <li><a href="/categories/Virtualization/">Virtualization</a><small>16</small></li>
   
     <li><a href="/categories/WordPress/">WordPress</a><small>2</small></li>
   
@@ -371,7 +719,7 @@ or
 <div class="widget tagcloud">
   <h3 class="title">Tag Cloud</h3>
   <div class="entry">
-    <a href="/tags/CIM/" style="font-size: 10.00px;">CIM</a><a href="/tags/CORS/" style="font-size: 10.00px;">CORS</a><a href="/tags/DBPM/" style="font-size: 10.00px;">DBPM</a><a href="/tags/Deploy/" style="font-size: 10.00px;">Deploy</a><a href="/tags/ELI/" style="font-size: 10.00px;">ELI</a><a href="/tags/NUMA/" style="font-size: 10.00px;">NUMA</a><a href="/tags/Nova/" style="font-size: 12.50px;">Nova</a><a href="/tags/OPTIONS/" style="font-size: 10.00px;">OPTIONS</a><a href="/tags/Paste/" style="font-size: 10.00px;">Paste</a><a href="/tags/QEMU/" style="font-size: 20.00px;">QEMU</a><a href="/tags/RabbitMQ/" style="font-size: 10.00px;">RabbitMQ</a><a href="/tags/WSGI/" style="font-size: 10.00px;">WSGI</a><a href="/tags/bfc/" style="font-size: 10.00px;">bfc</a><a href="/tags/block-stream/" style="font-size: 10.00px;">block-stream</a><a href="/tags/blockcopy/" style="font-size: 12.50px;">blockcopy</a><a href="/tags/cache/" style="font-size: 10.00px;">cache</a><a href="/tags/css/" style="font-size: 12.50px;">css</a><a href="/tags/dataplane/" style="font-size: 10.00px;">dataplane</a><a href="/tags/ervernote/" style="font-size: 10.00px;">ervernote</a><a href="/tags/etag/" style="font-size: 10.00px;">etag</a><a href="/tags/eval/" style="font-size: 10.00px;">eval</a><a href="/tags/fedora/" style="font-size: 10.00px;">fedora</a><a href="/tags/greasemonkey/" style="font-size: 10.00px;">greasemonkey</a><a href="/tags/http/" style="font-size: 12.50px;">http</a><a href="/tags/javascript/" style="font-size: 10.00px;">javascript</a><a href="/tags/libvirt/" style="font-size: 17.50px;">libvirt</a><a href="/tags/lighthttpd/" style="font-size: 10.00px;">lighthttpd</a><a href="/tags/lighttpd/" style="font-size: 10.00px;">lighttpd</a><a href="/tags/livecd/" style="font-size: 10.00px;">livecd</a><a href="/tags/mac/" style="font-size: 10.00px;">mac</a><a href="/tags/md5sum/" style="font-size: 10.00px;">md5sum</a><a href="/tags/mysql/" style="font-size: 12.50px;">mysql</a><a href="/tags/oVirt/" style="font-size: 12.50px;">oVirt</a><a href="/tags/pdo/" style="font-size: 10.00px;">pdo</a><a href="/tags/performance/" style="font-size: 12.50px;">performance</a><a href="/tags/permalink/" style="font-size: 10.00px;">permalink</a><a href="/tags/php/" style="font-size: 15.00px;">php</a><a href="/tags/post/" style="font-size: 10.00px;">post</a><a href="/tags/proxy/" style="font-size: 10.00px;">proxy</a><a href="/tags/qemu-img/" style="font-size: 10.00px;">qemu-img</a>
+    <a href="/tags/CIM/" style="font-size: 10.00px;">CIM</a><a href="/tags/CORS/" style="font-size: 10.00px;">CORS</a><a href="/tags/DBPM/" style="font-size: 10.00px;">DBPM</a><a href="/tags/Deploy/" style="font-size: 10.00px;">Deploy</a><a href="/tags/ELI/" style="font-size: 10.00px;">ELI</a><a href="/tags/NUMA/" style="font-size: 10.00px;">NUMA</a><a href="/tags/Nova/" style="font-size: 12.50px;">Nova</a><a href="/tags/OPTIONS/" style="font-size: 10.00px;">OPTIONS</a><a href="/tags/Paste/" style="font-size: 10.00px;">Paste</a><a href="/tags/QEMU/" style="font-size: 20.00px;">QEMU</a><a href="/tags/RabbitMQ/" style="font-size: 10.00px;">RabbitMQ</a><a href="/tags/WSGI/" style="font-size: 10.00px;">WSGI</a><a href="/tags/bfc/" style="font-size: 10.00px;">bfc</a><a href="/tags/block-stream/" style="font-size: 10.00px;">block-stream</a><a href="/tags/blockcopy/" style="font-size: 12.50px;">blockcopy</a><a href="/tags/cache/" style="font-size: 10.00px;">cache</a><a href="/tags/css/" style="font-size: 12.50px;">css</a><a href="/tags/dataplane/" style="font-size: 10.00px;">dataplane</a><a href="/tags/device-mapper/" style="font-size: 10.00px;">device-mapper</a><a href="/tags/ervernote/" style="font-size: 10.00px;">ervernote</a><a href="/tags/etag/" style="font-size: 10.00px;">etag</a><a href="/tags/eval/" style="font-size: 10.00px;">eval</a><a href="/tags/fdisk/" style="font-size: 10.00px;">fdisk</a><a href="/tags/fedora/" style="font-size: 10.00px;">fedora</a><a href="/tags/gpt/" style="font-size: 10.00px;">gpt</a><a href="/tags/greasemonkey/" style="font-size: 10.00px;">greasemonkey</a><a href="/tags/http/" style="font-size: 12.50px;">http</a><a href="/tags/isolinux/" style="font-size: 10.00px;">isolinux</a><a href="/tags/javascript/" style="font-size: 10.00px;">javascript</a><a href="/tags/libvirt/" style="font-size: 17.50px;">libvirt</a><a href="/tags/lighthttpd/" style="font-size: 10.00px;">lighthttpd</a><a href="/tags/lighttpd/" style="font-size: 10.00px;">lighttpd</a><a href="/tags/livecd/" style="font-size: 10.00px;">livecd</a><a href="/tags/mac/" style="font-size: 10.00px;">mac</a><a href="/tags/mbr/" style="font-size: 10.00px;">mbr</a><a href="/tags/md5sum/" style="font-size: 10.00px;">md5sum</a><a href="/tags/mysql/" style="font-size: 12.50px;">mysql</a><a href="/tags/oVirt/" style="font-size: 15.00px;">oVirt</a><a href="/tags/parted/" style="font-size: 10.00px;">parted</a><a href="/tags/pdo/" style="font-size: 10.00px;">pdo</a>
   </div>
 </div>
 

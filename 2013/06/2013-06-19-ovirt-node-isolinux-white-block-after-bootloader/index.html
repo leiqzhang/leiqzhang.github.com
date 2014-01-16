@@ -1,0 +1,291 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="baidu-site-verification" content="kZ3lZdC9wn" />
+  
+  <title>White background after boot menu of isolinux in ovirt-node | Technology &amp; Life</title>
+  <meta name="author" content="leiqzhang">
+  
+  <meta name="description" content="Virtualization Related Technologies">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="White background after boot menu of isolinux in ovirt-node"/>
+  <meta property="og:site_name" content="Technology &amp; Life"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico">
+  <link rel="alternate" href="/atom.xml" title="Technology &amp; Life" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
+  
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-40319520-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+  <script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3F6f62dffd0688838f0bc52fc65fd62af4' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">Technology &amp; Life</a></h1>
+  <h2><a href="/">blog of leiqzhang</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about">About</a></li>
+    
+      <li><a href="/atom.xml">RSS</a></li>
+    
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-06-18T12:40:31.000Z"><a href="/2013/06/2013-06-19-ovirt-node-isolinux-white-block-after-bootloader/">Jun 18 2013</a></time>
+      
+      
+  
+    <h1 class="title">White background after boot menu of isolinux in ovirt-node</h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <h2 id="-95ee-9898-">问题</h2>
+<p>当通过llivecd启动系统进行第一次部署时，在BOOT MENU页面(isolinux)后，会首先出现一段时间的“白屏”现象，然后才可以进入到安装和配置界面</p>
+<h2 id="-95ee-9898-539f-56e0-">问题原因</h2>
+<p>确认是启动参数中缺少了vga=选项</p>
+<p>可参考： <a href="https://wiki.archlinux.org/index.php/Syslinux#White_block_in_upper_left_corner_when_using_vesamenu" target="_blank">https://wiki.archlinux.org/index.php/Syslinux#White_block_in_upper_left_corner_when_using_vesamenu</a></p>
+<blockquote><p>Problem: As of linux-3.0, the modesetting driver tries to keep the current contents of the screen after changing the resolution (at least it does so with my Intel, when having Syslinux in text mode). It seems that this goes wrong when combined with the vesamenu module in Syslinux (the white block is actually an attempt to keep the Syslinux menu, but the driver fails to capture the picture from vesa graphics mode).</p>
+<p>If you have a custom resolution and a vesamenu with early modesetting, try to append the following in syslinux.cfg to remove the white block and continue in graphics mode:</p>
+<p>APPEND root=/dev/sda6 ro 5 vga=current quiet splash</p>
+<footer><strong>archlinux_wiki,White_block_in_upper_left_corner_when_using_vesamenu</strong><cite><a href="https://wiki.archlinux.org/index.php/Syslinux#White_block_in_upper_left_corner_when_using_vesamenu" target="_blank">ref_detail</a></cite></footer></blockquote>
+
+
+
+<h2 id="-793e-533a-76f8-5173-BUG-53ca-63cf-8ff0-">社区相关BUG及描述</h2>
+<a id="more"></a>
+
+<p>相关BUG可参考：<a href="https://bugs.archlinux.org/task/26452" target="_blank">https://bugs.archlinux.org/task/26452</a></p>
+<p>关于此BUG，一些开发者的回复如下：</p>
+<blockquote><p>Now that I ‘ve been thinking of it. I am using a custom syslinux.cfg file with resolution set at 1400x1050 pixels. How is it supposed for the modesetting driver to keep the current contents on the screen if 1400x1050 resolution is used in the first place and changed back and forth with the 640x480 resolution? That’s probably why I see the white block (that block is actually 640x480 pixels). If I had a syslinux 640x480 resolution, I would probably not see a white block, but the syslinux menu. And that’s why vga=current fixes it because it does not change resolution.So I think this is a modesetting bug rather than a syslinux one, <strong>if not a bug at all</strong>. I also wonder what will happen if I have two monitors connected with different native resolution, but in anyway its not in the scope of this bug report and neither it is for discussion.</p>
+<footer><strong>Tasos,bug_comment_1</strong><cite><a href="https://bugs.archlinux.org/task/26452" target="_blank">ref_detail</a></cite></footer></blockquote>
+
+
+
+<blockquote><p>As of 3.0, the modesetting driver tries to keep the current contents of the screen after changing the resolution (at least it does so with my intel, when having syslinux in text mode). It seems that this goes wrong when combined with the vesamenu module in syslinux (the white block is actually an attempt to keep the syslinux menu, but the driver fails to capture the picture from vesa graphics mode).It is my understanding that this block goes away when you either scroll it away or clear the screen. As this is <strong>likely a restriction in the graphics hardware</strong>, I am tempted to close this as <strong>“Won’t fix”</strong>.In any case, I will try to reproduce this (I do not use vesamenu currently, but the text-based syslinux menu).</p>
+<footer><strong>Thomas Bachler,bug_comment_2</strong><cite><a href="https://bugs.archlinux.org/task/26452" target="_blank">ref_detail</a></cite></footer></blockquote>
+
+
+<p>即各位认为此不属于syslinux应该解决的BUG</p>
+<h2 id="-8ddf-8fdb-">跟进</h2>
+<p>按照上文描述，在启动参数后加了vga=current后，在经过了MENU步骤后，分辨率不会自动发生变更，VNC窗口一直显示的是MENU的背景图片，无法自动进行分辨率切换并进入系统。</p>
+<p>但当在启动参数后面增加vga=0x317后功能正常，但不同的是进入系统后，VNC窗口的分辨率为1024*768</p>
+<p>关于vga选项的取值及其含义可参考：<a href="http://wiki.antlinux.com/pmwiki.php?n=HowTos.VgaModes" target="_blank">http://wiki.antlinux.com/pmwiki.php?n=HowTos.VgaModes</a> </p>
+<p>从上面资料可知0x317对应的分辨率是Kernel VESA的1024*768分辨率。</p>
+<p>试了一下，当前litevirt默认的vga是0x111，当指定vga=0x111时和vga=current的现象一直，不会进入系统。只有vga指定了一个和当前vga不同的值方可正常进入，也无白屏问题，但是这样的话进入系统后分辨率就固定了。</p>
+<p>这样会否影响安装后的系统的分辨率？经过安装完毕直接重启后验证，不会有影响。而且admin账户的管理portal中也没有可以设置分辨率的入口</p>
+<h2 id="-7ed3-8bba-">结论</h2>
+<p>因为当前白屏问题只是在第一次安装时出现，且不影响安装后系统的使用，故可以考虑直接在启动参数中添加“vga=xxx”的参数，只需保证这里vga的取值不要和isolinux默认或者自定义的MENU界面分辨率相同即可（经实验，当前isolinux默认的分辨率是0x111）</p>
+<h2 id="-53e6-5916-">另外</h2>
+<p>另外,有人提出Ubuntu针对此问题有相应的fix，但是fedora没有：<a href="http://thr3ads.net/syslinux/2011/02/1149712-not-sure-how-to-get-rid-of-white-screen-during-boot" target="_blank">http://thr3ads.net/syslinux/2011/02/1149712-not-sure-how-to-get-rid-of-white-screen-during-boot</a></p>
+<p>文中提到的两个相关的commit如下： </p>
+<ol>
+<li><a href="http://kernel.ubuntu.com/git?p=apw/ubuntu-natty.git;a=commit;h=c4a3d548b57f3c511218d7f1294a7426da5e2b4e" target="_blank">http://kernel.ubuntu.com/git?p=apw/ubuntu-natty.git;a=commit;h=c4a3d548b57f3c511218d7f1294a7426da5e2b4e</a></li>
+<li><a href="http://kernel.ubuntu.com/git?p=apw/ubuntu-natty.git;a=commit;h=8a5bd3f5f45544b4a92015f3e9f1e6998d927b03" target="_blank">http://kernel.ubuntu.com/git?p=apw/ubuntu-natty.git;a=commit;h=8a5bd3f5f45544b4a92015f3e9f1e6998d927b03</a></li>
+</ol>
+
+      
+    </div>
+    <footer>
+      
+        
+  
+  <div class="categories">
+    <a href="/categories/Virtualization/">Virtualization</a>
+  </div>
+
+        
+  
+  <div class="tags">
+    <a href="/tags/oVirt/">oVirt</a>, <a href="/tags/isolinux/">isolinux</a>, <a href="/tags/syslinux/">syslinux</a>, <a href="/tags/vesamenu/">vesamenu</a>, <a href="/tags/vga/">vga</a>
+  </div>
+
+        <!-- Baidu Button BEGIN -->
+<div id="bdshare" class="bdshare_t bds_tools get-codes-bdshare">
+<span class="bds_more">分享到：</span>
+<a class="bds_qzone"></a>
+<a class="bds_tsina"></a>
+<a class="bds_tqq"></a>
+<a class="bds_renren"></a>
+<a class="bds_t163"></a>
+<a class="shareCount"></a>
+</div>
+<script type="text/javascript" id="bdshare_js" data="type=tools&amp;uid=17824" ></script>
+<script type="text/javascript" id="bdshell_js"></script>
+<script type="text/javascript">
+document.getElementById("bdshell_js").src = "http://bdimg.share.baidu.com/static/js/shell_v2.js?cdnversion=" + Math.ceil(new Date()/3600000)
+</script>
+<!-- Baidu Button END -->
+
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+<section id="comment">
+<!-- Duoshuo Comment BEGIN -->
+    <div class="ds-thread" data-thread-key="/2013/06/2013-06-19-ovirt-node-isolinux-white-block-after-bootloader/" data-author-key="leiqzhang" data-title="White background after boot menu of isolinux in ovirt-node"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"leiqzhang"};
+    (function() {
+        var ds = document.createElement('script');
+        ds.type = 'text/javascript';ds.async = true;
+        ds.src = 'http://static.duoshuo.com/embed.js';
+        ds.charset = 'UTF-8';
+        (document.getElementsByTagName('head')[0] 
+        || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+    </script>
+<!-- Duoshuo Comment END -->
+</section>
+
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:leiqzhang.com">
+  </form>
+</div>
+
+  
+<div class="widget tag">
+  <h3 class="title">Categories</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/Linux/">Linux</a><small>3</small></li>
+  
+    <li><a href="/categories/OpenStack/">OpenStack</a><small>2</small></li>
+  
+    <li><a href="/categories/VIM/">VIM</a><small>3</small></li>
+  
+    <li><a href="/categories/Virtualization/">Virtualization</a><small>16</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>2</small></li>
+  
+    <li><a href="/categories/miscellaneous/">miscellaneous</a><small>1</small></li>
+  
+    <li><a href="/categories/web_dev/">web_dev</a><small>8</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tagcloud">
+  <h3 class="title">Tag Cloud</h3>
+  <div class="entry">
+    <a href="/tags/CIM/" style="font-size: 10.00px;">CIM</a><a href="/tags/CORS/" style="font-size: 10.00px;">CORS</a><a href="/tags/DBPM/" style="font-size: 10.00px;">DBPM</a><a href="/tags/Deploy/" style="font-size: 10.00px;">Deploy</a><a href="/tags/ELI/" style="font-size: 10.00px;">ELI</a><a href="/tags/NUMA/" style="font-size: 10.00px;">NUMA</a><a href="/tags/Nova/" style="font-size: 12.50px;">Nova</a><a href="/tags/OPTIONS/" style="font-size: 10.00px;">OPTIONS</a><a href="/tags/Paste/" style="font-size: 10.00px;">Paste</a><a href="/tags/QEMU/" style="font-size: 20.00px;">QEMU</a><a href="/tags/RabbitMQ/" style="font-size: 10.00px;">RabbitMQ</a><a href="/tags/WSGI/" style="font-size: 10.00px;">WSGI</a><a href="/tags/bfc/" style="font-size: 10.00px;">bfc</a><a href="/tags/block-stream/" style="font-size: 10.00px;">block-stream</a><a href="/tags/blockcopy/" style="font-size: 12.50px;">blockcopy</a><a href="/tags/cache/" style="font-size: 10.00px;">cache</a><a href="/tags/css/" style="font-size: 12.50px;">css</a><a href="/tags/dataplane/" style="font-size: 10.00px;">dataplane</a><a href="/tags/device-mapper/" style="font-size: 10.00px;">device-mapper</a><a href="/tags/ervernote/" style="font-size: 10.00px;">ervernote</a><a href="/tags/etag/" style="font-size: 10.00px;">etag</a><a href="/tags/eval/" style="font-size: 10.00px;">eval</a><a href="/tags/fdisk/" style="font-size: 10.00px;">fdisk</a><a href="/tags/fedora/" style="font-size: 10.00px;">fedora</a><a href="/tags/gpt/" style="font-size: 10.00px;">gpt</a><a href="/tags/greasemonkey/" style="font-size: 10.00px;">greasemonkey</a><a href="/tags/http/" style="font-size: 12.50px;">http</a><a href="/tags/isolinux/" style="font-size: 10.00px;">isolinux</a><a href="/tags/javascript/" style="font-size: 10.00px;">javascript</a><a href="/tags/libvirt/" style="font-size: 17.50px;">libvirt</a><a href="/tags/lighthttpd/" style="font-size: 10.00px;">lighthttpd</a><a href="/tags/lighttpd/" style="font-size: 10.00px;">lighttpd</a><a href="/tags/livecd/" style="font-size: 10.00px;">livecd</a><a href="/tags/mac/" style="font-size: 10.00px;">mac</a><a href="/tags/mbr/" style="font-size: 10.00px;">mbr</a><a href="/tags/md5sum/" style="font-size: 10.00px;">md5sum</a><a href="/tags/mysql/" style="font-size: 12.50px;">mysql</a><a href="/tags/oVirt/" style="font-size: 15.00px;">oVirt</a><a href="/tags/parted/" style="font-size: 10.00px;">parted</a><a href="/tags/pdo/" style="font-size: 10.00px;">pdo</a>
+  </div>
+</div>
+
+
+  <iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=2&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=0&uid=1644437791&verifier=c45a1931&dpc=1"></iframe>
+
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://blog.csdn.net/luo_brian" title="luo_brian">Luohao</a></li>
+<li><a href="http://blog.csdn.net/defeattroy" title="木马屠城">Defeattroy</a></li>
+<li><a href="http://www.smilgel.com/" title="听雨轩">MrSaxon</a></li>
+<li><a href="http://lanbolee.com/blog/" title="博之博">Rambolee</a></li>
+<li><a href="http://www.haoziyanwo.com/" title="耗子燕窝">浩子</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2014 leiqzhang
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+<script type="text/javascript">
+var disqus_shortname = 'leiqzhang';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+</body>
+</html>

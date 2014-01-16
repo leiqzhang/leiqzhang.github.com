@@ -1,0 +1,256 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="baidu-site-verification" content="kZ3lZdC9wn" />
+  
+  <title>mbr | Technology &amp; Life</title>
+  <meta name="author" content="leiqzhang">
+  
+  <meta name="description" content="Virtualization Related Technologies">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+  <meta property="og:site_name" content="Technology &amp; Life"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico">
+  <link rel="alternate" href="/atom.xml" title="Technology &amp; Life" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
+  
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-40319520-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+  <script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3F6f62dffd0688838f0bc52fc65fd62af4' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">Technology &amp; Life</a></h1>
+  <h2><a href="/">blog of leiqzhang</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about">About</a></li>
+    
+      <li><a href="/atom.xml">RSS</a></li>
+    
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper">
+<h2 class="archive-title tag">mbr</h2>
+
+
+  
+    <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-06-27T14:40:31.000Z"><a href="/2013/06/2013-06-27-merge-linear-dm-disks-into-single-disk-as-partitions/">Jun 27 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/06/2013-06-27-merge-linear-dm-disks-into-single-disk-as-partitions/">将多个linear device mapper虚拟磁盘改造为同一磁盘的多个分区</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <h2 id="-95ee-9898-">问题</h2>
+<p>在虚拟化场景下，历史上存在如下虚拟磁盘的管理模式：</p>
+<p>在一个LUN上通过linear device mapper的方式制作出若干个DM设备，这些DM设备之间在LUN上并不一定完全相邻，但第一个DM设备必然是从LUN的0扇区开始划分。将这些DM设备以RAW格式的虚拟镜像(卷)挂载给VM使用。</p>
+<figure class="highlight"><figcaption><span>structure</span></figcaption><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+</pre></td><td class="code"><pre>
+               <span class="comment">╔════════════════╗</span>
+               <span class="comment">║</span>      <span class="comment">VM</span>        <span class="comment">║</span>
+               <span class="comment">╚═══════╬════════╝</span>
+                       <span class="comment">|</span>
+                       <span class="comment">|</span>
+        <span class="literal">+</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">+</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">+</span>
+        <span class="comment">|</span>                           <span class="comment">|</span>
+ <span class="comment">╔══════╬═══════╤══════════╤════════╬═══════╗</span>
+ <span class="comment">║</span>  <span class="comment">DM</span>          <span class="comment">│</span>   <span class="comment">GAP</span>    <span class="comment">│</span>   <span class="comment">DM</span>           <span class="comment">║</span>
+ <span class="comment">╚══════════════╧══════════╧════════════════╝</span>
+</pre></td></tr></table></figure>
+
+
+<p>为了便于管理，现在需要将这些LUN按照一个单独卷进行管理。如果直接将此LUN挂载给VM,则只能识别到第一个DM设备对应的虚拟磁盘，后面的DM设别将不会被识别。</p>
+<p>本文主要讨论如何在不损坏数据且高效的解决此问题，达到透明的管理模式切换，即将LUN挂载给VM后，VM还是可以识别到和之前一样数量的磁盘。</p>
+<h2 id="-95ee-9898-539f-56e0-53ca-89e3-51b3-601d-8def-">问题原因及解决思路</h2>
+<p>由于之前是通过DM方式划分的LUN，并将不同的DM设备分别进行的文件系统格式化，故在每个DM设备起始位置的MBR或GPT中只会包含有此DM设备相关的分区信息。</p>
+<p>当把LUN整体挂载给VM时，VM只能通过此LUN起始位置处的MBR或GPT信息来识别磁盘分区信息，由于LUN起始位置的MBR就是第一个DM设备的MBR，故只能识别到第一个DM设备。</p>
+<p>解决此问题的思路也很简单，即将此LUN上除第一个DM外的DM设备的分区信息添加到第一个DM的MBR/GPT中包含的分区表中即可。</p>
+<h2 id="-573a-666f-6784-9020-">场景构造</h2>
+
+      
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/2013/06/2013-06-27-merge-linear-dm-disks-into-single-disk-as-partitions/#more" class="more-link">Read More</a>
+          </div>
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  
+
+  <nav id="pagination">
+  
+  
+  <div class="clearfix"></div>
+</nav>
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:leiqzhang.com">
+  </form>
+</div>
+
+  
+<div class="widget tag">
+  <h3 class="title">Categories</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/Linux/">Linux</a><small>3</small></li>
+  
+    <li><a href="/categories/OpenStack/">OpenStack</a><small>2</small></li>
+  
+    <li><a href="/categories/VIM/">VIM</a><small>3</small></li>
+  
+    <li><a href="/categories/Virtualization/">Virtualization</a><small>16</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>2</small></li>
+  
+    <li><a href="/categories/miscellaneous/">miscellaneous</a><small>1</small></li>
+  
+    <li><a href="/categories/web_dev/">web_dev</a><small>8</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tagcloud">
+  <h3 class="title">Tag Cloud</h3>
+  <div class="entry">
+    <a href="/tags/CIM/" style="font-size: 10.00px;">CIM</a><a href="/tags/CORS/" style="font-size: 10.00px;">CORS</a><a href="/tags/DBPM/" style="font-size: 10.00px;">DBPM</a><a href="/tags/Deploy/" style="font-size: 10.00px;">Deploy</a><a href="/tags/ELI/" style="font-size: 10.00px;">ELI</a><a href="/tags/NUMA/" style="font-size: 10.00px;">NUMA</a><a href="/tags/Nova/" style="font-size: 12.50px;">Nova</a><a href="/tags/OPTIONS/" style="font-size: 10.00px;">OPTIONS</a><a href="/tags/Paste/" style="font-size: 10.00px;">Paste</a><a href="/tags/QEMU/" style="font-size: 20.00px;">QEMU</a><a href="/tags/RabbitMQ/" style="font-size: 10.00px;">RabbitMQ</a><a href="/tags/WSGI/" style="font-size: 10.00px;">WSGI</a><a href="/tags/bfc/" style="font-size: 10.00px;">bfc</a><a href="/tags/block-stream/" style="font-size: 10.00px;">block-stream</a><a href="/tags/blockcopy/" style="font-size: 12.50px;">blockcopy</a><a href="/tags/cache/" style="font-size: 10.00px;">cache</a><a href="/tags/css/" style="font-size: 12.50px;">css</a><a href="/tags/dataplane/" style="font-size: 10.00px;">dataplane</a><a href="/tags/device-mapper/" style="font-size: 10.00px;">device-mapper</a><a href="/tags/ervernote/" style="font-size: 10.00px;">ervernote</a><a href="/tags/etag/" style="font-size: 10.00px;">etag</a><a href="/tags/eval/" style="font-size: 10.00px;">eval</a><a href="/tags/fdisk/" style="font-size: 10.00px;">fdisk</a><a href="/tags/fedora/" style="font-size: 10.00px;">fedora</a><a href="/tags/gpt/" style="font-size: 10.00px;">gpt</a><a href="/tags/greasemonkey/" style="font-size: 10.00px;">greasemonkey</a><a href="/tags/http/" style="font-size: 12.50px;">http</a><a href="/tags/isolinux/" style="font-size: 10.00px;">isolinux</a><a href="/tags/javascript/" style="font-size: 10.00px;">javascript</a><a href="/tags/libvirt/" style="font-size: 17.50px;">libvirt</a><a href="/tags/lighthttpd/" style="font-size: 10.00px;">lighthttpd</a><a href="/tags/lighttpd/" style="font-size: 10.00px;">lighttpd</a><a href="/tags/livecd/" style="font-size: 10.00px;">livecd</a><a href="/tags/mac/" style="font-size: 10.00px;">mac</a><a href="/tags/mbr/" style="font-size: 10.00px;">mbr</a><a href="/tags/md5sum/" style="font-size: 10.00px;">md5sum</a><a href="/tags/mysql/" style="font-size: 12.50px;">mysql</a><a href="/tags/oVirt/" style="font-size: 15.00px;">oVirt</a><a href="/tags/parted/" style="font-size: 10.00px;">parted</a><a href="/tags/pdo/" style="font-size: 10.00px;">pdo</a>
+  </div>
+</div>
+
+
+  <iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=2&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=0&uid=1644437791&verifier=c45a1931&dpc=1"></iframe>
+
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://blog.csdn.net/luo_brian" title="luo_brian">Luohao</a></li>
+<li><a href="http://blog.csdn.net/defeattroy" title="木马屠城">Defeattroy</a></li>
+<li><a href="http://www.smilgel.com/" title="听雨轩">MrSaxon</a></li>
+<li><a href="http://lanbolee.com/blog/" title="博之博">Rambolee</a></li>
+<li><a href="http://www.haoziyanwo.com/" title="耗子燕窝">浩子</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2014 leiqzhang
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+<script type="text/javascript">
+var disqus_shortname = 'leiqzhang';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+</body>
+</html>

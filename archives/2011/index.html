@@ -371,18 +371,44 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
       
         <p>项目开发过程中，有时会批量更新替换一系列其他人提供的文件，文件提供者会给出各文件的路径和md5，在将文件替换后，也需要对md5进行校验。此时可以使用md5sum的—check参数进行批量验证：</p>
 <p>用法是</p>
-<p>[code]</p>
-<p>md5sum —check ~/data_md5</p>
-<p>[/code]</p>
+<figure class="highlight lang-bash"><figcaption><span>md5sum_check </span></figcaption><table><tr><td class="gutter"><pre>1
+2
+</pre></td><td class="code"><pre>
+md5sum --check ~/data_md5
+</pre></td></tr></table></figure>
+
+
 <p>其中data_md5文件的内容如下：</p>
-<p>[code]</p>
-<p>MD5值[空格][空格]文件1路径<br>MD5值[空格][空格]文件2路径<br>…</p>
-<p>[/code]</p>
+<figure class="highlight lang-bash"><figcaption><span>md5sum_data </span></figcaption><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+</pre></td><td class="code"><pre>
+
+MD5值[空格][空格]文件<span class="number">1</span>路径
+MD5值[空格][空格]文件<span class="number">2</span>路径
+...
+
+</pre></td></tr></table></figure>
+
+
 <p>需要注意的是，每一行中的MD5值和路径之间必须是两个空格，否则md5sum会报文件不存在之类的错误。</p>
 <p>检测的输出结果的格式如下：</p>
-<p>[code]</p>
-<p>文件1路径： OK<br>文件2路径： FAILED</p>
-<p>[/code]</p>
+<figure class="highlight lang-bash"><figcaption><span>md5sum_data </span></figcaption><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+</pre></td><td class="code"><pre>
+
+文件<span class="number">1</span>路径： OK
+文件<span class="number">2</span>路径： FAILED
+
+</pre></td></tr></table></figure>
+
+
 <p>其中OK表示验证通过（文件md5和文件中给定的md5一直），FAILED表示验证失败</p>
 
       
@@ -427,7 +453,7 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
   
     <li><a href="/categories/VIM/">VIM</a><small>3</small></li>
   
-    <li><a href="/categories/Virtualization/">Virtualization</a><small>13</small></li>
+    <li><a href="/categories/Virtualization/">Virtualization</a><small>16</small></li>
   
     <li><a href="/categories/WordPress/">WordPress</a><small>2</small></li>
   
@@ -443,7 +469,7 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
 <div class="widget tagcloud">
   <h3 class="title">Tag Cloud</h3>
   <div class="entry">
-    <a href="/tags/CIM/" style="font-size: 10.00px;">CIM</a><a href="/tags/CORS/" style="font-size: 10.00px;">CORS</a><a href="/tags/DBPM/" style="font-size: 10.00px;">DBPM</a><a href="/tags/Deploy/" style="font-size: 10.00px;">Deploy</a><a href="/tags/ELI/" style="font-size: 10.00px;">ELI</a><a href="/tags/NUMA/" style="font-size: 10.00px;">NUMA</a><a href="/tags/Nova/" style="font-size: 12.50px;">Nova</a><a href="/tags/OPTIONS/" style="font-size: 10.00px;">OPTIONS</a><a href="/tags/Paste/" style="font-size: 10.00px;">Paste</a><a href="/tags/QEMU/" style="font-size: 20.00px;">QEMU</a><a href="/tags/RabbitMQ/" style="font-size: 10.00px;">RabbitMQ</a><a href="/tags/WSGI/" style="font-size: 10.00px;">WSGI</a><a href="/tags/bfc/" style="font-size: 10.00px;">bfc</a><a href="/tags/block-stream/" style="font-size: 10.00px;">block-stream</a><a href="/tags/blockcopy/" style="font-size: 12.50px;">blockcopy</a><a href="/tags/cache/" style="font-size: 10.00px;">cache</a><a href="/tags/css/" style="font-size: 12.50px;">css</a><a href="/tags/dataplane/" style="font-size: 10.00px;">dataplane</a><a href="/tags/ervernote/" style="font-size: 10.00px;">ervernote</a><a href="/tags/etag/" style="font-size: 10.00px;">etag</a><a href="/tags/eval/" style="font-size: 10.00px;">eval</a><a href="/tags/fedora/" style="font-size: 10.00px;">fedora</a><a href="/tags/greasemonkey/" style="font-size: 10.00px;">greasemonkey</a><a href="/tags/http/" style="font-size: 12.50px;">http</a><a href="/tags/javascript/" style="font-size: 10.00px;">javascript</a><a href="/tags/libvirt/" style="font-size: 17.50px;">libvirt</a><a href="/tags/lighthttpd/" style="font-size: 10.00px;">lighthttpd</a><a href="/tags/lighttpd/" style="font-size: 10.00px;">lighttpd</a><a href="/tags/livecd/" style="font-size: 10.00px;">livecd</a><a href="/tags/mac/" style="font-size: 10.00px;">mac</a><a href="/tags/md5sum/" style="font-size: 10.00px;">md5sum</a><a href="/tags/mysql/" style="font-size: 12.50px;">mysql</a><a href="/tags/oVirt/" style="font-size: 12.50px;">oVirt</a><a href="/tags/pdo/" style="font-size: 10.00px;">pdo</a><a href="/tags/performance/" style="font-size: 12.50px;">performance</a><a href="/tags/permalink/" style="font-size: 10.00px;">permalink</a><a href="/tags/php/" style="font-size: 15.00px;">php</a><a href="/tags/post/" style="font-size: 10.00px;">post</a><a href="/tags/proxy/" style="font-size: 10.00px;">proxy</a><a href="/tags/qemu-img/" style="font-size: 10.00px;">qemu-img</a>
+    <a href="/tags/CIM/" style="font-size: 10.00px;">CIM</a><a href="/tags/CORS/" style="font-size: 10.00px;">CORS</a><a href="/tags/DBPM/" style="font-size: 10.00px;">DBPM</a><a href="/tags/Deploy/" style="font-size: 10.00px;">Deploy</a><a href="/tags/ELI/" style="font-size: 10.00px;">ELI</a><a href="/tags/NUMA/" style="font-size: 10.00px;">NUMA</a><a href="/tags/Nova/" style="font-size: 12.50px;">Nova</a><a href="/tags/OPTIONS/" style="font-size: 10.00px;">OPTIONS</a><a href="/tags/Paste/" style="font-size: 10.00px;">Paste</a><a href="/tags/QEMU/" style="font-size: 20.00px;">QEMU</a><a href="/tags/RabbitMQ/" style="font-size: 10.00px;">RabbitMQ</a><a href="/tags/WSGI/" style="font-size: 10.00px;">WSGI</a><a href="/tags/bfc/" style="font-size: 10.00px;">bfc</a><a href="/tags/block-stream/" style="font-size: 10.00px;">block-stream</a><a href="/tags/blockcopy/" style="font-size: 12.50px;">blockcopy</a><a href="/tags/cache/" style="font-size: 10.00px;">cache</a><a href="/tags/css/" style="font-size: 12.50px;">css</a><a href="/tags/dataplane/" style="font-size: 10.00px;">dataplane</a><a href="/tags/device-mapper/" style="font-size: 10.00px;">device-mapper</a><a href="/tags/ervernote/" style="font-size: 10.00px;">ervernote</a><a href="/tags/etag/" style="font-size: 10.00px;">etag</a><a href="/tags/eval/" style="font-size: 10.00px;">eval</a><a href="/tags/fdisk/" style="font-size: 10.00px;">fdisk</a><a href="/tags/fedora/" style="font-size: 10.00px;">fedora</a><a href="/tags/gpt/" style="font-size: 10.00px;">gpt</a><a href="/tags/greasemonkey/" style="font-size: 10.00px;">greasemonkey</a><a href="/tags/http/" style="font-size: 12.50px;">http</a><a href="/tags/isolinux/" style="font-size: 10.00px;">isolinux</a><a href="/tags/javascript/" style="font-size: 10.00px;">javascript</a><a href="/tags/libvirt/" style="font-size: 17.50px;">libvirt</a><a href="/tags/lighthttpd/" style="font-size: 10.00px;">lighthttpd</a><a href="/tags/lighttpd/" style="font-size: 10.00px;">lighttpd</a><a href="/tags/livecd/" style="font-size: 10.00px;">livecd</a><a href="/tags/mac/" style="font-size: 10.00px;">mac</a><a href="/tags/mbr/" style="font-size: 10.00px;">mbr</a><a href="/tags/md5sum/" style="font-size: 10.00px;">md5sum</a><a href="/tags/mysql/" style="font-size: 12.50px;">mysql</a><a href="/tags/oVirt/" style="font-size: 15.00px;">oVirt</a><a href="/tags/parted/" style="font-size: 10.00px;">parted</a><a href="/tags/pdo/" style="font-size: 10.00px;">pdo</a>
   </div>
 </div>
 

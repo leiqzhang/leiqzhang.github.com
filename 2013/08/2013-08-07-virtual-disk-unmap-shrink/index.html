@@ -1,0 +1,314 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="baidu-site-verification" content="kZ3lZdC9wn" />
+  
+  <title>虚拟磁盘的空间回收: Virtual Disk UNMAP/Shrink | Technology &amp; Life</title>
+  <meta name="author" content="leiqzhang">
+  
+  <meta name="description" content="Virtualization Related Technologies">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="虚拟磁盘的空间回收: Virtual Disk UNMAP/Shrink"/>
+  <meta property="og:site_name" content="Technology &amp; Life"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico">
+  <link rel="alternate" href="/atom.xml" title="Technology &amp; Life" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
+  
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-40319520-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+  <script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3F6f62dffd0688838f0bc52fc65fd62af4' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">Technology &amp; Life</a></h1>
+  <h2><a href="/">blog of leiqzhang</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about">About</a></li>
+    
+      <li><a href="/atom.xml">RSS</a></li>
+    
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-08-07T14:40:31.000Z"><a href="/2013/08/2013-08-07-virtual-disk-unmap-shrink/">Aug 7 2013</a></time>
+      
+      
+  
+    <h1 class="title">虚拟磁盘的空间回收: Virtual Disk UNMAP/Shrink</h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <h2 id="-95ee-9898-">问题</h2>
+<p>在虚拟化场景下，瘦分配(Thin-provisioning)磁盘应用场景非常广泛。目前主流的虚拟磁盘镜像格式，如Dynamic VHD、Sparse Raw、Qcow2、VMDK等均只具有随着虚拟机读写而动态增长的能力，一般来说是按需每次分配一个固定大小的块，如VHD的块是2M为单位。</p>
+<p>当Guest OS删除了文件，已经分配的空间在虚拟磁盘上可否进行空间回收呢？</p>
+<p>空间回收主要包括两步，一是获取到可以回收的空间，二是在虚拟磁盘文件中对相应空间进行回收。</p>
+<p>根据获取所需回收空间时虚拟磁盘的IO情况来讲，回收主要有在线回收和离线回收，在线和离线的区别在于虚拟磁盘是否在有Guest持续写IO的情况下进行空间回收。也即离线回收不单单指虚拟机关机情形下的回收，也包括虚拟磁盘只有读IO的情况（如虚拟磁盘为某个ROW快照的父镜像）。</p>
+<p>就虚拟磁盘文件来说，空间回收的结果可以是如下两种</p>
+<ol>
+<li>在Host上实际占用的空间减少</li>
+<li>在Host上实际占用的空间减少，但是后续Guest的写入可以复用之前需要回收的空间，从而使得虚拟磁盘文件不会随着Guest的写入立即分配新块</li>
+</ol>
+<p>下文首先分别对离线和在线可回收空间获取方法进行讨论，然后对虚拟磁盘文件的空间回收方式进行讨论，最后以Qemu当前的实现为例进行说明。</p>
+<a id="more"></a>
+
+
+<h2 id="-79bb-7ebf-53ef-56de-6536-7a7a-95f4-83b7-53d6-65b9-6cd5-">离线可回收空间获取方法</h2>
+<p>离线情况下获取可回收空间，需要首先挂载虚拟磁盘到Dom0，然后进行如下几种方式之一的操作：</p>
+<ol>
+<li>读取虚拟磁盘上Guest文件系统信息，找到已经被删除的文件，在已删除文件区域填零作为标记</li>
+<li>直接在虚拟磁盘中生成一个能生成的极限大小的全零文件</li>
+</ol>
+<p>第一种需要感知具体的文件系统格式，如对于NTFS来说可以利用开源的ntfs-3g库，但总归是需要较为复杂的程序逻辑；第二种实现起来简单，但是此方法在标记完成后会将虚拟磁盘文件撑到其规格容量大小。</p>
+<h2 id="-5728-7ebf-53ef-56de-6536-7a7a-95f4-83b7-53d6-65b9-6cd5-_-2014-_-5168-96f6-6c14-7403-6587-4ef6-">在线可回收空间获取方法 — 全零气球文件</h2>
+<p>在线情况下，不能使用离线情况下的第一种方案，因为此方案实际是分为两步，第一步是向OS查询已删除空间，第二步是填零，这两步并非原子操作，由于虚拟磁盘有持续些IO，可能在第一步后OS又将此已删除空间分配了出去，那么接下来第二步的填零操作就会破坏文件系统的数据，当此时OS分配的空间是用于文件系统元数据的话，可能还会造成文件系统的损坏。</p>
+<p>所以在线情况下只能使用类似于离线第二种方案的方案，即利用OS的API在Guest内部生成极限大小的全零气球文件，以此文件所占的空间来标记可回收空间。对于NTFS来说，Mircosoft的SDelete工具可以做到这一点(<a href="http://www.microsoft.com/technet/sysinternals/Security/SDelete.mspx" target="_blank">http://www.microsoft.com/technet/sysinternals/Security/SDelete.mspx</a>).</p>
+<p>当然此方法也会导致虚拟磁盘文件首先撑到规格大小，且在后续回收时需要VM一定时间的暂停。</p>
+<h2 id="-5728-7ebf-53ef-56de-6536-7a7a-95f4-83b7-53d6-65b9-6cd5-_-2014-_-611f-77e5-6587-4ef6-5220-9664-">在线可回收空间获取方法 — 感知文件删除</h2>
+<p>在虚拟化场景下，如需Virtual Device Driver感知到文件的删除，只能两方面努力：</p>
+<ol>
+<li>使得Guest OS的文件系统在文件删除时可以下发通知到Driver层</li>
+<li>在Guest OS中的驱动或半虚驱动（PVDriver、VirtioDriver、VMware Tools）中对文件系统的通知进行处理，并进行相应地处理</li>
+</ol>
+<h3 id="-6587-4ef6-7cfb-7edf-4e0b-53d1-5220-9664-901a-77e5-">文件系统下发删除通知</h3>
+<p>当前NTFS已经支持在删除文件时下发TRIM指令到Driver, 可以通过“fsutil behavior query DisableDeleteNotify“命令查询是否开启了TRIM；</p>
+<p>EXT4在mount时可以指定-o discard选项，则删除文件后，EXT4会自动下发discard指令到Driver（ioctl BLKDISCARD）；EXT3等文件系统可以手动执行fstrim来使得文件系统对于已经删除的空间下发Discard。</p>
+<h3 id="Driver-5c42-7684-5904-7406-">Driver层的处理</h3>
+<p>当前ATA-8 ACS-2协议以及SCSI协议均已经对存储设备的空间回收提供了相应的协议支持，在ATA中此命令称为TRIM，在SCSI中此命令称为UNMAP。</p>
+<p>提到TRIM，可能更多的会联想到SSD，其实当前IDE也已经支持此命令了，SCSI的UNMAP一般为Thinly-provisioned storage提供支持，所有走SCSI协议的设备理论上均可以接受UNMAP命令。</p>
+<p>当虚拟机内部的虚拟设备是支持UNMAP/TRIM的半虚设备时，如virtio-scsi，需要半虚驱动在接收到文件系统的删除通知后将其转换为相应协议中的UNMAP或TRIM命令；如果非半虚驱动，如IDE，则Guest OS中自带或者安装的原生驱动会负责处理文件系统删除命令到协议命令的转换；如果虚拟机内部的半虚设备或者非半虚设备所采用的协议不支持空间回收，如virtio-blk、xen的pvblk等等，是不能支持空间回收的。</p>
+<h3 id="-7ed3-8bba-">结论</h3>
+<p>结合上述的协议和文件系统支持，在虚拟化场景下，可以使得Guest OS使用如上开启TRIM的NTFS、开启DISCARD的EXT4或支持fstrim的文件系统，然后模拟IDE、SSD或者SCSI设备到Guest中，并对半虚设备使用支持命令转换的半虚驱动，是实现空间回收的必要条件。</p>
+<h2 id="-865a-62df-78c1-76d8-6587-4ef6-7a7a-95f4-56de-6536-65b9-6cd5-">虚拟磁盘文件空间回收方法</h2>
+<p>对于支持稀疏文件空间回收的系统来说，如Linux 2.6.38 + Ext4/ocfs2等，可以通过fallocate系统调用的FALLOC_FL_PUNCH_HOLE flag来对文件内部指定区域进行punch hole，进而达到空间回收的目的。</p>
+<p>对于Qcow2等虚拟镜像文件，可以对回收块对应的L Table和Refcount Table进行标记，从而使得此空间后续可进行复用。</p>
+<h2 id="QEMU-4e0b-5728-7ebf-7a7a-95f4-56de-6536-7684-5b9e-73b0-">QEMU下在线空间回收的实现</h2>
+<p>这里得在线空间回收是指感知文件删除方式。</p>
+<p>条件：</p>
+<ol>
+<li>启动时对于相应的drive指定discard=on选项，如-drive file=/path/to/file.qcow2,format=qcow2,if=none,cache=none,discard=on</li>
+<li>使用Default PC类型的Machine，即指定-m PC选项。对于-m pc-0.15来说，模拟的ide设备不支持trim指令</li>
+<li>对于Windows 7 + NTFS来说，可使用IDE、AHCI等driver</li>
+<li>对于Linux + EXT4来说，可使用IDE、AHCI、virtio-scsi等driver</li>
+</ol>
+<p>实现：</p>
+<p>QEMU的block层接受到Guest OS通过Driver转发下来的TRIM或UNMAP命令后，最终会执行到相应的虚拟磁盘文件对应的driver中，对于qcow2来说，执行的操作就是标记Table，对于Raw来说，执行的操作是fallocate，对于设备来说，执行的操作是ioctl(BLKDISCARD)</p>
+<p>Windows限制：</p>
+<p>当前Windows下virtio-scsi还无法支持空间回收(qemu 1.5)，主要原因是windows下的virtio scsi驱动并未对NTFS下发的TRIM指令进行捕获并翻译为SCSI的UNMAP指令。考虑到Windows得驱动栈，应该需要实现一个filter driver。当前社区正在进行此项工作，预计不久就会予以支持。</p>
+<h2 id="-53c2-8003-8d44-6599-">参考资料</h2>
+<ul>
+<li>Fallocate： <a href="http://man7.org/linux/man-pages/man2/fallocate.2.html" target="_blank">http://man7.org/linux/man-pages/man2/fallocate.2.html</a></li>
+<li>BLKDISCARD: <a href="http://man7.org/linux/man-pages/man8/blkdiscard.8.html" target="_blank">http://man7.org/linux/man-pages/man8/blkdiscard.8.html</a></li>
+<li>AHCI &amp; IDE： <a href="http://communities.intel.com/thread/8934" target="_blank">http://communities.intel.com/thread/8934</a></li>
+<li>QEMU Discard Option：<a href="http://lists.nongnu.org/archive/html/qemu-devel/2013-03/msg02851.html" target="_blank">http://lists.nongnu.org/archive/html/qemu-devel/2013-03/msg02851.html</a></li>
+<li>TRIM实例：<a href="http://dustymabe.com/2013/06/11/recover-space-from-vm-disk-images-by-using-discardfstrim/" target="_blank">http://dustymabe.com/2013/06/11/recover-space-from-vm-disk-images-by-using-discardfstrim/</a></li>
+<li>TRIM实例2：<a href="http://dustymabe.com/2013/06/21/guest-discardfstrim-on-thin-lvs/" target="_blank">http://dustymabe.com/2013/06/21/guest-discardfstrim-on-thin-lvs/</a></li>
+<li>一种利用loop设备+ext4的TRIM方式：<a href="http://www.outflux.net/blog/archives/2012/02/15/discard-hole-punching-and-trim/" target="_blank">http://www.outflux.net/blog/archives/2012/02/15/discard-hole-punching-and-trim/</a></li>
+</ul>
+
+      
+    </div>
+    <footer>
+      
+        
+  
+  <div class="categories">
+    <a href="/categories/Virtualization/">Virtualization</a>
+  </div>
+
+        
+  
+  <div class="tags">
+    <a href="/tags/unmap/">unmap</a>, <a href="/tags/trim/">trim</a>, <a href="/tags/shrink/">shrink</a>, <a href="/tags/sparse/">sparse</a>, <a href="/tags/scsi/">scsi</a>
+  </div>
+
+        <!-- Baidu Button BEGIN -->
+<div id="bdshare" class="bdshare_t bds_tools get-codes-bdshare">
+<span class="bds_more">分享到：</span>
+<a class="bds_qzone"></a>
+<a class="bds_tsina"></a>
+<a class="bds_tqq"></a>
+<a class="bds_renren"></a>
+<a class="bds_t163"></a>
+<a class="shareCount"></a>
+</div>
+<script type="text/javascript" id="bdshare_js" data="type=tools&amp;uid=17824" ></script>
+<script type="text/javascript" id="bdshell_js"></script>
+<script type="text/javascript">
+document.getElementById("bdshell_js").src = "http://bdimg.share.baidu.com/static/js/shell_v2.js?cdnversion=" + Math.ceil(new Date()/3600000)
+</script>
+<!-- Baidu Button END -->
+
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+<section id="comment">
+<!-- Duoshuo Comment BEGIN -->
+    <div class="ds-thread" data-thread-key="/2013/08/2013-08-07-virtual-disk-unmap-shrink/" data-author-key="leiqzhang" data-title="虚拟磁盘的空间回收: Virtual Disk UNMAP/Shrink"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"leiqzhang"};
+    (function() {
+        var ds = document.createElement('script');
+        ds.type = 'text/javascript';ds.async = true;
+        ds.src = 'http://static.duoshuo.com/embed.js';
+        ds.charset = 'UTF-8';
+        (document.getElementsByTagName('head')[0] 
+        || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+    </script>
+<!-- Duoshuo Comment END -->
+</section>
+
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:leiqzhang.com">
+  </form>
+</div>
+
+  
+<div class="widget tag">
+  <h3 class="title">Categories</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/Linux/">Linux</a><small>3</small></li>
+  
+    <li><a href="/categories/OpenStack/">OpenStack</a><small>2</small></li>
+  
+    <li><a href="/categories/VIM/">VIM</a><small>3</small></li>
+  
+    <li><a href="/categories/Virtualization/">Virtualization</a><small>16</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>2</small></li>
+  
+    <li><a href="/categories/miscellaneous/">miscellaneous</a><small>1</small></li>
+  
+    <li><a href="/categories/web_dev/">web_dev</a><small>8</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tagcloud">
+  <h3 class="title">Tag Cloud</h3>
+  <div class="entry">
+    <a href="/tags/CIM/" style="font-size: 10.00px;">CIM</a><a href="/tags/CORS/" style="font-size: 10.00px;">CORS</a><a href="/tags/DBPM/" style="font-size: 10.00px;">DBPM</a><a href="/tags/Deploy/" style="font-size: 10.00px;">Deploy</a><a href="/tags/ELI/" style="font-size: 10.00px;">ELI</a><a href="/tags/NUMA/" style="font-size: 10.00px;">NUMA</a><a href="/tags/Nova/" style="font-size: 12.50px;">Nova</a><a href="/tags/OPTIONS/" style="font-size: 10.00px;">OPTIONS</a><a href="/tags/Paste/" style="font-size: 10.00px;">Paste</a><a href="/tags/QEMU/" style="font-size: 20.00px;">QEMU</a><a href="/tags/RabbitMQ/" style="font-size: 10.00px;">RabbitMQ</a><a href="/tags/WSGI/" style="font-size: 10.00px;">WSGI</a><a href="/tags/bfc/" style="font-size: 10.00px;">bfc</a><a href="/tags/block-stream/" style="font-size: 10.00px;">block-stream</a><a href="/tags/blockcopy/" style="font-size: 12.50px;">blockcopy</a><a href="/tags/cache/" style="font-size: 10.00px;">cache</a><a href="/tags/css/" style="font-size: 12.50px;">css</a><a href="/tags/dataplane/" style="font-size: 10.00px;">dataplane</a><a href="/tags/device-mapper/" style="font-size: 10.00px;">device-mapper</a><a href="/tags/ervernote/" style="font-size: 10.00px;">ervernote</a><a href="/tags/etag/" style="font-size: 10.00px;">etag</a><a href="/tags/eval/" style="font-size: 10.00px;">eval</a><a href="/tags/fdisk/" style="font-size: 10.00px;">fdisk</a><a href="/tags/fedora/" style="font-size: 10.00px;">fedora</a><a href="/tags/gpt/" style="font-size: 10.00px;">gpt</a><a href="/tags/greasemonkey/" style="font-size: 10.00px;">greasemonkey</a><a href="/tags/http/" style="font-size: 12.50px;">http</a><a href="/tags/isolinux/" style="font-size: 10.00px;">isolinux</a><a href="/tags/javascript/" style="font-size: 10.00px;">javascript</a><a href="/tags/libvirt/" style="font-size: 17.50px;">libvirt</a><a href="/tags/lighthttpd/" style="font-size: 10.00px;">lighthttpd</a><a href="/tags/lighttpd/" style="font-size: 10.00px;">lighttpd</a><a href="/tags/livecd/" style="font-size: 10.00px;">livecd</a><a href="/tags/mac/" style="font-size: 10.00px;">mac</a><a href="/tags/mbr/" style="font-size: 10.00px;">mbr</a><a href="/tags/md5sum/" style="font-size: 10.00px;">md5sum</a><a href="/tags/mysql/" style="font-size: 12.50px;">mysql</a><a href="/tags/oVirt/" style="font-size: 15.00px;">oVirt</a><a href="/tags/parted/" style="font-size: 10.00px;">parted</a><a href="/tags/pdo/" style="font-size: 10.00px;">pdo</a>
+  </div>
+</div>
+
+
+  <iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=2&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=0&uid=1644437791&verifier=c45a1931&dpc=1"></iframe>
+
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://blog.csdn.net/luo_brian" title="luo_brian">Luohao</a></li>
+<li><a href="http://blog.csdn.net/defeattroy" title="木马屠城">Defeattroy</a></li>
+<li><a href="http://www.smilgel.com/" title="听雨轩">MrSaxon</a></li>
+<li><a href="http://lanbolee.com/blog/" title="博之博">Rambolee</a></li>
+<li><a href="http://www.haoziyanwo.com/" title="耗子燕窝">浩子</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2014 leiqzhang
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+<script type="text/javascript">
+var disqus_shortname = 'leiqzhang';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+</body>
+</html>

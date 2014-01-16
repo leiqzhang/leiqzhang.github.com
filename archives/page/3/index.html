@@ -90,6 +90,216 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
     <header>
       
         <div class="icon"></div>
+        <time datetime="2011-02-25T12:24:13.000Z"><a href="/2011/02/2011-02-25-lighthttpd-wordpress-permalink-postname/">Feb 25 2011</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2011/02/2011-02-25-lighthttpd-wordpress-permalink-postname/">lighthttpd实现WordPress永久链接(Permalink)</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>WordPress的永久链接(permalink)可支持自定义的链接结构,如本博客的url格式为<a href="http://leivli.duapp.com/%postname%,其中postname表示文章的别名。" target="_blank">http://leivli.duapp.com/%postname%,其中postname表示文章的别名。</a></p>
+<p>站点迁移到lighthttpd环境后，需要进行一些配置才可以支持:</p>
+<p>[code]</p>
+<p>$HTTP[“host”] =~ “leivli.(.<em>)” {<br>url.rewrite-once = (<br> “^/(wp-admin\/.</em>)/?$” =&gt; “/$1”,<br> “^/([_0-9a-zA-Z-]+)/?$” =&gt; “/index.php?name=$1”,<br> )<br>}</p>
+<p>[/code]</p>
+<p>原理其实就是将/postname形式的url重新改为index.php?name=postname的形式，但需要特殊处理管理入口(/wp-admin)，否则会认为wp-admin也是一个postname</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  
+    <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2011-01-05T13:58:32.000Z"><a href="/2011/01/2011-01-05-md5sum-check-with-file/">Jan 5 2011</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2011/01/2011-01-05-md5sum-check-with-file/">md5sum的--check用法</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>项目开发过程中，有时会批量更新替换一系列其他人提供的文件，文件提供者会给出各文件的路径和md5，在将文件替换后，也需要对md5进行校验。此时可以使用md5sum的—check参数进行批量验证：</p>
+<p>用法是</p>
+<figure class="highlight lang-bash"><figcaption><span>md5sum_check </span></figcaption><table><tr><td class="gutter"><pre>1
+2
+</pre></td><td class="code"><pre>
+md5sum --check ~/data_md5
+</pre></td></tr></table></figure>
+
+
+<p>其中data_md5文件的内容如下：</p>
+<figure class="highlight lang-bash"><figcaption><span>md5sum_data </span></figcaption><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+</pre></td><td class="code"><pre>
+
+MD5值[空格][空格]文件<span class="number">1</span>路径
+MD5值[空格][空格]文件<span class="number">2</span>路径
+...
+
+</pre></td></tr></table></figure>
+
+
+<p>需要注意的是，每一行中的MD5值和路径之间必须是两个空格，否则md5sum会报文件不存在之类的错误。</p>
+<p>检测的输出结果的格式如下：</p>
+<figure class="highlight lang-bash"><figcaption><span>md5sum_data </span></figcaption><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+</pre></td><td class="code"><pre>
+
+文件<span class="number">1</span>路径： OK
+文件<span class="number">2</span>路径： FAILED
+
+</pre></td></tr></table></figure>
+
+
+<p>其中OK表示验证通过（文件md5和文件中给定的md5一直），FAILED表示验证失败</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  
+    <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2010-12-06T09:37:57.000Z"><a href="/2010/12/2010-12-06-vim-tips-incresing-list-substitute-replace/">Dec 6 2010</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2010/12/2010-12-06-vim-tips-incresing-list-substitute-replace/">VIM中通过substitute/replace快速生成一系列连续的IP地址</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>今天有这么一个操作，需要快速添加一个IP段，如220.181.50.206～220.181.50.254，我需要快速生成该段中一个所有IP地址的列表，以进行IP地址的导入。</p>
+<p>在VIM中可以这样：</p>
+<p>首先输入第一行:</p>
+<figure class="highlight lang-linux"><figcaption><span>first_step </span></figcaption><table><tr><td class="gutter"><pre>1
+2
+3
+4
+</pre></td><td class="code"><pre>
+
+<span class="undefined">220.181.50.206
+</span>
+</pre></td></tr></table></figure>
+
+
+<p>然后yy复制第一行，并48p复制出49行”220.181.50.206”, 然后执行以下命令即可</p>
+<figure class="highlight lang-linux"><figcaption><span>substitute </span></figcaption><table><tr><td class="gutter"><pre>1
+2
+3
+4
+</pre></td><td class="code"><pre>
+
+<span class="brainfuck"><span class="comment">：%s/50</span><span class="string">.</span><span class="comment">\zs\(\d\</span><span class="literal">+</span><span class="comment">\)\ze$/\=eval(submatch(1)</span><span class="literal">+</span><span class="comment">line("</span><span class="string">.</span><span class="comment">")</span><span class="literal">-</span><span class="comment">1)/g</span>
+</span>
+</pre></td></tr></table></figure>
+
+
+<p>该命令是指对于所有匹配的部分（ip最后一个段），加上当前行号减一，这样就生成了一个从206到254的连续ip地址列表。</p>
+<p>Just Enjoy It！</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  
+    <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
         <time datetime="2010-11-30T13:27:24.000Z"><a href="/2010/11/2010-11-30-http-proxy-request-uri/">Nov 30 2010</a></time>
       
       
@@ -158,33 +368,43 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
       
         <p>通过svn merge合并代码时经常会报树冲突(tree conflict)，而对于每个树冲突不能简单的忽略了事，需要和待merge版本相应的文件进行diff才可以。</p>
 <p>目前我们组的并行项目很多，svn merge时，树冲突往往非常多，一个一个手动去diff是一个很繁琐的过程，下午大概写了一个shell方法对所有树冲突的文件进行diff，可以将以下代码加入~/.bash_profile文件：</p>
-<p>[shell]</p>
-<h1 id="-8bbe-5b9a-9879-76ee-6240-5728-76ee-5f55-">设定项目所在目录</h1>
-<p>export PRJ=/home/work/var/www/htdocs</p>
-<h1 id="-6839-636e-svn_info-83b7-53d6-5f53-524d-76ee-5f55-5c42-6b21-ff0c-5e76-6784-9020-76f8-5e94-7684-diff-76ee-7684-6587-4ef6-8def-5f84-">根据svn info获取当前目录层次，并构造相应的diff目的文件路径</h1>
-<h1 id="-5982-5f53-524d-5728-24-PRJ-2f-pro_merge-2f-protected-2f-modules-2f-operations-4e0b-">如当前在$PRJ/pro_merge/protected/modules/operations下</h1>
-<h1 id="-5219-201d-getDir_-24-PRJ-2f-pro-201d-7684-7ed3-679c-662f-24-PRJ-2f-pro-2f-protected-2f-modules-2f-operations">则”getDir $PRJ/pro”的结果是$PRJ/pro/protected/modules/operations</h1>
-<h1 id="-5f53-7136-524d-63d0-662f-svn_info-4e2d-7684-URL-884c-5bf9-5e94-7684-683c-5f0f-662f-3c-a_href-3d-22-https-3a-2f-2f-2a-2f-2a-_BRANCH-2f-protected-2f-modules-2f-operations-6216-https-3a-2f-2f-2a-2f-2a-_PD_BL-2f-protected-2f-modules-2f-operations-22-3e-https-3a-2f-2f-2a-2f-2a-_BRANCH-2f-protected-2f-modules-2f-operations-6216-https-3a-2f-2f-2a-2f-2a-_PD_BL-2f-protected-2f-modules-2f-operations-3c-2f-a-3e-">当然前提是svn info中的URL行对应的格式是<a href="https://*/*_BRANCH/protected/modules/operations或https://*/*_PD_BL/protected/modules/operations" target="_blank">https://*/*_BRANCH/protected/modules/operations或https://*/*_PD_BL/protected/modules/operations</a></h1>
-<h1 id="-53ef-6839-636e-5b9e-9645-60c5-51b5-8fdb-884c-4fee-6539-">可根据实际情况进行修改</h1>
-<p>function getDir() { DIR=<code>echo $1 | sed &#39;s/\//\\\\\//g&#39;</code>; svn info | grep “^URL” | awk ‘{print $2}’ | sed “s/^https:.*(_BRANCH|_PD_BL)/$DIR/g”; }</p>
-<h1 id="-901a-8fc7-svn_st-548c-awk-83b7-53d6-6240-6709-6811-51b2-7a81-6587-4ef6-76f8-5bf9-8def-5f84-">通过svn st和awk获取所有树冲突文件相对路径</h1>
-<h1 id="-4f9d-6b21-548c-6307-5b9a-7684-76ee-6807-6587-4ef6-8fdb-884c-diff-2c-5176-4e2d-5ffd-7565-4e86-5bf9-png_-gif-7b49-7c7b-578b-6587-4ef6-7684-5904-7406-">依次和指定的目标文件进行diff,其中忽略了对.png .gif等类型文件的处理</h1>
-<p>function td() { svn st | grep “^[[:space:]]+C” | awk ‘$2!~/(.<em>.png)|(.</em>.gif)/ {print $2}’ | xargs -t -i diff -u —exclude=”.svn” {} “<code>getDir $1</code>/{}”; }<br>[/shell]</p>
+<figure class="highlight lang-shell"><figcaption><span>batch_diff </span></figcaption><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+</pre></td><td class="code"><pre>
+<span class="comment">#设定项目所在目录
+</span>export PRJ=/home/work/var/www/htdocs
+<span class="comment">#根据svn info获取当前目录层次，并构造相应的diff目的文件路径
+</span><span class="comment">#如当前在$PRJ/pro_merge/protected/modules/operations下
+</span><span class="comment">#则"getDir $PRJ/pro"的结果是$PRJ/pro/protected/modules/operations
+</span><span class="comment">#当然前提是svn info中的URL行对应的格式是https://*/*_BRANCH/protected/modules/operations或https://*/*_PD_BL/protected/modules/operations
+</span><span class="comment">#可根据实际情况进行修改
+</span><span class="function"><span class="keyword">function</span> <span class="title">getDir</span>() { <span class="title">DIR</span>=`<span class="title">echo</span> $<span class="title">1</span> | <span class="title">sed</span> <span class="string">'s/\//\\\\\//g'</span>`; <span class="title">svn</span> <span class="title">info</span> | <span class="title">grep</span> <span class="string">"^URL"</span> | <span class="title">awk</span> <span class="string">'{print $2}'</span> | <span class="title">sed</span> <span class="string">"s/^https:.*\(_BRANCH\|_PD_BL\)/$DIR/g"</span>; }</span>
+<span class="comment">#通过svn st和awk获取所有树冲突文件相对路径
+</span><span class="comment">#依次和指定的目标文件进行diff,其中忽略了对.png .gif等类型文件的处理
+</span><span class="function"><span class="keyword">function</span> <span class="title">td</span>() { <span class="title">svn</span> <span class="title">st</span> | <span class="title">grep</span> <span class="string">"^[[:space:]]\+C"</span> | <span class="title">awk</span> <span class="string">'$2!~/(.*\.png)|(.*\.gif)/ {print $2}'</span> | <span class="title">xargs</span> -<span class="title">t</span> -<span class="title">i</span> <span class="title">diff</span> -<span class="title">u</span> --<span class="title">exclude</span>=<span class="string">"\.svn"</span> {} <span class="string">"`getDir $1`/{}"</span>; }</span>
+</pre></td></tr></table></figure>
+
+
 <p>假设合并代码后的目录是$PRJ/pro_merge,而合入的版本代码在$PRJ/pro_src,则可以在$PRJ/pro_merge的任意子目录下执行如下命令：</p>
-<p>[shell]<br>td $PRJ/pro_src<br>[/shell]</p>
-<p>即可输出当前目录下所有子目录的树冲突文件和带合并文件的diff情况</p>
-<p>+++++++2010年12月6日更新++++++++++</p>
-<p>该方法可以进一步扩展，将diff出来的没有不同的文件直接”svn resolved“了，因此写了一个简单的shell脚本：</p>
-<p>[bash]</p>
-<h1 id="-21-_-2f-bin-2f-sh">! /bin/sh</h1>
-<p>function getDir() { DIR=<code>echo $1 | sed &#39;s/\//\\\\\//g&#39;</code>; svn info | grep “^URL” | awk ‘{print $2}’ | sed “s/^https:.*(_BRANC<br>H|_PD_BL)/$DIR/g”; }</p>
-<p>files=<code>svn st | grep &quot;^[[:space:]]\+C&quot; | awk &#39;$2!~/(.*\.png)|(.*\.gif)/ {print $2}&#39;</code><br>dir=<code>getDir $1</code><br>for file in $files<br>do<br>    echo “$file”<br>    out=<code>diff -ur --exclude=&quot;\.svn&quot; &quot;$file&quot; &quot;$dir/$file&quot; 2&gt;&amp;1</code><br>    if [ $? -eq “0” ]<br>    then<br>        echo will svn resolved $file<br>        svn resolved $file<br>    else<br>        echo “$out”<br>    fi<br>done</p>
-<p>[/bash] </p>
 
       
     </div>
     <footer>
       
+        
+          <div class="alignleft">
+            <a href="/2010/11/2010-11-29-diff_svn_tree_conflict/#more" class="more-link">Read More</a>
+          </div>
         
         
       
@@ -673,190 +893,6 @@ xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" SOAP-ENV:encodingStyl
 
 
   
-    <article class="post">
-  
-    <div class="gallery">
-  <div class="photoset">
-    
-      <img src="">
-    
-  </div>
-  <div class="control">
-    <div class="prev"></div>
-    <div class="next"></div>
-  </div>
-</div>
-  
-  <div class="post-content">
-    <header>
-      
-        <div class="icon"></div>
-        <time datetime="2010-11-14T17:12:11.000Z"><a href="/2010/11/2010-11-15-greasemonkey-baidu-space/">Nov 15 2010</a></time>
-      
-      
-  
-    <h1 class="title"><a href="/2010/11/2010-11-15-greasemonkey-baidu-space/">百度空间插入代码段和HTML代码片段的GreaseMonkey脚本</a></h1>
-  
-
-    </header>
-    <div class="entry">
-      
-        <p>现在百度空间写日志时，在IE/firefox下的文本编辑器是不能直接查看和编辑日志的HTML代码的，应该是基于安全考虑。目前在chrome下，百度空间的兼容性不好，写新日志或者编辑日志时，直接是提供的一个文本框，可以直接敲入HTML代码（当然了，写入<script>是会被过滤掉的)。</p>
-<p>如果空间可以支持直接插入代码片段（语法高亮、缩进等等），则空间用来写技术文档就更方便了。最近刚好发现VIM的TOhtml命令非常强大，可以直接把编辑器中文本按照其颜色、缩进等生成相应的HTML片段，如果空间可以直接插入一段HTML代码的话，代码片段的插入也就不成问题了。</p>
-<p>之前在<a href="http://www.laruence.com/" target="_blank">雪候鸟</a>的博客上看到了<a href="http://www.laruence.com/2010/03/31/1377.html" target="_blank">东方时尚约车脚本</a>相关的内容，联想我的需求，参考其东方时尚约车脚本写了一个简单的Greasemonkey脚本，主要在以下两方面对空间的编辑器进行了扩展：</p>
-<ol>
-<li>支持查看当前日志的HTML代码，以便进行简单的修改，和粘贴来自VIM的代码片段</li>
-<li>支持直接插入一段来自VIM的代码段，该代码段可以具有一定的样式，如常见的有边框包围，字体更清晰等等</li>
-</ol>
-<p><strong>安装方法:</strong></p>
-<ol>
-<li>需要firefox</li>
-<li>firefox需要安装greaseMonkey插件, 插件地址: <a href="https://addons.mozilla.org/en-US/firefox/addon/748" target="_blank"><a href="https://addons.mozilla.org/en-US/firefox/addon/748">https://addons.mozilla.org/en-US/firefox/addon/748</a></a></li>
-<li>用firefox浏览本页, 并<a href="http://userscripts.org/scripts/show/78912" target="_blank">点此</a>下载安装</li>
-</ol>
-<p><strong>使用方法：</strong></p>
-<p>安装后打开自己的空间，“新建文章”或者“编辑”已发布的日志时，在标题的右侧会出现“插入代码段“和”HTML视图“两个按钮，如下图：</p>
-<p><img src="http://leivli.duapp.com/wp-content/uploads/1.png" alt=""></p>
-<p>其中”<strong>插入代码段</strong>“可以直接插入一段代码段，如我们VIM中TOhtml一个php脚本文件的结果，然后复制到”代码段“中：</p>
-<p><img src="http://leivli.duapp.com/wp-content/uploads/2.png" alt=""></p>
-<p>以下是结果：</p>
-<p>1 &lt;?php<br>2 <strong>$</strong>file <strong>=</strong> file(“harddisk.txt”);<br>3 <strong>foreach</strong>(<strong>$</strong>file <strong>as</strong> <strong>$</strong>line){<br>4  <strong>$</strong>line <strong>=</strong> trim(<strong>$</strong>line);<br>5  <strong>$</strong>s <strong>=</strong> preg_match_all(“/(?:\d)+[GTM]/i”,<strong>$</strong>line,<strong>$</strong>matches,PREG_PATTERN_ORDER);<br>6  <strong>if</strong>(<strong>!**</strong>$<strong>s){<br>7  echo “error parse.. “</strong>.<strong>**$</strong>line<strong>.</strong>“\n”;<br>8  }<br>9  <strong>else</strong> <strong>if</strong>(<strong>$</strong>s <strong>&gt;</strong> 1){<br>10  echo “multi match .. “<strong>.**</strong>$<strong>line</strong>.<strong>“: \n”;<br>11  </strong>foreach<strong>(</strong>$<strong>matches[0] </strong>as<strong> </strong>$<strong>match){<br>12  echo “</strong>$<strong>match\n”;<br>13  }<br>14  }<br>15  </strong>else<strong>{<br>16  echo “find..”</strong>.<strong>**$</strong>line<strong>.</strong>“: \n”;<br>17  echo <strong>$</strong>matches[0][0]<strong>.</strong>“\n”;<br>18  }<br>19 }<br>20 ?&gt;</p>
-<p>代码段插入后，双击代码段可以进行<strong>编辑</strong>。</p>
-<p>”<strong>HTML视图</strong>“则显示当前日志的HTML代码，可以直接编辑：</p>
-<p><img src="http://leivli.duapp.com/wp-content/uploads/3.png" alt=""><br>该对话框上面的”更新“按钮可以将改动写回空间的编辑器，而”加载“则是可以再次加载空间编辑器中的内容</p>
-
-      
-    </div>
-    <footer>
-      
-        
-        
-      
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-  
-    <article class="post">
-  
-    <div class="gallery">
-  <div class="photoset">
-    
-      <img src="">
-    
-  </div>
-  <div class="control">
-    <div class="prev"></div>
-    <div class="next"></div>
-  </div>
-</div>
-  
-  <div class="post-content">
-    <header>
-      
-        <div class="icon"></div>
-        <time datetime="2010-11-14T15:18:45.000Z"><a href="/2010/11/2010-11-14-vim-force-overwrite/">Nov 14 2010</a></time>
-      
-      
-  
-    <h1 class="title"><a href="/2010/11/2010-11-14-vim-force-overwrite/">VIM overwrite read-only file</a></h1>
-  
-
-    </header>
-    <div class="entry">
-      
-        <p>今天在使用vim编辑一个read-only的文件（权限为r— r— r—)，在保存时虽然提示只读不能保存，但是通过w!可以强制覆盖原文件内容，难道VIM可以绕过权限限制么？</p>
-<p>后来发现是在使用w！时，vim会强制删除原文件，并新建一个新的同名文件，并写入新的内容，所以，使用w！强制保存时，就要求当前用户有删除原文件的权限，即：</p>
-<ol>
-<li>该文件所在的目录必须具有w权限</li>
-</ol>
-<ol>
-<li>如果所在目录设置了t标志，还需要当前文件的所有者为自己</li>
-</ol>
-<p>其实这也可以从vim的帮助中看到：</p>
-<p><em>write-readonly</em></p>
-<p>When the ‘cpoptions’ option contains ‘W’, Vim will refuse to overwrite a</p>
-<p>readonly file.  When ‘W’ is not present, “:w!” will overwrite a readonly file,</p>
-<p>if the system allows it (the directory must be writable).</p>
-
-      
-    </div>
-    <footer>
-      
-        
-        
-      
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-  
-    <article class="post">
-  
-    <div class="gallery">
-  <div class="photoset">
-    
-      <img src="">
-    
-  </div>
-  <div class="control">
-    <div class="prev"></div>
-    <div class="next"></div>
-  </div>
-</div>
-  
-  <div class="post-content">
-    <header>
-      
-        <div class="icon"></div>
-        <time datetime="2010-11-12T06:44:38.000Z"><a href="/2010/11/2010-11-12-wget-mirror/">Nov 12 2010</a></time>
-      
-      
-  
-    <h1 class="title"><a href="/2010/11/2010-11-12-wget-mirror/">wget下载整个网站的镜像</a></h1>
-  
-
-    </header>
-    <div class="entry">
-      
-        <p><span style="background-color: #ffff00;">$ wget —mirror -p —convert-links -P ./LOCAL-DIR WEBSITE-URL</span></p>
-<ul>
-<li>–mirror : 下载镜像</li>
-</ul>
-<ul>
-<li>-p : 下载gif等显示html必须的资源</li>
-</ul>
-<ul>
-<li>–convert-links : 下载后，将文档中所有的链接进行转换，以支持本地查看</li>
-</ul>
-<ul>
-<li>-P ./LOCAL-DIR : 需要保存下载文档的目录</li>
-</ul>
-
-      
-    </div>
-    <footer>
-      
-        
-        
-      
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-  
 
   <nav id="pagination">
   
@@ -887,7 +923,7 @@ xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" SOAP-ENV:encodingStyl
   
     <li><a href="/categories/VIM/">VIM</a><small>3</small></li>
   
-    <li><a href="/categories/Virtualization/">Virtualization</a><small>13</small></li>
+    <li><a href="/categories/Virtualization/">Virtualization</a><small>16</small></li>
   
     <li><a href="/categories/WordPress/">WordPress</a><small>2</small></li>
   
@@ -903,7 +939,7 @@ xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" SOAP-ENV:encodingStyl
 <div class="widget tagcloud">
   <h3 class="title">Tag Cloud</h3>
   <div class="entry">
-    <a href="/tags/CIM/" style="font-size: 10.00px;">CIM</a><a href="/tags/CORS/" style="font-size: 10.00px;">CORS</a><a href="/tags/DBPM/" style="font-size: 10.00px;">DBPM</a><a href="/tags/Deploy/" style="font-size: 10.00px;">Deploy</a><a href="/tags/ELI/" style="font-size: 10.00px;">ELI</a><a href="/tags/NUMA/" style="font-size: 10.00px;">NUMA</a><a href="/tags/Nova/" style="font-size: 12.50px;">Nova</a><a href="/tags/OPTIONS/" style="font-size: 10.00px;">OPTIONS</a><a href="/tags/Paste/" style="font-size: 10.00px;">Paste</a><a href="/tags/QEMU/" style="font-size: 20.00px;">QEMU</a><a href="/tags/RabbitMQ/" style="font-size: 10.00px;">RabbitMQ</a><a href="/tags/WSGI/" style="font-size: 10.00px;">WSGI</a><a href="/tags/bfc/" style="font-size: 10.00px;">bfc</a><a href="/tags/block-stream/" style="font-size: 10.00px;">block-stream</a><a href="/tags/blockcopy/" style="font-size: 12.50px;">blockcopy</a><a href="/tags/cache/" style="font-size: 10.00px;">cache</a><a href="/tags/css/" style="font-size: 12.50px;">css</a><a href="/tags/dataplane/" style="font-size: 10.00px;">dataplane</a><a href="/tags/ervernote/" style="font-size: 10.00px;">ervernote</a><a href="/tags/etag/" style="font-size: 10.00px;">etag</a><a href="/tags/eval/" style="font-size: 10.00px;">eval</a><a href="/tags/fedora/" style="font-size: 10.00px;">fedora</a><a href="/tags/greasemonkey/" style="font-size: 10.00px;">greasemonkey</a><a href="/tags/http/" style="font-size: 12.50px;">http</a><a href="/tags/javascript/" style="font-size: 10.00px;">javascript</a><a href="/tags/libvirt/" style="font-size: 17.50px;">libvirt</a><a href="/tags/lighthttpd/" style="font-size: 10.00px;">lighthttpd</a><a href="/tags/lighttpd/" style="font-size: 10.00px;">lighttpd</a><a href="/tags/livecd/" style="font-size: 10.00px;">livecd</a><a href="/tags/mac/" style="font-size: 10.00px;">mac</a><a href="/tags/md5sum/" style="font-size: 10.00px;">md5sum</a><a href="/tags/mysql/" style="font-size: 12.50px;">mysql</a><a href="/tags/oVirt/" style="font-size: 12.50px;">oVirt</a><a href="/tags/pdo/" style="font-size: 10.00px;">pdo</a><a href="/tags/performance/" style="font-size: 12.50px;">performance</a><a href="/tags/permalink/" style="font-size: 10.00px;">permalink</a><a href="/tags/php/" style="font-size: 15.00px;">php</a><a href="/tags/post/" style="font-size: 10.00px;">post</a><a href="/tags/proxy/" style="font-size: 10.00px;">proxy</a><a href="/tags/qemu-img/" style="font-size: 10.00px;">qemu-img</a>
+    <a href="/tags/CIM/" style="font-size: 10.00px;">CIM</a><a href="/tags/CORS/" style="font-size: 10.00px;">CORS</a><a href="/tags/DBPM/" style="font-size: 10.00px;">DBPM</a><a href="/tags/Deploy/" style="font-size: 10.00px;">Deploy</a><a href="/tags/ELI/" style="font-size: 10.00px;">ELI</a><a href="/tags/NUMA/" style="font-size: 10.00px;">NUMA</a><a href="/tags/Nova/" style="font-size: 12.50px;">Nova</a><a href="/tags/OPTIONS/" style="font-size: 10.00px;">OPTIONS</a><a href="/tags/Paste/" style="font-size: 10.00px;">Paste</a><a href="/tags/QEMU/" style="font-size: 20.00px;">QEMU</a><a href="/tags/RabbitMQ/" style="font-size: 10.00px;">RabbitMQ</a><a href="/tags/WSGI/" style="font-size: 10.00px;">WSGI</a><a href="/tags/bfc/" style="font-size: 10.00px;">bfc</a><a href="/tags/block-stream/" style="font-size: 10.00px;">block-stream</a><a href="/tags/blockcopy/" style="font-size: 12.50px;">blockcopy</a><a href="/tags/cache/" style="font-size: 10.00px;">cache</a><a href="/tags/css/" style="font-size: 12.50px;">css</a><a href="/tags/dataplane/" style="font-size: 10.00px;">dataplane</a><a href="/tags/device-mapper/" style="font-size: 10.00px;">device-mapper</a><a href="/tags/ervernote/" style="font-size: 10.00px;">ervernote</a><a href="/tags/etag/" style="font-size: 10.00px;">etag</a><a href="/tags/eval/" style="font-size: 10.00px;">eval</a><a href="/tags/fdisk/" style="font-size: 10.00px;">fdisk</a><a href="/tags/fedora/" style="font-size: 10.00px;">fedora</a><a href="/tags/gpt/" style="font-size: 10.00px;">gpt</a><a href="/tags/greasemonkey/" style="font-size: 10.00px;">greasemonkey</a><a href="/tags/http/" style="font-size: 12.50px;">http</a><a href="/tags/isolinux/" style="font-size: 10.00px;">isolinux</a><a href="/tags/javascript/" style="font-size: 10.00px;">javascript</a><a href="/tags/libvirt/" style="font-size: 17.50px;">libvirt</a><a href="/tags/lighthttpd/" style="font-size: 10.00px;">lighthttpd</a><a href="/tags/lighttpd/" style="font-size: 10.00px;">lighttpd</a><a href="/tags/livecd/" style="font-size: 10.00px;">livecd</a><a href="/tags/mac/" style="font-size: 10.00px;">mac</a><a href="/tags/mbr/" style="font-size: 10.00px;">mbr</a><a href="/tags/md5sum/" style="font-size: 10.00px;">md5sum</a><a href="/tags/mysql/" style="font-size: 12.50px;">mysql</a><a href="/tags/oVirt/" style="font-size: 15.00px;">oVirt</a><a href="/tags/parted/" style="font-size: 10.00px;">parted</a><a href="/tags/pdo/" style="font-size: 10.00px;">pdo</a>
   </div>
 </div>
 

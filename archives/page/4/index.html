@@ -90,6 +90,190 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
     <header>
       
         <div class="icon"></div>
+        <time datetime="2010-11-14T17:12:11.000Z"><a href="/2010/11/2010-11-15-greasemonkey-baidu-space/">Nov 15 2010</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2010/11/2010-11-15-greasemonkey-baidu-space/">百度空间插入代码段和HTML代码片段的GreaseMonkey脚本</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>现在百度空间写日志时，在IE/firefox下的文本编辑器是不能直接查看和编辑日志的HTML代码的，应该是基于安全考虑。目前在chrome下，百度空间的兼容性不好，写新日志或者编辑日志时，直接是提供的一个文本框，可以直接敲入HTML代码（当然了，写入<script>是会被过滤掉的)。</p>
+<p>如果空间可以支持直接插入代码片段（语法高亮、缩进等等），则空间用来写技术文档就更方便了。最近刚好发现VIM的TOhtml命令非常强大，可以直接把编辑器中文本按照其颜色、缩进等生成相应的HTML片段，如果空间可以直接插入一段HTML代码的话，代码片段的插入也就不成问题了。</p>
+<p>之前在<a href="http://www.laruence.com/" target="_blank">雪候鸟</a>的博客上看到了<a href="http://www.laruence.com/2010/03/31/1377.html" target="_blank">东方时尚约车脚本</a>相关的内容，联想我的需求，参考其东方时尚约车脚本写了一个简单的Greasemonkey脚本，主要在以下两方面对空间的编辑器进行了扩展：</p>
+<ol>
+<li>支持查看当前日志的HTML代码，以便进行简单的修改，和粘贴来自VIM的代码片段</li>
+<li>支持直接插入一段来自VIM的代码段，该代码段可以具有一定的样式，如常见的有边框包围，字体更清晰等等</li>
+</ol>
+<p><strong>安装方法:</strong></p>
+<ol>
+<li>需要firefox</li>
+<li>firefox需要安装greaseMonkey插件, 插件地址: <a href="https://addons.mozilla.org/en-US/firefox/addon/748" target="_blank"><a href="https://addons.mozilla.org/en-US/firefox/addon/748">https://addons.mozilla.org/en-US/firefox/addon/748</a></a></li>
+<li>用firefox浏览本页, 并<a href="http://userscripts.org/scripts/show/78912" target="_blank">点此</a>下载安装</li>
+</ol>
+<p><strong>使用方法：</strong></p>
+<p>安装后打开自己的空间，“新建文章”或者“编辑”已发布的日志时，在标题的右侧会出现“插入代码段“和”HTML视图“两个按钮，如下图：</p>
+<p><img src="http://leivli.duapp.com/wp-content/uploads/1.png" alt=""></p>
+<p>其中”<strong>插入代码段</strong>“可以直接插入一段代码段，如我们VIM中TOhtml一个php脚本文件的结果，然后复制到”代码段“中：</p>
+<p><img src="http://leivli.duapp.com/wp-content/uploads/2.png" alt=""></p>
+<p>以下是结果：</p>
+<p>1 &lt;?php<br>2 <strong>$</strong>file <strong>=</strong> file(“harddisk.txt”);<br>3 <strong>foreach</strong>(<strong>$</strong>file <strong>as</strong> <strong>$</strong>line){<br>4  <strong>$</strong>line <strong>=</strong> trim(<strong>$</strong>line);<br>5  <strong>$</strong>s <strong>=</strong> preg_match_all(“/(?:\d)+[GTM]/i”,<strong>$</strong>line,<strong>$</strong>matches,PREG_PATTERN_ORDER);<br>6  <strong>if</strong>(<strong>!**</strong>$<strong>s){<br>7  echo “error parse.. “</strong>.<strong>**$</strong>line<strong>.</strong>“\n”;<br>8  }<br>9  <strong>else</strong> <strong>if</strong>(<strong>$</strong>s <strong>&gt;</strong> 1){<br>10  echo “multi match .. “<strong>.**</strong>$<strong>line</strong>.<strong>“: \n”;<br>11  </strong>foreach<strong>(</strong>$<strong>matches[0] </strong>as<strong> </strong>$<strong>match){<br>12  echo “</strong>$<strong>match\n”;<br>13  }<br>14  }<br>15  </strong>else<strong>{<br>16  echo “find..”</strong>.<strong>**$</strong>line<strong>.</strong>“: \n”;<br>17  echo <strong>$</strong>matches[0][0]<strong>.</strong>“\n”;<br>18  }<br>19 }<br>20 ?&gt;</p>
+<p>代码段插入后，双击代码段可以进行<strong>编辑</strong>。</p>
+<p>”<strong>HTML视图</strong>“则显示当前日志的HTML代码，可以直接编辑：</p>
+<p><img src="http://leivli.duapp.com/wp-content/uploads/3.png" alt=""><br>该对话框上面的”更新“按钮可以将改动写回空间的编辑器，而”加载“则是可以再次加载空间编辑器中的内容</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  
+    <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2010-11-14T15:18:45.000Z"><a href="/2010/11/2010-11-14-vim-force-overwrite/">Nov 14 2010</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2010/11/2010-11-14-vim-force-overwrite/">VIM overwrite read-only file</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>今天在使用vim编辑一个read-only的文件（权限为r— r— r—)，在保存时虽然提示只读不能保存，但是通过w!可以强制覆盖原文件内容，难道VIM可以绕过权限限制么？</p>
+<p>后来发现是在使用w！时，vim会强制删除原文件，并新建一个新的同名文件，并写入新的内容，所以，使用w！强制保存时，就要求当前用户有删除原文件的权限，即：</p>
+<ol>
+<li>该文件所在的目录必须具有w权限</li>
+<li>如果所在目录设置了t标志，还需要当前文件的所有者为自己</li>
+</ol>
+<p>其实这也可以从vim的帮助中看到：</p>
+<blockquote><p><em>write-readonly</em></p>
+<p>When the ‘cpoptions’ option contains ‘W’, Vim will refuse to overwrite a</p>
+<p>readonly file.  When ‘W’ is not present, “:w!” will overwrite a readonly file,</p>
+<p>if the system allows it (the directory must be writable).</p>
+<footer><strong>vim</strong></footer></blockquote>
+
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  
+    <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2010-11-12T06:44:38.000Z"><a href="/2010/11/2010-11-12-wget-mirror/">Nov 12 2010</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2010/11/2010-11-12-wget-mirror/">wget下载整个网站的镜像</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p><span style="background-color: #ffff00;">$ wget —mirror -p —convert-links -P ./LOCAL-DIR WEBSITE-URL</span></p>
+<ul>
+<li>–mirror : 下载镜像</li>
+</ul>
+<ul>
+<li>-p : 下载gif等显示html必须的资源</li>
+</ul>
+<ul>
+<li>–convert-links : 下载后，将文档中所有的链接进行转换，以支持本地查看</li>
+</ul>
+<ul>
+<li>-P ./LOCAL-DIR : 需要保存下载文档的目录</li>
+</ul>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  
+    <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
         <time datetime="2010-11-05T09:41:46.000Z"><a href="/2010/11/2010-11-05-vim-tips/">Nov 5 2010</a></time>
       
       
@@ -101,44 +285,117 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
     <div class="entry">
       
         <ol>
-<li>词自动补全： <C-P>（向上搜索） <C-N>(向下搜索)</li>
-<li>行自动补全： <C-X><C-L></li>
-<li>文件名自动补全： <C-X><C-F></li>
-<li>搜索的正则表达式：<br>\         取消后面所跟字符的特殊含义。比如 [vim] 匹配字符串“[vim]”<br>[]        匹配其中之一。比如 [vim] 匹配字母“v”、“i”或者“m”，[a-zA-Z] 匹配任意字母<br>[^]       匹配非其中之一。比如 [^vim] 匹配除字母“v”、“i”和“m”之外的所有字符<br>.         匹配任意字符</li>
+<li>词自动补全 </li>
 </ol>
-<ul>
-<li>匹配前一字符大于等于零遍。比如 vi<em>m 匹配“vm”、“vim”、“viim”……<br>+        匹配前一字符大于等于一遍。比如 vi+m 匹配“vim”、“viim”、“viiim”……<br>\?        匹配前一字符零遍或者一遍。比如 vi\?m 匹配“vm”或者“vim”<br>^         匹配行首。例如 /^hello 查找出现在行首的单词 hello<br>$         匹配行末。例如 /hello$ 查找出现在行末的单词 hello<br>()      括住某段正规表达式<br>\数字     重复匹配前面某段括住的表达式。例如 (hello).</em>\1 匹配一个开始和末尾都是“hello”，中间是任意字符串的字符串</li>
-</ul>
-<p>对于替换字符串，可以用“&amp;”代表整个搜索字符串，或者用“\数字”代表搜索字符串中的某段括住的表达式。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+</pre></td><td class="code"><pre>
+    &lt;<span class="comment">C</span><span class="literal">-</span><span class="comment">P</span>&gt;<span class="comment">（向上搜索）</span> &lt;<span class="comment">C</span><span class="literal">-</span><span class="comment">N</span>&gt;<span class="comment">(向下搜索)</span>
+</pre></td></tr></table></figure>
+
+
 <ol>
-<li>替换1,3s/pattern/replace/gc</li>
+<li>行自动补全</li>
 </ol>
-<p>1,3表示从第一行到第3行，可以用.,$表示当前行到文件末尾，可以用%表示当前行</p>
-<p>s表示替换</p>
-<p>pattern表示要替换的模式（可以是正则）</p>
-<p>replace表示要使用的替换文本；</p>
-<p>g表示全局，会在替换一个后替换下一个</p>
-<p>c表示确认，再替换每一个时提示确认信息</p>
-<p>6.替换中：可用v选中一个区域，使用’&lt;和’&gt;分别代表区域开始和结束</p>
-<p>7.替换中，可用\zs和\ze分别表示匹配由此开始和匹配到此结束；\=表示后面是一个表达式，可以使用printf等方法，来根据匹配到的串计算值；</p>
-<p>line（)方法用来获取行号，如line(“.”)表示当前行，line(“‘&lt;”)表示选中的第一行行号</p>
-<p>submatch(0) == \0</p>
-<p>|可用于分隔多条命令</p>
-<p>g/str1/s//str2/  表示对于匹配“str1”的所有串，执行后面的命令（g的作用，后面命令指s替换），s省略匹配串，表示使用前面g命令的匹配串，str2表示替换为str2</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+</pre></td><td class="code"><pre>
+    &lt;<span class="comment">C</span><span class="literal">-</span><span class="comment">X</span>&gt;&lt;<span class="comment">C</span><span class="literal">-</span><span class="comment">L</span>&gt;
+</pre></td></tr></table></figure>
+
+
 <ol>
+<li>文件名自动补全</li>
+</ol>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+</pre></td><td class="code"><pre>
+    &lt;<span class="comment">C</span><span class="literal">-</span><span class="comment">X</span>&gt;&lt;<span class="comment">C</span><span class="literal">-</span><span class="comment">F</span>&gt;
+</pre></td></tr></table></figure>
+
+
+<ol>
+<li>搜索的正则表达式：</li>
+</ol>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+</pre></td><td class="code"><pre>
+    <span class="command">\ </span>        取消后面所跟字符的特殊含义。比如 <span class="command">\[</span>vim<span class="command">\]</span> 匹配字符串“<span class="special">[</span>vim<span class="special">]</span>”
+    <span class="special">[</span><span class="special">]</span>        匹配其中之一。比如 <span class="special">[</span>vim<span class="special">]</span> 匹配字母“v”、“i”或者“m”，<span class="special">[</span>a-zA-Z<span class="special">]</span> 匹配任意字母
+    <span class="special">[</span>^<span class="special">]</span>       匹配非其中之一。比如 <span class="special">[</span>^vim<span class="special">]</span> 匹配除字母“v”、“i”和“m”之外的所有字符
+    .         匹配任意字符
+    *         匹配前一字符大于等于零遍。比如 vi*m 匹配“vm”、“vim”、“viim”……
+    <span class="command">\+</span>        匹配前一字符大于等于一遍。比如 vi<span class="command">\+</span>m 匹配“vim”、“viim”、“viiim”……
+    <span class="command">\?</span>        匹配前一字符零遍或者一遍。比如 vi<span class="command">\?</span>m 匹配“vm”或者“vim”
+    ^         匹配行首。例如 /^hello 查找出现在行首的单词 hello
+    <span class="formula">$         匹配行末。例如 /hello$</span> 查找出现在行末的单词 hello
+    <span class="command">\(</span><span class="command">\)</span>      括住某段正规表达式
+    <span class="command">\数</span>字     重复匹配前面某段括住的表达式。例如 <span class="command">\(</span>hello<span class="command">\)</span>.*\1 匹配一个开始和末尾都是“hello”，中间是任意字符串的字符串
+</pre></td></tr></table></figure>
+
+
+<pre><code>对于替换字符串，可以用“<span class="special">&amp;</span>”代表整个搜索字符串，或者用“<span class="command">\数</span>字”代表搜索字符串中的某段括住的表达式。
+</code></pre><ol>
+<li>替换</li>
+</ol>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+</pre></td><td class="code"><pre>
+    1,3s/pattern/<span class="operator"><span class="keyword">replace</span>/gc</span>
+</pre></td></tr></table></figure>
+
+
+<pre><code><span class="bullet">* </span>1,3表示从第一行到第3行，可以用.,$表示当前行到文件末尾，可以用%表示当前行
+<span class="bullet">* </span>s表示替换
+<span class="bullet">* </span>pattern表示要替换的模式（可以是正则）
+<span class="bullet">* </span>replace表示要使用的替换文本；
+<span class="bullet">* </span>g表示全局，会在替换一个后替换下一个
+<span class="bullet">* </span>c表示确认，再替换每一个时提示确认信息
+</code></pre><p>6.替换中的技巧</p>
+<pre><code>* 可用v选中一个区域，使用<span class="string">'&lt;和'</span>&gt;分别代表区域开始和结束
+* 可用\zs和\ze分别表示匹配由此开始和匹配到此结束
+* \=表示后面是一个表达式，可以使用<span class="keyword">printf</span>等方法，来根据匹配到的串计算值；line（)方法用来获取行号，如line(<span class="string">"."</span>)表示当前行，line(<span class="string">"'&lt;"</span>)表示选中的第一行行号
+* submatch(<span class="number">0</span>) == \<span class="number">0</span>
+* |可用于分隔多条命令
+* g/str1/<span class="regexp">s//str2/</span>  表示对于匹配“str1”的所有串，执行后面的命令（g的作用，后面命令指<span class="keyword">s</span>替换），<span class="keyword">s</span>省略匹配串，表示使用前面g命令的匹配串，str2表示替换为str2
+</code></pre><ol>
 <li><p>f@表示在该行向后调到第一个<a href="mailto:%20@">‘@’</a>字符处，F@是向左跳转</p>
 </li>
 <li><p>[{向前跳转到第一个{  ]}是像后跳转到第一个}</p>
 </li>
 <li><p>v|c|d i|a { | [ | “ | ‘  实现块级编辑</p>
+<p> 如在</p>
 </li>
 </ol>
-<p>如在</p>
-<p>{</p>
-<p>aaaaaaaaaa</p>
-<p>}</p>
-<p>的aaa这行出按下vi{将选中aaa这一行，如果是va{则表示选中包含左右大括号和aaa那一行的三行</p>
-<p>待补充。。。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+</pre></td><td class="code"><pre>
+    <span class="cell">{
+
+    aaaaaaaaaa
+
+    }</span>
+</pre></td></tr></table></figure>
+
+
+<pre><code>的aaa这行出按下vi{将选中aaa这一行，如果是va{则表示选中包含左右大括号和aaa那一行的三行
+</code></pre><ol>
+<li>待补充。。。</li>
+</ol>
 
       
     </div>
@@ -286,7 +543,7 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
   
     <li><a href="/categories/VIM/">VIM</a><small>3</small></li>
   
-    <li><a href="/categories/Virtualization/">Virtualization</a><small>13</small></li>
+    <li><a href="/categories/Virtualization/">Virtualization</a><small>16</small></li>
   
     <li><a href="/categories/WordPress/">WordPress</a><small>2</small></li>
   
@@ -302,7 +559,7 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
 <div class="widget tagcloud">
   <h3 class="title">Tag Cloud</h3>
   <div class="entry">
-    <a href="/tags/CIM/" style="font-size: 10.00px;">CIM</a><a href="/tags/CORS/" style="font-size: 10.00px;">CORS</a><a href="/tags/DBPM/" style="font-size: 10.00px;">DBPM</a><a href="/tags/Deploy/" style="font-size: 10.00px;">Deploy</a><a href="/tags/ELI/" style="font-size: 10.00px;">ELI</a><a href="/tags/NUMA/" style="font-size: 10.00px;">NUMA</a><a href="/tags/Nova/" style="font-size: 12.50px;">Nova</a><a href="/tags/OPTIONS/" style="font-size: 10.00px;">OPTIONS</a><a href="/tags/Paste/" style="font-size: 10.00px;">Paste</a><a href="/tags/QEMU/" style="font-size: 20.00px;">QEMU</a><a href="/tags/RabbitMQ/" style="font-size: 10.00px;">RabbitMQ</a><a href="/tags/WSGI/" style="font-size: 10.00px;">WSGI</a><a href="/tags/bfc/" style="font-size: 10.00px;">bfc</a><a href="/tags/block-stream/" style="font-size: 10.00px;">block-stream</a><a href="/tags/blockcopy/" style="font-size: 12.50px;">blockcopy</a><a href="/tags/cache/" style="font-size: 10.00px;">cache</a><a href="/tags/css/" style="font-size: 12.50px;">css</a><a href="/tags/dataplane/" style="font-size: 10.00px;">dataplane</a><a href="/tags/ervernote/" style="font-size: 10.00px;">ervernote</a><a href="/tags/etag/" style="font-size: 10.00px;">etag</a><a href="/tags/eval/" style="font-size: 10.00px;">eval</a><a href="/tags/fedora/" style="font-size: 10.00px;">fedora</a><a href="/tags/greasemonkey/" style="font-size: 10.00px;">greasemonkey</a><a href="/tags/http/" style="font-size: 12.50px;">http</a><a href="/tags/javascript/" style="font-size: 10.00px;">javascript</a><a href="/tags/libvirt/" style="font-size: 17.50px;">libvirt</a><a href="/tags/lighthttpd/" style="font-size: 10.00px;">lighthttpd</a><a href="/tags/lighttpd/" style="font-size: 10.00px;">lighttpd</a><a href="/tags/livecd/" style="font-size: 10.00px;">livecd</a><a href="/tags/mac/" style="font-size: 10.00px;">mac</a><a href="/tags/md5sum/" style="font-size: 10.00px;">md5sum</a><a href="/tags/mysql/" style="font-size: 12.50px;">mysql</a><a href="/tags/oVirt/" style="font-size: 12.50px;">oVirt</a><a href="/tags/pdo/" style="font-size: 10.00px;">pdo</a><a href="/tags/performance/" style="font-size: 12.50px;">performance</a><a href="/tags/permalink/" style="font-size: 10.00px;">permalink</a><a href="/tags/php/" style="font-size: 15.00px;">php</a><a href="/tags/post/" style="font-size: 10.00px;">post</a><a href="/tags/proxy/" style="font-size: 10.00px;">proxy</a><a href="/tags/qemu-img/" style="font-size: 10.00px;">qemu-img</a>
+    <a href="/tags/CIM/" style="font-size: 10.00px;">CIM</a><a href="/tags/CORS/" style="font-size: 10.00px;">CORS</a><a href="/tags/DBPM/" style="font-size: 10.00px;">DBPM</a><a href="/tags/Deploy/" style="font-size: 10.00px;">Deploy</a><a href="/tags/ELI/" style="font-size: 10.00px;">ELI</a><a href="/tags/NUMA/" style="font-size: 10.00px;">NUMA</a><a href="/tags/Nova/" style="font-size: 12.50px;">Nova</a><a href="/tags/OPTIONS/" style="font-size: 10.00px;">OPTIONS</a><a href="/tags/Paste/" style="font-size: 10.00px;">Paste</a><a href="/tags/QEMU/" style="font-size: 20.00px;">QEMU</a><a href="/tags/RabbitMQ/" style="font-size: 10.00px;">RabbitMQ</a><a href="/tags/WSGI/" style="font-size: 10.00px;">WSGI</a><a href="/tags/bfc/" style="font-size: 10.00px;">bfc</a><a href="/tags/block-stream/" style="font-size: 10.00px;">block-stream</a><a href="/tags/blockcopy/" style="font-size: 12.50px;">blockcopy</a><a href="/tags/cache/" style="font-size: 10.00px;">cache</a><a href="/tags/css/" style="font-size: 12.50px;">css</a><a href="/tags/dataplane/" style="font-size: 10.00px;">dataplane</a><a href="/tags/device-mapper/" style="font-size: 10.00px;">device-mapper</a><a href="/tags/ervernote/" style="font-size: 10.00px;">ervernote</a><a href="/tags/etag/" style="font-size: 10.00px;">etag</a><a href="/tags/eval/" style="font-size: 10.00px;">eval</a><a href="/tags/fdisk/" style="font-size: 10.00px;">fdisk</a><a href="/tags/fedora/" style="font-size: 10.00px;">fedora</a><a href="/tags/gpt/" style="font-size: 10.00px;">gpt</a><a href="/tags/greasemonkey/" style="font-size: 10.00px;">greasemonkey</a><a href="/tags/http/" style="font-size: 12.50px;">http</a><a href="/tags/isolinux/" style="font-size: 10.00px;">isolinux</a><a href="/tags/javascript/" style="font-size: 10.00px;">javascript</a><a href="/tags/libvirt/" style="font-size: 17.50px;">libvirt</a><a href="/tags/lighthttpd/" style="font-size: 10.00px;">lighthttpd</a><a href="/tags/lighttpd/" style="font-size: 10.00px;">lighttpd</a><a href="/tags/livecd/" style="font-size: 10.00px;">livecd</a><a href="/tags/mac/" style="font-size: 10.00px;">mac</a><a href="/tags/mbr/" style="font-size: 10.00px;">mbr</a><a href="/tags/md5sum/" style="font-size: 10.00px;">md5sum</a><a href="/tags/mysql/" style="font-size: 12.50px;">mysql</a><a href="/tags/oVirt/" style="font-size: 15.00px;">oVirt</a><a href="/tags/parted/" style="font-size: 10.00px;">parted</a><a href="/tags/pdo/" style="font-size: 10.00px;">pdo</a>
   </div>
 </div>
 
