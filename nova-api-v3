@@ -1,0 +1,115 @@
+# NOVA API V3: Plugin/Extension Mechanism #
+
+**前提**
+
+1. 对Nova的整体结构已经有所理解
+2. 基于stable/havana分支
+3. 基于Redhat的RDO库进行的环境安装，基于CentOS 6.4
+
+**内容**
+
+1. V2扩展机制存在的问题
+2. Nova API V3中Plugin的实现机制和现状
+3. 总结和展望
+
+## V2的扩展机制存在的问题 ##
+
+参考V3 API framework的Spec，当前V2 API存在的问题如下：
+
+The development of the Nova v3 API will give us the opportunity to rework the extension framework. The current framework suffers from:
+
+* extension specific code required to exist in core code for specific extensions to work
+	* eg nova/api/openstack/compute/servers.py:Controller:create where there are hard coded references to parameters specific to extensions to pass kwargs to the server create call
+* issues around efficiency with extensions each doing their own db lookup loops
+	* https://bugs.launchpad.net/nova/+bug/1160487
+* Can't have CamelCase class names for extension classes due to extension loading mechanism
+
+这里主要展开说明前两点。
+
+### Extension需要涉及Core Code的变动 ###
+
+第一个问题主要指当前的extension机制中，增加一个contrib后，往往需要在所谓的“core code”中添加必要的参数处理来将extension中引入的参数传入到内部的API中。**需要注意的是**这里的core code指的是api.openstack.compute.*,即仅仅指的是API层次中核心资源相关的API Handlers，并非指的是各个Module内部的API/RPCAPI->Manager->Driver的代码。
+
+以当前对核心资源“虚拟机”的create方法扩展来看，在api.openstack.compute.servers.py:create中存在大量类似如下的逻辑：
+
+```
+		# optional openstack extensions:
+        key_name = None
+        if self.ext_mgr.is_loaded('os-keypairs'):
+            key_name = server_dict.get('key_name')
+
+        user_data = None
+        if self.ext_mgr.is_loaded('os-user-data'):
+            user_data = server_dict.get('user_data')
+        self._validate_user_data(user_data)
+```
+
+如上代码中的os-keypairs和os-user-data就是两个extensions。当添加这俩extension后，就需要在servers.py的create方法中进行检测和参数处理，以便最终将获取到的key_name和user_data等参数传递到内部的compute_api:create方法中。
+
+### 性能问题 ###
+
+关于第二个问题，在上文的bugs链接中已经描述的比较清楚，以servers为例，问题主要是指在GET等方法中，各个extension的处理逻辑中往往需要往返回的server信息中追加extension相关的信息，如disk_config扩展需要追加存储在DB中的disk config相关的信息等，故在各个extension中均会分别进行数据库查询操作，从而导致性能问题。
+
+不过从目前HAVANA的代码来看，此问题已经通过一种方法缓解了，但从commit来看，和V3 API并不属于同一系列的提交。以servers为例，此问题现在的解决办法是，在core API处理时，就将可能需要从db中读取出来的servers相关的信息全部一次性读取出来并放入Cache中的Instance对象，在各个extension处理时只需要从Cache中取出所需的属性即可。在core API中一次性读出的信息除了instances表中一些extension添加的字段外，还会读出关联的instance_metadata、instance_system_metadata等多个表的信息。具体可参考nova.db.sqlalchemy.api:instance_get等相关的方法实现。
+
+
+## Nova API V3中Plugin的实现机制和现状 ##
+
+### 实现机制 ###
+
+API V3中的Plugin的实现机制利用的是和Ceilometer一样的Stevedore，此模块主要是对python setuptools中的Entry Points机制进行了封装。
+
+### Setuptools Entry Points ###
+
+Python setuptools的Entry Points机制主要用途有两个：Automatic Script Creation和Dynamic Discovery of Services and Plugins。
+
+Automatic Script Creation主要功能是封装了平台的差异，在不同平台上生成Python Package的入口脚本。如RDO库中的/usr/bin目录下的nova-api、nova-scheduler等入口脚本均是通过此机制生成的。
+
+Dynamic Discovery of Services and Plugins主要是指本Package通过Entry Point声明自身的“扩展点”，然后第三方Package或者本Package的各个Module可以声明对此“扩展点”的实现。在本Package中，可以通过某种方式获取相应“扩展点”当前所有的实现，并进行相应的处理。
+
+Entry Point的声明和注册均是在各个Package的setup.cfg配置文件或者setup.py:setup method中完成的。以当前的HAVANA为例，在nova的setup.cfg中可以看到有如下配置：
+
+```
+	[entry_points]
+	#...
+
+	console_scripts =
+    	nova-all = nova.cmd.all:main
+    	nova-api = nova.cmd.api:main
+		#....
+	nova.api.v3.extensions =
+    	admin_actions = nova.api.openstack.compute.plugins.v3.admin_actions:AdminActions
+    	admin_password = nova.api.openstack.compute.plugins.v3.admin_password:AdminPassword
+    	agents = nova.api.openstack.compute.plugins.v3.agents:Agents
+		#...
+	nova.api.v3.extensions.server.create =
+    	availability_zone = nova.api.openstack.compute.plugins.v3.availability_zone:AvailabilityZone
+    	block_device_mapping = nova.api.openstack.compute.plugins.v3.block_device_mapping:BlockDeviceMapping
+		#...
+	#...
+```
+
+其中的"console_scripts"是一个特殊的entry_point，触发的就是上述的Automatic Script Creation，在执行setup.py install时，就会根据这里的配置在/usr/bin目录下生成相应内容的nova-all和nova-api等文件。
+
+后面的nova.api.v3.extensions和nova.api.v3.extensions.server.create就是此Package支持的“扩展点”,其Value中对应的list就是此扩展点对应的实现。
+
+
+## Python stevedore ##
+
+Python setuptools的pkg_resources包中，有多种utils方法，可以获取指定entry_point对应的所有的实现。Stevedore就是对这些方法进行了封装，并对外提供了几种扩展机制，具体可参考其官方网站。这里只简单说明下几种：
+
+* DriverManager: 对应的是Driver形式的扩展机制，即使一个EntryPoint有多个实现，系统只能使用其中一个
+* HookManager：对应的是Hook机制，会遍历EntryPoint的所有实现，并进行invoke
+* EnabledExtensionManager：在load所有实现时，增加check_func的filter机制
+
+### OpenStack ###
+
+
+
+## 参考资料 ##
+
+* [Nova API V3 Extension Framework](https://etherpad.openstack.org/p/NovaAPIExtensionFramework)
+* [Nova API V2 Extension Problem about db lookup loops](https://bugs.launchpad.net/nova/+bug/1160487)
+* [Python Stevedore](http://stevedore.readthedocs.org/en/latest/)
+* [Python SetupTools EntryPoints and Plugins](http://pythonhosted.org/setuptools/setuptools.html#dynamic-discovery-of-services-and-plugins)
+* [Python Discovery and Resource Access using pkg_resources](http://pythonhosted.org/setuptools/pkg_resources.html)
