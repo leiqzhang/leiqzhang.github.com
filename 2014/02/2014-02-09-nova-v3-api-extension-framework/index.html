@@ -122,6 +122,8 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
 <li>Can’t have CamelCase class names for extension classes due to extension loading mechanism</li>
 </ul>
 <p>这里主要展开说明前两点。</p>
+<a id="more"></a>
+
 <h3 id="Extension-9700-8981-6d89-53ca-Core_Code-7684-53d8-52a8-">Extension需要涉及Core Code的变动</h3>
 <p>第一个问题主要指当前的extension机制中，增加一个contrib后，往往需要在所谓的“core code”中添加必要的参数处理来将extension中引入的参数传入到内部的API中。<strong>需要注意的是</strong>这里的core code指的是nova.api.openstack.compute.*,即仅仅指的是API层次中核心资源相关的API Handlers，并非指的是各个Module内部的API/RPCAPI-&gt;Manager-&gt;Driver的代码层次结构中的代码。</p>
 <p>以当前对核心资源“虚拟机”的create方法扩展来看，在api.openstack.compute.servers.py:create中存在大量类似如下的逻辑：</p>
