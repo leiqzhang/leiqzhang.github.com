@@ -215,7 +215,7 @@ class DiskConfig(extensions.V3APIExtensionBase):
     #...
 ```
 
-但是V3 API中可以通过配置约定了其中部分的API是作为“Core Extension”的，对于Core Extension，如上面代码所示，会在初始化时检测是否均被正常加载。
+但是V3 API中可以通过配置约定了其中部分的API是作为“Core Extension”的，对于Core Extension，如本节最开始的代码所示，会在初始化时检测是否均被正常加载。
 
 ** 避免各Extension之间的代码耦合 **
 
