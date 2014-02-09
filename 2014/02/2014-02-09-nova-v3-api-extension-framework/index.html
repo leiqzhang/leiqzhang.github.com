@@ -362,7 +362,7 @@ nova<span class="preprocessor">.api</span><span class="preprocessor">.v</span>3<
     <span class="comment">#...</span>
 </pre></td></tr></table></figure>
 
-<p>但是V3 API中可以通过配置约定了其中部分的API是作为“Core Extension”的，对于Core Extension，如上面代码所示，会在初始化时检测是否均被正常加载。</p>
+<p>但是V3 API中可以通过配置约定了其中部分的API是作为“Core Extension”的，对于Core Extension，如本节最开始的代码所示，会在初始化时检测是否均被正常加载。</p>
 <p><strong> 避免各Extension之间的代码耦合 </strong></p>
 <p>上述两个步骤，只是换了中方式完成了V2 API中的Extension功能，下面看V3 API中如何解决了前文所述的Extension需要涉及Core API代码改动的问题。</p>
 <p>V3中，主要是利用了Stevedore避免了各Extension之间的代码耦合，从而避免了上述问题。</p>
