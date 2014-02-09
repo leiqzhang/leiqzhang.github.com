@@ -86,6 +86,156 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
     <header>
       
         <div class="icon"></div>
+        <time datetime="2013-05-20T12:40:31.000Z"><a href="/2013/05/2013-05-20-qemu-virtio-refactoring/">May 20 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/05/2013-05-20-qemu-virtio-refactoring/">QEMU Fetures: Virtio Refactoring</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <h2 id="Background">Background</h2>
+<p>在研究QEMU的virtio-scsi时，发现了如下问题: 1.5的qemu相比1.2多了几种virtio及scsi相关的设备 </p>
+<figure class="highlight"><figcaption><span>qemu-1.2</span></figcaption><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+</pre></td><td class="code"><pre>
+    <span class="comment">qemu</span><span class="literal">-</span><span class="comment">kvm</span> <span class="literal">-</span><span class="comment">device</span> <span class="comment">?</span> <span class="comment">2</span>&gt;<span class="comment">&amp;1</span> <span class="comment">|</span> <span class="comment">grep</span> <span class="comment">"virtio\|scsi"</span>
+    
+    <span class="comment">name</span> <span class="comment">"scsi</span><span class="literal">-</span><span class="comment">hd"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">SCSI</span><span class="string">,</span> <span class="comment">desc</span> <span class="comment">"virtual</span> <span class="comment">SCSI</span> <span class="comment">disk"</span>
+    <span class="comment">name</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">blk</span><span class="literal">-</span><span class="comment">pci"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">PCI</span><span class="string">,</span> <span class="comment">alias</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">blk"</span>
+    <span class="comment">name</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">9p</span><span class="literal">-</span><span class="comment">pci"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">PCI</span>
+    <span class="comment">name</span> <span class="comment">"scsi</span><span class="literal">-</span><span class="comment">block"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">SCSI</span><span class="string">,</span> <span class="comment">desc</span> <span class="comment">"SCSI</span> <span class="comment">block</span> <span class="comment">device</span> <span class="comment">passthrough"</span>
+    <span class="comment">name</span> <span class="comment">"scsi</span><span class="literal">-</span><span class="comment">generic"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">SCSI</span><span class="string">,</span> <span class="comment">desc</span> <span class="comment">"pass</span> <span class="comment">through</span> <span class="comment">generic</span> <span class="comment">scsi</span> <span class="comment">device</span> <span class="comment">(/dev/sg*)"</span>
+    <span class="comment">name</span> <span class="comment">"scsi</span><span class="literal">-</span><span class="comment">disk"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">SCSI</span><span class="string">,</span> <span class="comment">desc</span> <span class="comment">"virtual</span> <span class="comment">SCSI</span> <span class="comment">disk</span> <span class="comment">or</span> <span class="comment">CD</span><span class="literal">-</span><span class="comment">ROM</span> <span class="comment">(legacy)"</span>
+    <span class="comment">name</span> <span class="comment">"virtserialport"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">virtio</span><span class="literal">-</span><span class="comment">serial</span><span class="literal">-</span><span class="comment">bus</span>
+    <span class="comment">name</span> <span class="comment">"scsi</span><span class="literal">-</span><span class="comment">cd"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">SCSI</span><span class="string">,</span> <span class="comment">desc</span> <span class="comment">"virtual</span> <span class="comment">SCSI</span> <span class="comment">CD</span><span class="literal">-</span><span class="comment">ROM"</span>
+    <span class="comment">name</span> <span class="comment">"virtconsole"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">virtio</span><span class="literal">-</span><span class="comment">serial</span><span class="literal">-</span><span class="comment">bus</span>
+    <span class="comment">name</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">serial</span><span class="literal">-</span><span class="comment">pci"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">PCI</span><span class="string">,</span> <span class="comment">alias</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">serial"</span>
+    <span class="comment">name</span> <span class="comment">"am53c974"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">PCI</span><span class="string">,</span> <span class="comment">desc</span> <span class="comment">"AMD</span> <span class="comment">Am53c974</span> <span class="comment">PCscsi</span><span class="literal">-</span><span class="comment">PCI</span> <span class="comment">SCSI</span> <span class="comment">adapter"</span>
+    <span class="comment">name</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">net</span><span class="literal">-</span><span class="comment">pci"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">PCI</span><span class="string">,</span> <span class="comment">alias</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">net"</span>
+    <span class="comment">name</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">balloon</span><span class="literal">-</span><span class="comment">pci"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">PCI</span><span class="string">,</span> <span class="comment">alias</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">balloon"</span>
+    <span class="comment">name</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">scsi</span><span class="literal">-</span><span class="comment">pci"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">PCI</span>
+</pre></td></tr></table></figure>
+
+
+<figure class="highlight"><figcaption><span>qemu-1.5</span></figcaption><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+</pre></td><td class="code"><pre>
+    <span class="string">.</span><span class="comment">/x86_64</span><span class="literal">-</span><span class="comment">softmmu/qemu</span><span class="literal">-</span><span class="comment">system</span><span class="literal">-</span><span class="comment">x86_64</span>  <span class="literal">-</span><span class="comment">device</span> <span class="comment">?</span> <span class="comment">2</span>&gt;<span class="comment">&amp;1</span> <span class="comment">|</span> <span class="comment">grep</span> <span class="comment">"virtio\|scsi"</span>
+
+    <span class="comment">name</span> <span class="comment">"scsi</span><span class="literal">-</span><span class="comment">hd"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">SCSI</span><span class="string">,</span> <span class="comment">desc</span> <span class="comment">"virtual</span> <span class="comment">SCSI</span> <span class="comment">disk"</span>
+    <span class="comment">name</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">blk</span><span class="literal">-</span><span class="comment">pci"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">PCI</span><span class="string">,</span> <span class="comment">alias</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">blk"</span>
+    <span class="comment">name</span> <span class="comment">"vhost</span><span class="literal">-</span><span class="comment">scsi</span><span class="literal">-</span><span class="comment">pci"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">PCI</span>
+    <span class="comment">name</span> <span class="comment">"scsi</span><span class="literal">-</span><span class="comment">block"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">SCSI</span><span class="string">,</span> <span class="comment">desc</span> <span class="comment">"SCSI</span> <span class="comment">block</span> <span class="comment">device</span> <span class="comment">passthrough"</span>
+    <span class="comment">name</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">serial</span><span class="literal">-</span><span class="comment">device"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">virtio</span><span class="literal">-</span><span class="comment">bus</span>
+    <span class="comment">name</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">scsi</span><span class="literal">-</span><span class="comment">common"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">virtio</span><span class="literal">-</span><span class="comment">bus</span>
+    <span class="comment">name</span> <span class="comment">"scsi</span><span class="literal">-</span><span class="comment">generic"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">SCSI</span><span class="string">,</span> <span class="comment">desc</span> <span class="comment">"pass</span> <span class="comment">through</span> <span class="comment">generic</span> <span class="comment">scsi</span> <span class="comment">device</span> <span class="comment">(/dev/sg*)"</span>
+    <span class="comment">name</span> <span class="comment">"vhost</span><span class="literal">-</span><span class="comment">scsi"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">virtio</span><span class="literal">-</span><span class="comment">bus</span>
+    <span class="comment">name</span> <span class="comment">"scsi</span><span class="literal">-</span><span class="comment">disk"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">SCSI</span><span class="string">,</span> <span class="comment">desc</span> <span class="comment">"virtual</span> <span class="comment">SCSI</span> <span class="comment">disk</span> <span class="comment">or</span> <span class="comment">CD</span><span class="literal">-</span><span class="comment">ROM</span> <span class="comment">(legacy)"</span>
+    <span class="comment">name</span> <span class="comment">"virtserialport"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">virtio</span><span class="literal">-</span><span class="comment">serial</span><span class="literal">-</span><span class="comment">bus</span>
+    <span class="comment">name</span> <span class="comment">"scsi</span><span class="literal">-</span><span class="comment">cd"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">SCSI</span><span class="string">,</span> <span class="comment">desc</span> <span class="comment">"virtual</span> <span class="comment">SCSI</span> <span class="comment">CD</span><span class="literal">-</span><span class="comment">ROM"</span>
+    <span class="comment">name</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">net</span><span class="literal">-</span><span class="comment">device"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">virtio</span><span class="literal">-</span><span class="comment">bus</span>
+    <span class="comment">name</span> <span class="comment">"virtconsole"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">virtio</span><span class="literal">-</span><span class="comment">serial</span><span class="literal">-</span><span class="comment">bus</span>
+    <span class="comment">name</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">serial</span><span class="literal">-</span><span class="comment">pci"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">PCI</span><span class="string">,</span> <span class="comment">alias</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">serial"</span>
+    <span class="comment">name</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">balloon</span><span class="literal">-</span><span class="comment">device"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">virtio</span><span class="literal">-</span><span class="comment">bus</span>
+    <span class="comment">name</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">rng</span><span class="literal">-</span><span class="comment">pci"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">PCI</span>
+    <span class="comment">name</span> <span class="comment">"pvscsi"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">PCI</span>
+    <span class="comment">name</span> <span class="comment">"am53c974"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">PCI</span><span class="string">,</span> <span class="comment">desc</span> <span class="comment">"AMD</span> <span class="comment">Am53c974</span> <span class="comment">PCscsi</span><span class="literal">-</span><span class="comment">PCI</span> <span class="comment">SCSI</span> <span class="comment">adapter"</span>
+    <span class="comment">name</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">balloon</span><span class="literal">-</span><span class="comment">pci"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">PCI</span><span class="string">,</span> <span class="comment">alias</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">balloon"</span>
+    <span class="comment">name</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">scsi</span><span class="literal">-</span><span class="comment">pci"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">PCI</span>
+    <span class="comment">name</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">blk</span><span class="literal">-</span><span class="comment">device"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">virtio</span><span class="literal">-</span><span class="comment">bus</span>
+    <span class="comment">name</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">scsi</span><span class="literal">-</span><span class="comment">device"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">virtio</span><span class="literal">-</span><span class="comment">bus</span>
+    <span class="comment">name</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">net</span><span class="literal">-</span><span class="comment">pci"</span><span class="string">,</span> <span class="comment">bus</span> <span class="comment">PCI</span><span class="string">,</span> <span class="comment">alias</span> <span class="comment">"virtio</span><span class="literal">-</span><span class="comment">net"</span>
+</pre></td></tr></table></figure>
+
+
+<h2 id="Questions">Questions</h2>
+<ol>
+<li>What is virtio-bus?</li>
+<li>Which device can provide virtio-bus?</li>
+<li>How to use virtio-scsi-device or virtio-blk-device?</li>
+<li>What is virtio-scsi-common?</li>
+</ol>
+
+      
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/2013/05/2013-05-20-qemu-virtio-refactoring/#more" class="more-link">Read More</a>
+          </div>
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+  <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
         <time datetime="2013-05-06T08:56:31.000Z"><a href="/2013/05/2013-05-06-qemu-contribute-submit-patch-steps/">May 6 2013</a></time>
       
       
@@ -922,73 +1072,6 @@ or
 
 
 
-  <article class="post">
-  
-    <div class="gallery">
-  <div class="photoset">
-    
-      <img src="">
-    
-  </div>
-  <div class="control">
-    <div class="prev"></div>
-    <div class="next"></div>
-  </div>
-</div>
-  
-  <div class="post-content">
-    <header>
-      
-        <div class="icon"></div>
-        <time datetime="2011-02-28T07:30:40.000Z"><a href="/2011/02/2011-02-28-mysql-delete-rows-from-multi-tables/">Feb 28 2011</a></time>
-      
-      
-  
-    <h1 class="title"><a href="/2011/02/2011-02-28-mysql-delete-rows-from-multi-tables/">MySQL同时删除多表数据</a></h1>
-  
-
-    </header>
-    <div class="entry">
-      
-        <p>假设有如下三个表：</p>
-<p>[sql]<br>CREATE TABLE <code>list</code> (<br><code>id</code> int(11) NOT NULL AUTO_INCREMENT,<br><code>name</code> varchar(255) DEFAULT NULL,<br>PRIMARY KEY (<code>id</code>)<br>) ENGINE=InnoDB  DEFAULT CHARSET=utf8</p>
-<p>CREATE TABLE <code>detail</code> (<br><code>id</code> int(11) NOT NULL AUTO_INCREMENT,<br><code>list_id</code> int(11) DEFAULT NULL,<br>PRIMARY KEY (<code>id</code>)<br>) ENGINE=InnoDB DEFAULT CHARSET=utf8</p>
-<p>CREATE TABLE <code>workflow</code> (<br><code>id</code> int(11) NOT NULL AUTO_INCREMENT,<br><code>list_id</code> int(11) DEFAULT NULL,<br>PRIMARY KEY (<code>id</code>)<br>) ENGINE=InnoDB  DEFAULT CHARSET=utf8</p>
-<p>[/sql]</p>
-<p>detail和workflow表均通过list_id和list表的id关联<br>如果我们需要删除list表中id为1及其关联的detail和workflow表记录时，除了通过添加外键关联ON DELETE约束外，可否在一条语句中完成?即可否使用类似于如下的语句：<br>[sql]<br>delete from list,detail,workflow where list.id=detail.list_id and workflow.list_id=list.id;<br>[/sql]</p>
-<blockquote>
-<p>答案是不行的，但是MySQL是可以支持多表删除的，具体用法如下(摘自MySQL<a href="http://dev.mysql.com/doc/refman/5.0/en/delete.html" target="_blank">官方文档</a>)</p>
-</blockquote>
-<p>对于第一种多表删除语法，只有在FROM语句之前列出的表中的匹配记录会被删除;第二种语法中,只有在FROM语句中列出的表(USING语句之前)中匹配的记录会被删除.效果是你可以同时从多个表中删除记录，而另外一些的表可仅起辅助查询作用.<br>For the first multiple-table syntax, only matching rows from the tables listed before the FROM clause are deleted. For the second multiple-table syntax, only matching rows from the tables listed in the FROM clause (before the USING clause) are deleted. The effect is that you can delete rows from many tables at the same time and have additional tables that are used only for searching:</p>
-<p>DELETE t1, t2 FROM t1 INNER JOIN t2 INNER JOIN t3<br>WHERE t1.id=t2.id AND t2.id=t3.id;</p>
-<p>Or:</p>
-<p>DELETE FROM t1, t2 USING t1 INNER JOIN t2 INNER JOIN t3<br>WHERE t1.id=t2.id AND t2.id=t3.id;</p>
-<p>这些语句使用了三个表来查找需要删除的记录，但是仅仅从t1和t2表中删除符合条件的记录<br>These statements use all three tables when searching for rows to delete, but delete matching rows only from tables t1 and t2.</p>
-<p>前面的例子使用的是INNER JOIN，而多表删除时也可以使用其余类型的JOIN，如LEFT JOIN等等。例如，如果需要删除在t1中存在而在t2中不存在的数据，可以使用如下的删除语句:<br>The preceding examples use INNER JOIN, but multiple-table DELETE statements can use other types of join permitted in SELECT statements, such as LEFT JOIN. For example, to delete rows that exist in t1 that have no match in t2, use a LEFT JOIN:</p>
-<p>DELETE t1 FROM t1 LEFT JOIN t2 ON t1.id=t2.id WHERE t2.id IS NULL;</p>
-<p>如果多表删除涉及了存在外键约束的InnoDB表,MySQL优化器处理多表的顺序可能会和其父子关系不一致,这样的话,该语句会执行失败并进行回滚。这种情况下，可以通过添加ON DELETE外键约束来完成多表删除。<br>If you use a multiple-table DELETE statement involving InnoDB tables for which there are foreign key constraints, the MySQL optimizer might process tables in an order that differs from that of their parent/child relationship. In this case, the statement fails and rolls back. Instead, you should delete from a single table and rely on the ON DELETE capabilities that InnoDB provides to cause the other tables to be modified accordingly.</p>
-<p>对于开头的三个表删除需求，可以这么进行删除:</p>
-<p>[sql]<br>delete list,detail,workflow from list,detail,workflow where list.id=detail.list_id and workflow.list_id=list.id and list.id=1;</p>
-<p>delete list,detail,workflow from list inner join detail inner join workflow where list.id=detail.list_id and workflow.list_id=list.id and list.id=1;</p>
-<p>delete from list,detail,workflow using list inner join workflow inner join detail where list.id=detail.list_id and workflow.list_id=list.id and list.id=1;</p>
-<p>[/sql]</p>
-
-      
-    </div>
-    <footer>
-      
-        
-        
-      
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
 
 <nav id="pagination">
   
@@ -1014,7 +1097,7 @@ or
   
     <li><a href="/categories/Linux/">Linux</a><small>3</small></li>
   
-    <li><a href="/categories/OpenStack/">OpenStack</a><small>3</small></li>
+    <li><a href="/categories/OpenStack/">OpenStack</a><small>4</small></li>
   
     <li><a href="/categories/VIM/">VIM</a><small>3</small></li>
   
@@ -1034,7 +1117,7 @@ or
 <div class="widget tagcloud">
   <h3 class="title">Tag Cloud</h3>
   <div class="entry">
-    <a href="/tags/CIM/" style="font-size: 10.00px;">CIM</a><a href="/tags/CORS/" style="font-size: 10.00px;">CORS</a><a href="/tags/DBPM/" style="font-size: 10.00px;">DBPM</a><a href="/tags/Deploy/" style="font-size: 10.00px;">Deploy</a><a href="/tags/ELI/" style="font-size: 10.00px;">ELI</a><a href="/tags/NUMA/" style="font-size: 10.00px;">NUMA</a><a href="/tags/Nova/" style="font-size: 15.00px;">Nova</a><a href="/tags/OPTIONS/" style="font-size: 10.00px;">OPTIONS</a><a href="/tags/Paste/" style="font-size: 10.00px;">Paste</a><a href="/tags/QEMU/" style="font-size: 20.00px;">QEMU</a><a href="/tags/RabbitMQ/" style="font-size: 10.00px;">RabbitMQ</a><a href="/tags/Stevedore/" style="font-size: 10.00px;">Stevedore</a><a href="/tags/WSGI/" style="font-size: 10.00px;">WSGI</a><a href="/tags/bfc/" style="font-size: 10.00px;">bfc</a><a href="/tags/block-stream/" style="font-size: 10.00px;">block-stream</a><a href="/tags/blockcopy/" style="font-size: 12.50px;">blockcopy</a><a href="/tags/cache/" style="font-size: 10.00px;">cache</a><a href="/tags/css/" style="font-size: 12.50px;">css</a><a href="/tags/dataplane/" style="font-size: 10.00px;">dataplane</a><a href="/tags/device-mapper/" style="font-size: 10.00px;">device-mapper</a><a href="/tags/ervernote/" style="font-size: 10.00px;">ervernote</a><a href="/tags/etag/" style="font-size: 10.00px;">etag</a><a href="/tags/eval/" style="font-size: 10.00px;">eval</a><a href="/tags/fdisk/" style="font-size: 10.00px;">fdisk</a><a href="/tags/fedora/" style="font-size: 10.00px;">fedora</a><a href="/tags/gpt/" style="font-size: 10.00px;">gpt</a><a href="/tags/greasemonkey/" style="font-size: 10.00px;">greasemonkey</a><a href="/tags/http/" style="font-size: 12.50px;">http</a><a href="/tags/isolinux/" style="font-size: 10.00px;">isolinux</a><a href="/tags/javascript/" style="font-size: 10.00px;">javascript</a><a href="/tags/libvirt/" style="font-size: 17.50px;">libvirt</a><a href="/tags/lighthttpd/" style="font-size: 10.00px;">lighthttpd</a><a href="/tags/lighttpd/" style="font-size: 10.00px;">lighttpd</a><a href="/tags/livecd/" style="font-size: 10.00px;">livecd</a><a href="/tags/mac/" style="font-size: 10.00px;">mac</a><a href="/tags/mbr/" style="font-size: 10.00px;">mbr</a><a href="/tags/md5sum/" style="font-size: 10.00px;">md5sum</a><a href="/tags/mysql/" style="font-size: 12.50px;">mysql</a><a href="/tags/oVirt/" style="font-size: 15.00px;">oVirt</a><a href="/tags/parted/" style="font-size: 10.00px;">parted</a>
+    <a href="/tags/CIM/" style="font-size: 10.00px;">CIM</a><a href="/tags/CORS/" style="font-size: 10.00px;">CORS</a><a href="/tags/DBPM/" style="font-size: 10.00px;">DBPM</a><a href="/tags/Deploy/" style="font-size: 10.00px;">Deploy</a><a href="/tags/ELI/" style="font-size: 10.00px;">ELI</a><a href="/tags/NUMA/" style="font-size: 10.00px;">NUMA</a><a href="/tags/Nova/" style="font-size: 16.00px;">Nova</a><a href="/tags/OPTIONS/" style="font-size: 10.00px;">OPTIONS</a><a href="/tags/Paste/" style="font-size: 10.00px;">Paste</a><a href="/tags/QEMU/" style="font-size: 20.00px;">QEMU</a><a href="/tags/RabbitMQ/" style="font-size: 10.00px;">RabbitMQ</a><a href="/tags/Stevedore/" style="font-size: 10.00px;">Stevedore</a><a href="/tags/WSGI/" style="font-size: 10.00px;">WSGI</a><a href="/tags/bfc/" style="font-size: 10.00px;">bfc</a><a href="/tags/block-stream/" style="font-size: 10.00px;">block-stream</a><a href="/tags/blockcopy/" style="font-size: 12.00px;">blockcopy</a><a href="/tags/cache/" style="font-size: 10.00px;">cache</a><a href="/tags/css/" style="font-size: 12.00px;">css</a><a href="/tags/dataplane/" style="font-size: 10.00px;">dataplane</a><a href="/tags/device-mapper/" style="font-size: 10.00px;">device-mapper</a><a href="/tags/ervernote/" style="font-size: 10.00px;">ervernote</a><a href="/tags/etag/" style="font-size: 10.00px;">etag</a><a href="/tags/eval/" style="font-size: 10.00px;">eval</a><a href="/tags/fdisk/" style="font-size: 10.00px;">fdisk</a><a href="/tags/fedora/" style="font-size: 10.00px;">fedora</a><a href="/tags/gpt/" style="font-size: 10.00px;">gpt</a><a href="/tags/greasemonkey/" style="font-size: 10.00px;">greasemonkey</a><a href="/tags/http/" style="font-size: 12.00px;">http</a><a href="/tags/isolinux/" style="font-size: 10.00px;">isolinux</a><a href="/tags/javascript/" style="font-size: 10.00px;">javascript</a><a href="/tags/libvirt/" style="font-size: 18.00px;">libvirt</a><a href="/tags/lighthttpd/" style="font-size: 10.00px;">lighthttpd</a><a href="/tags/lighttpd/" style="font-size: 10.00px;">lighttpd</a><a href="/tags/livecd/" style="font-size: 10.00px;">livecd</a><a href="/tags/mac/" style="font-size: 10.00px;">mac</a><a href="/tags/mbr/" style="font-size: 10.00px;">mbr</a><a href="/tags/md5sum/" style="font-size: 10.00px;">md5sum</a><a href="/tags/mysql/" style="font-size: 12.00px;">mysql</a><a href="/tags/oVirt/" style="font-size: 14.00px;">oVirt</a><a href="/tags/parted/" style="font-size: 10.00px;">parted</a>
   </div>
 </div>
 
