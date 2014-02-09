@@ -86,59 +86,79 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
     <header>
       
         <div class="icon"></div>
-        <time datetime="2014-01-09T14:40:31.000Z"><a href="/2014/01/2014-01-09-nova-api-service-initialization/">Jan 9 2014</a></time>
+        <time datetime="2014-02-09T14:55:31.000Z"><a href="/2014/02/2014-02-09-nova-v3-api-extension-framework/">Feb 9 2014</a></time>
       
       
   
-    <h1 class="title"><a href="/2014/01/2014-01-09-nova-api-service-initialization/">NOVA API Service Initialization Process</a></h1>
+    <h1 class="title"><a href="/2014/02/2014-02-09-nova-v3-api-extension-framework/">NOVA V3 API Extension Framework</a></h1>
   
 
     </header>
     <div class="entry">
       
-        <h1 id="NOVA-API-670d-52a1-542f-52a8-6d41-7a0b-">NOVA-API服务启动流程</h1>
-<p><strong>前提</strong></p>
+        <h1 id="NOVA_V3_API_Extension_Framework">NOVA V3 API Extension Framework</h1>
+<p><strong>背景</strong></p>
 <ol>
-<li>对Nova的整体结构已经有所理解</li>
 <li>基于stable/havana分支</li>
-<li>基于Redhat的RDO库进行的环境安装，基于CentOS 6.4</li>
+<li>基于CentOS 6.4，以Redhat的RDO库进行的环境安装</li>
 </ol>
 <p><strong>内容</strong></p>
 <ol>
-<li>openstack-nova-api服务启动流程</li>
-<li>Paste、Deploy、WSGI等相关知识</li>
+<li>V2扩展机制存在的问题</li>
+<li>Nova API V3中Plugin的实现机制和现状</li>
+<li>总结</li>
 </ol>
-<h2 id="-6267-884c-7ed3-679c-">执行结果</h2>
-<p>启动API服务时的命令为：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre>1
-</pre></td><td class="code"><pre><span class="comment">service</span> <span class="comment">openstack</span><span class="literal">-</span><span class="comment">nova</span><span class="literal">-</span><span class="comment">api</span> <span class="comment">start</span>
-</pre></td></tr></table></figure>
-
-<p>启动成功后，查看系统进程，发现实际执行结果为一个nova-api父进程，同时其有三个nova-api子进程：</p>
+<h2 id="V2-7684-6269-5c55-673a-5236-5b58-5728-7684-95ee-9898-">V2的扩展机制存在的问题</h2>
+<p>参考V3 API framework的Spec，当前V2 API存在的问题如下：</p>
+<p>The development of the Nova v3 API will give us the opportunity to rework the extension framework. The current framework suffers from:</p>
+<ul>
+<li>extension specific code required to exist in core code for specific extensions to work<ul>
+<li>eg nova/api/openstack/compute/servers.py:Controller:create where there are hard coded references to parameters specific to extensions to pass kwargs to the server create call</li>
+</ul>
+</li>
+<li>issues around efficiency with extensions each doing their own db lookup loops<ul>
+<li><a href="https://bugs.launchpad.net/nova/+bug/1160487" target="_blank">https://bugs.launchpad.net/nova/+bug/1160487</a></li>
+</ul>
+</li>
+<li>Can’t have CamelCase class names for extension classes due to extension loading mechanism</li>
+</ul>
+<p>这里主要展开说明前两点。</p>
+<h3 id="Extension-9700-8981-6d89-53ca-Core_Code-7684-53d8-52a8-">Extension需要涉及Core Code的变动</h3>
+<p>第一个问题主要指当前的extension机制中，增加一个contrib后，往往需要在所谓的“core code”中添加必要的参数处理来将extension中引入的参数传入到内部的API中。<strong>需要注意的是</strong>这里的core code指的是nova.api.openstack.compute.*,即仅仅指的是API层次中核心资源相关的API Handlers，并非指的是各个Module内部的API/RPCAPI-&gt;Manager-&gt;Driver的代码层次结构中的代码。</p>
+<p>以当前对核心资源“虚拟机”的create方法扩展来看，在api.openstack.compute.servers.py:create中存在大量类似如下的逻辑：</p>
 <figure class="highlight"><table><tr><td class="gutter"><pre>1
 2
 3
 4
-</pre></td><td class="code"><pre>nova <span class="number">3438</span> S <span class="number">0</span>:<span class="number">07</span> <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>python <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>nova<span class="attribute">-api</span> <span class="subst">--</span>logfile <span class="subst">/</span><span class="built_in">var</span><span class="subst">/</span><span class="keyword">log</span><span class="subst">/</span>nova<span class="subst">/</span>api<span class="built_in">.</span><span class="keyword">log</span>
-nova <span class="number">3446</span> S <span class="number">0</span>:<span class="number">00</span> <span class="subst">\</span>_ <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>python <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>nova<span class="attribute">-api</span> <span class="subst">--</span>logfile <span class="subst">/</span><span class="built_in">var</span><span class="subst">/</span><span class="keyword">log</span><span class="subst">/</span>nova<span class="subst">/</span>api<span class="built_in">.</span><span class="keyword">log</span>
-nova <span class="number">3447</span> S <span class="number">0</span>:<span class="number">00</span> <span class="subst">\</span>_ <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>python <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>nova<span class="attribute">-api</span> <span class="subst">--</span>logfile <span class="subst">/</span><span class="built_in">var</span><span class="subst">/</span><span class="keyword">log</span><span class="subst">/</span>nova<span class="subst">/</span>api<span class="built_in">.</span><span class="keyword">log</span>
-nova <span class="number">3448</span> S <span class="number">0</span>:<span class="number">00</span> <span class="subst">\</span>_ <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>python <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>nova<span class="attribute">-api</span> <span class="subst">--</span>logfile <span class="subst">/</span><span class="built_in">var</span><span class="subst">/</span><span class="keyword">log</span><span class="subst">/</span>nova<span class="subst">/</span>api<span class="built_in">.</span><span class="keyword">log</span>
+5
+6
+7
+8
+9
+</pre></td><td class="code"><pre><span class="preprocessor"># optional openstack extensions:</span>
+        key_name = None
+        <span class="keyword">if</span> self.ext_mgr.is_loaded(<span class="comment">'os-keypairs'):</span>
+            key_name = server_dict.<span class="keyword">get</span>(<span class="comment">'key_name')</span>
+
+        user_data = None
+        <span class="keyword">if</span> self.ext_mgr.is_loaded(<span class="comment">'os-user-data'):</span>
+            user_data = server_dict.<span class="keyword">get</span>(<span class="comment">'user_data')</span>
+        self._validate_user_data(user_data)
 </pre></td></tr></table></figure>
 
-<p>查看监听的端口，发现父进程nova-api同时监听了三个端口：</p>
+<p>如上代码中的os-keypairs和os-user-data就是两个extensions。当添加这俩extension后，就需要在servers.py的create方法中进行检测和参数处理，以便最终将获取到的key_name和user_data等参数传递到内部的compute_api:create方法中。</p>
+<h3 id="-6027-80fd-95ee-9898-">性能问题</h3>
+<p>关于第二个问题，在上文的bugs链接中已经描述的比较清楚，以servers为例，问题主要是指在GET等方法中，各个extension的处理逻辑中往往需要往返回的server信息中追加extension相关的信息，如disk_config扩展需要追加存储在DB中的disk config相关的信息等，故在各个extension中均会分别进行数据库查询操作，从而导致性能问题。</p>
+<p>不过从目前HAVANA的代码来看，此问题已经通过一种方法缓解了，但从commit来看，和V3 API并不属于同一系列的提交。以servers为例，此问题现在的解决办法是，在core API处理时，就将可能需要从db中读取出来的servers相关的信息全部一次性读取出来并放入Cache中的Instance对象，在各个extension处理时只需要从Cache中取出所需的属性即可。在core API中一次性读出的信息除了instances表中一些extension添加的字段外，还会读出关联的instance_metadata、instance_system_metadata等多个表的信息。具体可参考nova.db.sqlalchemy.api:instance_get等相关的方法实现。</p>
+<h2 id="Nova_API_V3-4e2d-Plugin-7684-5b9e-73b0-673a-5236-548c-73b0-72b6-">Nova API V3中Plugin的实现机制和现状</h2>
+<h3 id="-5b9e-73b0-673a-5236-">实现机制</h3>
+<p>API V3中的Plugin的实现机制利用的是和Ceilometer一样的Stevedore，此模块主要是对python setuptools中的Entry Points机制进行了封装。</p>
+<h3 id="Setuptools_Entry_Points">Setuptools Entry Points</h3>
+<p>Python setuptools的Entry Points机制主要用途有两个：Automatic Script Creation和Dynamic Discovery of Services and Plugins。</p>
+<p>Automatic Script Creation主要功能是封装了平台的差异，在不同平台上生成Python Package的入口脚本。如RDO库中的/usr/bin目录下的nova-api、nova-scheduler等入口脚本均是通过此机制生成的。</p>
+<p>Dynamic Discovery of Services and Plugins主要是指本Package通过Entry Point声明自身的“扩展点”，然后第三方Package或者本Package的各个Module可以声明对此“扩展点”的实现。在本Package中，可以通过某种方式获取相应“扩展点”当前所有的实现，并进行相应的处理。</p>
+<p>Entry Point的声明和注册均是在各个Package的setup.cfg配置文件或者setup.py:setup method中完成的。以当前的HAVANA为例，在nova的setup.cfg中可以看到有如下配置：</p>
 <figure class="highlight"><table><tr><td class="gutter"><pre>1
-2
-3
-</pre></td><td class="code"><pre><span class="title">tcp</span>        <span class="number">0</span>      <span class="number">0</span> <span class="number">0.0.0.0:8773</span>                <span class="number">0.0.0.0</span>:*                   LISTEN      <span class="number">3438</span>/python         
-tcp        <span class="number">0</span>      <span class="number">0</span> <span class="number">0.0.0.0:8774</span>                <span class="number">0.0.0.0</span>:*                   LISTEN      <span class="number">3438</span>/python         
-tcp        <span class="number">0</span>      <span class="number">0</span> <span class="number">0.0.0.0:8775</span>                <span class="number">0.0.0.0</span>:*                   LISTEN      <span class="number">3438</span>/python
-</pre></td></tr></table></figure>
-
-<h2 id="-4ee3-7801-8def-5f84-">代码路径</h2>
-<h3 id="-4e3b-8981-8def-5f84-">主要路径</h3>
-<p>服务启动脚本为/etc/init.d/openstack-nova-api，查看此脚本发现在启动服务时实际执行的是/usr/bin/nova-api,而/usr/bin/nova-api是一个python脚本，实际执行的是nova.cmd.api.main</p>
-<p>nova.cmd.api.main的主要代码如下：</p>
-<figure class="highlight lang-python"><table><tr><td class="gutter"><pre>1
 2
 3
 4
@@ -148,35 +168,329 @@ tcp        <span class="number">0</span>      <span class="number">0</span> <spa
 8
 9
 10
-</pre></td><td class="code"><pre>    launcher = service.process_launcher()
-    <span class="keyword">for</span> api <span class="keyword">in</span> CONF.enabled_apis:
-        should_use_ssl = api <span class="keyword">in</span> CONF.enabled_ssl_apis
-        <span class="keyword">if</span> api == <span class="string">'ec2'</span>:
-            server = service.WSGIService(api, use_ssl=should_use_ssl,
-                                         max_url_len=<span class="number">16384</span>)
-        <span class="keyword">else</span>:
-            server = service.WSGIService(api, use_ssl=should_use_ssl)
-        launcher.launch_service(server, workers=server.workers <span class="keyword">or</span> <span class="number">1</span>)
-    launcher.wait()
+11
+12
+13
+14
+15
+16
+17
+</pre></td><td class="code"><pre>[entry_points]
+<span class="preprocessor">#...</span>
+
+console_scripts =
+    	nova-all = nova<span class="preprocessor">.cmd</span><span class="preprocessor">.all</span>:main
+    	nova-api = nova<span class="preprocessor">.cmd</span><span class="preprocessor">.api</span>:main
+	<span class="preprocessor">#....</span>
+nova<span class="preprocessor">.api</span><span class="preprocessor">.v</span>3<span class="preprocessor">.extensions</span> =
+    	admin_actions = nova<span class="preprocessor">.api</span><span class="preprocessor">.openstack</span><span class="preprocessor">.compute</span><span class="preprocessor">.plugins</span><span class="preprocessor">.v</span>3<span class="preprocessor">.admin</span>_actions:AdminActions
+    	admin_password = nova<span class="preprocessor">.api</span><span class="preprocessor">.openstack</span><span class="preprocessor">.compute</span><span class="preprocessor">.plugins</span><span class="preprocessor">.v</span>3<span class="preprocessor">.admin</span>_password:AdminPassword
+    	agents = nova<span class="preprocessor">.api</span><span class="preprocessor">.openstack</span><span class="preprocessor">.compute</span><span class="preprocessor">.plugins</span><span class="preprocessor">.v</span>3<span class="preprocessor">.agents</span>:Agents
+	<span class="preprocessor">#...</span>
+nova<span class="preprocessor">.api</span><span class="preprocessor">.v</span>3<span class="preprocessor">.extensions</span><span class="preprocessor">.server</span><span class="preprocessor">.create</span> =
+    	availability_zone = nova<span class="preprocessor">.api</span><span class="preprocessor">.openstack</span><span class="preprocessor">.compute</span><span class="preprocessor">.plugins</span><span class="preprocessor">.v</span>3<span class="preprocessor">.availability</span>_zone:AvailabilityZone
+    	block_device_mapping = nova<span class="preprocessor">.api</span><span class="preprocessor">.openstack</span><span class="preprocessor">.compute</span><span class="preprocessor">.plugins</span><span class="preprocessor">.v</span>3<span class="preprocessor">.block</span>_device_mapping:BlockDeviceMapping
+	<span class="preprocessor">#...</span>
+<span class="preprocessor">#...</span>
 </pre></td></tr></table></figure>
 
-<p>首先生成一个nova.common.service.Processlauncher类型的launcher, 接着会根据配置中的enabled_apis列表值，依次生成相应的WSGIService:</p>
+<p>其中的”console_scripts”是一个特殊的entry_point，触发的就是上述的Automatic Script Creation，在执行setup.py install时，就会根据这里的配置在/usr/bin目录下生成相应内容的nova-all和nova-api等文件。</p>
+<p>后面的nova.api.v3.extensions和nova.api.v3.extensions.server.create就是此Package支持的“扩展点”,其Value中对应的list就是此扩展点对应的实现。</p>
+<h3 id="Python_stevedore">Python stevedore</h3>
+<p>Python setuptools的pkg_resources包中，有多种utils方法，可以获取指定entry_point对应的所有的实现。Stevedore就是对这些方法进行了封装，并对外提供了几种扩展机制，具体可参考其官方网站。这里只简单说明下几种：</p>
+<ul>
+<li>DriverManager: 对应的是Driver形式的扩展机制，即使一个EntryPoint有多个实现，系统只能使用其中一个</li>
+<li>HookManager：对应的是Hook机制，会遍历EntryPoint的所有实现，并进行invoke</li>
+<li>EnabledExtensionManager：在load所有实现时，增加check_func的filter机制</li>
+</ul>
+<p>在ExtensionManager中，比较重要的一个方法是map(func, <em>args, </em>kwds),此方法会遍历所有的extensions，并依次调用func方法。</p>
+<h3 id="NOVA-4e2d-7684-73b0-72b6-">NOVA中的现状</h3>
+<p>NOVA中APIv3相关的代码在nova.api.openstack.compute.pulgins.v3层次下。下面对V3 API Extension Framework的工作机制做简单的分析：</p>
+<p><strong> v3 API入口 </strong></p>
+<p>在etc.nova.api-paste.ini中，通过配置定义了/v3的URL入口，并最终指向的app_factory是nova.api.openstack.compute:APIRouterV3.factory。</p>
+<p><strong> 加载所有Extensions </strong></p>
+<p>在APIRouteV3中，会通过初始化self.api_extension_manager为stevedore.enabled.EnabledExtensionManager来加载所有声明为nova.api.v3.extensions的Extensions，然后会对各extensions进行相应的map调用来进行类似V2 API中的资源和Action的扩展，并会检测配置的Core API是否全部成功load：</p>
 <figure class="highlight"><table><tr><td class="gutter"><pre>1
-</pre></td><td class="code"><pre>server = service.WSGIService(<span class="keyword">...</span>)
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+</pre></td><td class="code"><pre>    API_EXTENSION_NAMESPACE = <span class="string">'nova.api.v3.extensions'</span>
+    
+    <span class="comment"># 初始化api_extension_manager并load所有的API_EXTENSION_NAMESPACE对应的extensions。</span>
+    <span class="comment"># 如前文所述，这里load就是nova项目中setup.cfg中配置的此namespace对应的所有extensions。当然如果有第三方的应用也声明了此namespace的extension，这里也会一并load进来。</span>
+    <span class="comment"># 其中的check_func为check_load_extension,其所作的工作主要包括：</span>
+    <span class="comment"># a) 检测是否为相应的V3APIExtensionBase类型</span>
+    <span class="comment"># b) extension的黑白名单过滤和验证</span>
+    <span class="keyword">self</span>.api_extension_manager = stevedore.enabled.EnabledExtensionManager(
+            <span class="keyword">namespace</span>=<span class="keyword">self</span>.API_EXTENSION_NAMESPACE,
+            check_func=_check_load_extension,
+            invoke_on_load=<span class="keyword">True</span>,
+            invoke_kwds={<span class="string">"extension_info"</span>: <span class="keyword">self</span>.loaded_extension_info})
+            
+    <span class="comment">#…</span>
+
+    <span class="comment"># NOTE(cyeoh) Core API support is rewritten as extensions</span>
+    <span class="comment"># but conceptually still have core</span>
+    <span class="keyword">if</span> <span class="keyword">list</span>(<span class="keyword">self</span>.api_extension_manager):
+        <span class="comment"># 对所有的extension依次进行_register_resources和_register_controllers的方法调用</span>
+        <span class="keyword">self</span>.api_extension_manager.map(<span class="keyword">self</span>._register_resources,
+                                           mapper=mapper)
+            <span class="keyword">self</span>.api_extension_manager.map(<span class="keyword">self</span>._register_controllers)
+
+        <span class="comment">#检测配置的Core Extension是否全部成功加载</span>
+        missing_core_extensions = <span class="keyword">self</span>.get_missing_core_extensions(
+            <span class="keyword">self</span>.loaded_extension_info.get_extensions().keys())
+        <span class="keyword">if</span> not <span class="keyword">self</span>.init_only <span class="keyword">and</span> missing_core_extensions:
+            LOG.critical(_(<span class="string">"Missing core API extensions: %s"</span>),
+                         missing_core_extensions)
+            raise <span class="keyword">exception</span>.CoreAPIMissing(
+                missing_apis=missing_core_extensions)
 </pre></td></tr></table></figure>
 
-<p>然后通过launcher的launch_service方法，将上述的WSGIService和workers数量作为参数传入。</p>
-<p>在luanch_service方法中，会根据传入的workers参数fork出相应个数的子进程，并在各个子进程中调用对应WSGIService的start方法，开始对外服务。</p>
-<h3 id="-6d89-53ca-7684-914d-7f6e-">涉及的配置</h3>
+<p>其中上面代码中的_register_resources和_register_controllers会分别调用extension的get_resources和get_controller_extensions方法，其所作的工作分别对应于V2 API中在contrib中所作的新增资源和扩展现有资源以添加action。这里就不详细展开。</p>
+<p>这里需要注意的是，V2 API中会区分Core API和Extension API。在V3 API中，所有的API均作为extension的形式提供。如V2 API中的servers是Core API，在V3 API中也是一个普通的extension，此extension会在get_resources方法中返回servers资源对象，而get_controller_extensions方法会返回空list：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+</pre></td><td class="code"><pre>    <span class="comment">#nova.api.openstack.compute.pulgins.v3.servers:Servers</span>
+    
+    <span class="class"><span class="keyword">class</span> <span class="title">Servers</span><span class="params">(extensions.V3APIExtensionBase)</span>:</span>
+    <span class="string">"""Servers."""</span>
+
+    name = <span class="string">"Servers"</span>
+    alias = <span class="string">"servers"</span>
+    namespace = <span class="string">"http://docs.openstack.org/compute/core/servers/v3"</span>
+    version = <span class="number">1</span>
+
+    <span class="function"><span class="keyword">def</span> <span class="title">get_resources</span><span class="params">(self)</span>:</span>
+        member_actions = {<span class="string">'action'</span>: <span class="string">'POST'</span>}
+        collection_actions = {<span class="string">'detail'</span>: <span class="string">'GET'</span>}
+        resources = [
+            extensions.ResourceExtension(
+                <span class="string">'servers'</span>,
+                ServersController(extension_info=self.extension_info),
+                member_name=<span class="string">'server'</span>, collection_actions=collection_actions,
+                member_actions=member_actions)]
+
+        <span class="keyword">return</span> resources
+
+    <span class="function"><span class="keyword">def</span> <span class="title">get_controller_extensions</span><span class="params">(self)</span>:</span>
+        <span class="keyword">return</span> []
+</pre></td></tr></table></figure>
+
+<p>而当disk_config等需要对servers资源扩展action时，其所需做的就是在get_controller_extensions中返回对servers资源的扩展：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+</pre></td><td class="code"><pre>    <span class="comment">#nova.api.openstack.compute.pulgins.v3.disk_config</span>
+<span class="class"><span class="keyword">class</span> <span class="title">DiskConfig</span><span class="params">(extensions.V3APIExtensionBase)</span>:</span>
+    <span class="string">"""Disk Management Extension."""</span>
+
+    name = <span class="string">"DiskConfig"</span>
+    alias = ALIAS
+    namespace = XMLNS_DCF
+    version = <span class="number">1</span>
+
+    <span class="function"><span class="keyword">def</span> <span class="title">get_controller_extensions</span><span class="params">(self)</span>:</span>
+        servers_extension = extensions.ControllerExtension(
+            self, <span class="string">'servers'</span>, ServerDiskConfigController())
+
+        <span class="keyword">return</span> [servers_extension]
+        
+    <span class="comment">#...</span>
+</pre></td></tr></table></figure>
+
+<p>但是V3 API中可以通过配置约定了其中部分的API是作为“Core Extension”的，对于Core Extension，如上面代码所示，会在初始化时检测是否均被正常加载。</p>
+<p><strong> 避免各Extension之间的代码耦合 </strong></p>
+<p>上述两个步骤，只是换了中方式完成了V2 API中的Extension功能，下面看V3 API中如何解决了前文所述的Extension需要涉及Core API代码改动的问题。</p>
+<p>V3中，主要是利用了Stevedore避免了各Extension之间的代码耦合，从而避免了上述问题。</p>
+<p>还是以当前对核心资源“虚拟机”的create方法扩展来看，在servers资源对应的Controller nova.api.openstack.compute.pulgins.v3.servers:ServersController中，将create作为了一个extension的namespace，并会在初始化时就load所有的extensions：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+</pre></td><td class="code"><pre>    EXTENSION_CREATE_NAMESPACE = <span class="string">'nova.api.v3.extensions.server.create'</span>
+
+    <span class="comment">#…</span>
+    <span class="comment"># Look for implmentation of extension point of server creation</span>
+    <span class="keyword">self</span>.create_extension_manager = \
+      stevedore.enabled.EnabledExtensionManager(
+          <span class="keyword">namespace</span>=<span class="keyword">self</span>.EXTENSION_CREATE_NAMESPACE,
+          check_func=_check_load_extension(<span class="string">'server_create'</span>),
+          invoke_on_load=<span class="keyword">True</span>,
+          invoke_kwds={<span class="string">"extension_info"</span>: <span class="keyword">self</span>.extension_info},
+          propagate_map_exceptions=<span class="keyword">True</span>)
+</pre></td></tr></table></figure>
+
+<p>然后在create方法中，会通过map方法依次调用各个Extensions的server_create方法：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+</pre></td><td class="code"><pre>    <span class="comment">#create method:</span>
+    <span class="keyword">if</span> list(self.create_extension_manager):
+        self.create_extension_manager.map(self._create_extension_point,
+                                              server_dict, create_kwargs)
+                                              
+
+    <span class="comment">#….</span>
+    <span class="function"><span class="keyword">def</span> <span class="title">_create_extension_point</span><span class="params">(self, ext, server_dict, create_kwargs)</span>:</span>
+        handler = ext.obj
+        LOG.debug(_(<span class="string">"Running _create_extension_point for %s"</span>), ext.obj)
+
+        handler.server_create(server_dict, create_kwargs)
+</pre></td></tr></table></figure>
+
+<p>在nova的setup.cfg中也配置了此namespace对应的所有的extensions，比如nova.api.openstack.compute.plugins.v3.disk_config:DiskConfig，其server_create方法如下所示，会更新ServersController:create方法中传入的create_kwargs字典</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+</pre></td><td class="code"><pre>    <span class="function"><span class="keyword">def</span> <span class="title">server_create</span><span class="params">(self, server_dict, create_kwargs)</span>:</span>
+        create_kwargs[<span class="string">'auto_disk_config'</span>] = server_dict.get(
+            <span class="string">'auto_disk_config'</span>)
+</pre></td></tr></table></figure>
+
+<p>最终，ServersController:create方法会以如下方式调用内部API来创建VM，即直接使用被各个extensions更新过的create_kwargs，而不用感知其实际的内容。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+</pre></td><td class="code"><pre>            (instances, resv_id) = <span class="transposed_variable">self.</span><span class="transposed_variable">compute_api.</span>create(context,
+                            inst_type,
+                            image_uuid,
+                            display_name=name,
+                            display_description=name,
+                            metadata=<span class="transposed_variable">server_dict.</span>get(<span class="string">'metadata'</span>, <span class="cell">{}</span>),
+                            access_ip_v4=access_ip_v4,
+                            access_ip_v6=access_ip_v6,
+                            admin_password=password,
+                            requested_networks=requested_networks,
+                            **create_kwargs)
+</pre></td></tr></table></figure>
+
+<h2 id="-603b-7ed3-">总结</h2>
+<p>由上面的分析可知，如上所有的所谓的Extension，最终均依赖的还是一个内部的API，如果此API本身不具有扩展性，那么如上所有的Extension，均只能在此内部API支持的功能的基础上进行发挥。 比如文中提到的创建VM的内部create API，此API的参数是固定的：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+</pre></td><td class="code"><pre>    def create(<span class="built_in">self</span>, context, instance_type,
+               image_href, kernel_id<span class="subst">=</span><span class="literal">None</span>, ramdisk_id<span class="subst">=</span><span class="literal">None</span>,
+               min_count<span class="subst">=</span><span class="literal">None</span>, max_count<span class="subst">=</span><span class="literal">None</span>,
+               display_name<span class="subst">=</span><span class="literal">None</span>, display_description<span class="subst">=</span><span class="literal">None</span>,
+               key_name<span class="subst">=</span><span class="literal">None</span>, key_data<span class="subst">=</span><span class="literal">None</span>, security_group<span class="subst">=</span><span class="literal">None</span>,
+               availability_zone<span class="subst">=</span><span class="literal">None</span>, user_data<span class="subst">=</span><span class="literal">None</span>, metadata<span class="subst">=</span><span class="literal">None</span>,
+               injected_files<span class="subst">=</span><span class="literal">None</span>, admin_password<span class="subst">=</span><span class="literal">None</span>,
+               block_device_mapping<span class="subst">=</span><span class="literal">None</span>, access_ip_v4<span class="subst">=</span><span class="literal">None</span>,
+               access_ip_v6<span class="subst">=</span><span class="literal">None</span>, requested_networks<span class="subst">=</span><span class="literal">None</span>, config_drive<span class="subst">=</span><span class="literal">None</span>,
+               auto_disk_config<span class="subst">=</span><span class="literal">None</span>, scheduler_hints<span class="subst">=</span><span class="literal">None</span>, legacy_bdm<span class="subst">=</span><span class="literal">True</span>):
+</pre></td></tr></table></figure>
+
+<p>故上述各种Extension无论如何进行扩展，均不能做到使传入到内部底层的参数变多，V3 API只是使得调用此内部API时，不需要由单个所谓的Core Extension来做逻辑处理和参数封装了，而是通过Entry Point的机制巧妙的由各个Extension自行封装参数而已。</p>
+<p>而且不论是V2还是V3 Extension机制，均是在Public API层做的文章，如果要实现一个从Public API层到底层libvirt/hypervisor的新功能，不可避免是需要新增内部API的。故这里的Extension和传统我们理解的Plugin根本不是一回事。</p>
+<h2 id="-53c2-8003-8d44-6599-">参考资料</h2>
+<ul>
+<li><a href="https://etherpad.openstack.org/p/NovaAPIExtensionFramework" target="_blank">Nova API V3 Extension Framework</a></li>
+<li><a href="https://blueprints.launchpad.net/nova/+spec/v3-api-extension-framework" target="_blank">Nova API V3 Extension Framework BP</a></li>
+<li><a href="https://bugs.launchpad.net/nova/+bug/1160487" target="_blank">Nova API V2 Extension Problem about db lookup loops</a></li>
+<li><a href="http://stevedore.readthedocs.org/en/latest/" target="_blank">Python Stevedore</a></li>
+<li><a href="http://pythonhosted.org/setuptools/setuptools.html#dynamic-discovery-of-services-and-plugins" target="_blank">Python SetupTools EntryPoints and Plugins</a></li>
+<li><a href="http://pythonhosted.org/setuptools/pkg_resources.html" target="_blank">Python Discovery and Resource Access using pkg_resources</a></li>
+</ul>
 
       
     </div>
     <footer>
       
-        
-          <div class="alignleft">
-            <a href="/2014/01/2014-01-09-nova-api-service-initialization/#more" class="more-link">Read More</a>
-          </div>
         
         
       
@@ -298,6 +612,127 @@ Listing consumers <span class="keyword">...</span>
         
           <div class="alignleft">
             <a href="/2014/01/2014-01-09-nova-scheduler-service-initialization/#more" class="more-link">Read More</a>
+          </div>
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+  <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2014-01-09T14:40:31.000Z"><a href="/2014/01/2014-01-09-nova-api-service-initialization/">Jan 9 2014</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2014/01/2014-01-09-nova-api-service-initialization/">NOVA API Service Initialization Process</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <h1 id="NOVA-API-670d-52a1-542f-52a8-6d41-7a0b-">NOVA-API服务启动流程</h1>
+<p><strong>前提</strong></p>
+<ol>
+<li>对Nova的整体结构已经有所理解</li>
+<li>基于stable/havana分支</li>
+<li>基于Redhat的RDO库进行的环境安装，基于CentOS 6.4</li>
+</ol>
+<p><strong>内容</strong></p>
+<ol>
+<li>openstack-nova-api服务启动流程</li>
+<li>Paste、Deploy、WSGI等相关知识</li>
+</ol>
+<h2 id="-6267-884c-7ed3-679c-">执行结果</h2>
+<p>启动API服务时的命令为：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre><span class="comment">service</span> <span class="comment">openstack</span><span class="literal">-</span><span class="comment">nova</span><span class="literal">-</span><span class="comment">api</span> <span class="comment">start</span>
+</pre></td></tr></table></figure>
+
+<p>启动成功后，查看系统进程，发现实际执行结果为一个nova-api父进程，同时其有三个nova-api子进程：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+</pre></td><td class="code"><pre>nova <span class="number">3438</span> S <span class="number">0</span>:<span class="number">07</span> <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>python <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>nova<span class="attribute">-api</span> <span class="subst">--</span>logfile <span class="subst">/</span><span class="built_in">var</span><span class="subst">/</span><span class="keyword">log</span><span class="subst">/</span>nova<span class="subst">/</span>api<span class="built_in">.</span><span class="keyword">log</span>
+nova <span class="number">3446</span> S <span class="number">0</span>:<span class="number">00</span> <span class="subst">\</span>_ <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>python <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>nova<span class="attribute">-api</span> <span class="subst">--</span>logfile <span class="subst">/</span><span class="built_in">var</span><span class="subst">/</span><span class="keyword">log</span><span class="subst">/</span>nova<span class="subst">/</span>api<span class="built_in">.</span><span class="keyword">log</span>
+nova <span class="number">3447</span> S <span class="number">0</span>:<span class="number">00</span> <span class="subst">\</span>_ <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>python <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>nova<span class="attribute">-api</span> <span class="subst">--</span>logfile <span class="subst">/</span><span class="built_in">var</span><span class="subst">/</span><span class="keyword">log</span><span class="subst">/</span>nova<span class="subst">/</span>api<span class="built_in">.</span><span class="keyword">log</span>
+nova <span class="number">3448</span> S <span class="number">0</span>:<span class="number">00</span> <span class="subst">\</span>_ <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>python <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>nova<span class="attribute">-api</span> <span class="subst">--</span>logfile <span class="subst">/</span><span class="built_in">var</span><span class="subst">/</span><span class="keyword">log</span><span class="subst">/</span>nova<span class="subst">/</span>api<span class="built_in">.</span><span class="keyword">log</span>
+</pre></td></tr></table></figure>
+
+<p>查看监听的端口，发现父进程nova-api同时监听了三个端口：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+</pre></td><td class="code"><pre><span class="title">tcp</span>        <span class="number">0</span>      <span class="number">0</span> <span class="number">0.0.0.0:8773</span>                <span class="number">0.0.0.0</span>:*                   LISTEN      <span class="number">3438</span>/python         
+tcp        <span class="number">0</span>      <span class="number">0</span> <span class="number">0.0.0.0:8774</span>                <span class="number">0.0.0.0</span>:*                   LISTEN      <span class="number">3438</span>/python         
+tcp        <span class="number">0</span>      <span class="number">0</span> <span class="number">0.0.0.0:8775</span>                <span class="number">0.0.0.0</span>:*                   LISTEN      <span class="number">3438</span>/python
+</pre></td></tr></table></figure>
+
+<h2 id="-4ee3-7801-8def-5f84-">代码路径</h2>
+<h3 id="-4e3b-8981-8def-5f84-">主要路径</h3>
+<p>服务启动脚本为/etc/init.d/openstack-nova-api，查看此脚本发现在启动服务时实际执行的是/usr/bin/nova-api,而/usr/bin/nova-api是一个python脚本，实际执行的是nova.cmd.api.main</p>
+<p>nova.cmd.api.main的主要代码如下：</p>
+<figure class="highlight lang-python"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+</pre></td><td class="code"><pre>    launcher = service.process_launcher()
+    <span class="keyword">for</span> api <span class="keyword">in</span> CONF.enabled_apis:
+        should_use_ssl = api <span class="keyword">in</span> CONF.enabled_ssl_apis
+        <span class="keyword">if</span> api == <span class="string">'ec2'</span>:
+            server = service.WSGIService(api, use_ssl=should_use_ssl,
+                                         max_url_len=<span class="number">16384</span>)
+        <span class="keyword">else</span>:
+            server = service.WSGIService(api, use_ssl=should_use_ssl)
+        launcher.launch_service(server, workers=server.workers <span class="keyword">or</span> <span class="number">1</span>)
+    launcher.wait()
+</pre></td></tr></table></figure>
+
+<p>首先生成一个nova.common.service.Processlauncher类型的launcher, 接着会根据配置中的enabled_apis列表值，依次生成相应的WSGIService:</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre>server = service.WSGIService(<span class="keyword">...</span>)
+</pre></td></tr></table></figure>
+
+<p>然后通过launcher的launch_service方法，将上述的WSGIService和workers数量作为参数传入。</p>
+<p>在luanch_service方法中，会根据传入的workers参数fork出相应个数的子进程，并在各个子进程中调用对应WSGIService的start方法，开始对外服务。</p>
+<h3 id="-6d89-53ca-7684-914d-7f6e-">涉及的配置</h3>
+
+      
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/2014/01/2014-01-09-nova-api-service-initialization/#more" class="more-link">Read More</a>
           </div>
         
         
@@ -856,66 +1291,6 @@ XMLHttpRequest Cannot load <span class="attribute">http</span>:<span class="rege
 
 
 
-  <article class="post">
-  
-    <div class="gallery">
-  <div class="photoset">
-    
-      <img src="">
-    
-  </div>
-  <div class="control">
-    <div class="prev"></div>
-    <div class="next"></div>
-  </div>
-</div>
-  
-  <div class="post-content">
-    <header>
-      
-        <div class="icon"></div>
-        <time datetime="2013-05-06T08:56:31.000Z"><a href="/2013/05/2013-05-06-qemu-contribute-submit-patch-steps/">May 6 2013</a></time>
-      
-      
-  
-    <h1 class="title"><a href="/2013/05/2013-05-06-qemu-contribute-submit-patch-steps/">QEMU Contribute: steps of submit a patch</a></h1>
-  
-
-    </header>
-    <div class="entry">
-      
-        <ol>
-<li><p>邮件的收件人和抄送人</p>
-<ul>
-<li>收件人：qemu-devel@nongnu.org</li>
-<li>抄送人<ul>
-<li>参考代码库中的MAINTAINERS文件</li>
-<li>使用scripts/getmaintainer.pl来获取此文件的主要提交者</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>邮件的主题和内容的格式<br>
-      
-    </div>
-    <footer>
-      
-        
-          <div class="alignleft">
-            <a href="/2013/05/2013-05-06-qemu-contribute-submit-patch-steps/#more" class="more-link">Read More</a>
-          </div>
-        
-        
-      
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
 
 <nav id="pagination">
   
@@ -939,7 +1314,7 @@ XMLHttpRequest Cannot load <span class="attribute">http</span>:<span class="rege
   
     <li><a href="/categories/Linux/">Linux</a><small>3</small></li>
   
-    <li><a href="/categories/OpenStack/">OpenStack</a><small>2</small></li>
+    <li><a href="/categories/OpenStack/">OpenStack</a><small>3</small></li>
   
     <li><a href="/categories/VIM/">VIM</a><small>3</small></li>
   
@@ -959,7 +1334,7 @@ XMLHttpRequest Cannot load <span class="attribute">http</span>:<span class="rege
 <div class="widget tagcloud">
   <h3 class="title">Tag Cloud</h3>
   <div class="entry">
-    <a href="/tags/CIM/" style="font-size: 10.00px;">CIM</a><a href="/tags/CORS/" style="font-size: 10.00px;">CORS</a><a href="/tags/DBPM/" style="font-size: 10.00px;">DBPM</a><a href="/tags/Deploy/" style="font-size: 10.00px;">Deploy</a><a href="/tags/ELI/" style="font-size: 10.00px;">ELI</a><a href="/tags/NUMA/" style="font-size: 10.00px;">NUMA</a><a href="/tags/Nova/" style="font-size: 12.50px;">Nova</a><a href="/tags/OPTIONS/" style="font-size: 10.00px;">OPTIONS</a><a href="/tags/Paste/" style="font-size: 10.00px;">Paste</a><a href="/tags/QEMU/" style="font-size: 20.00px;">QEMU</a><a href="/tags/RabbitMQ/" style="font-size: 10.00px;">RabbitMQ</a><a href="/tags/WSGI/" style="font-size: 10.00px;">WSGI</a><a href="/tags/bfc/" style="font-size: 10.00px;">bfc</a><a href="/tags/block-stream/" style="font-size: 10.00px;">block-stream</a><a href="/tags/blockcopy/" style="font-size: 12.50px;">blockcopy</a><a href="/tags/cache/" style="font-size: 10.00px;">cache</a><a href="/tags/css/" style="font-size: 12.50px;">css</a><a href="/tags/dataplane/" style="font-size: 10.00px;">dataplane</a><a href="/tags/device-mapper/" style="font-size: 10.00px;">device-mapper</a><a href="/tags/ervernote/" style="font-size: 10.00px;">ervernote</a><a href="/tags/etag/" style="font-size: 10.00px;">etag</a><a href="/tags/eval/" style="font-size: 10.00px;">eval</a><a href="/tags/fdisk/" style="font-size: 10.00px;">fdisk</a><a href="/tags/fedora/" style="font-size: 10.00px;">fedora</a><a href="/tags/gpt/" style="font-size: 10.00px;">gpt</a><a href="/tags/greasemonkey/" style="font-size: 10.00px;">greasemonkey</a><a href="/tags/http/" style="font-size: 12.50px;">http</a><a href="/tags/isolinux/" style="font-size: 10.00px;">isolinux</a><a href="/tags/javascript/" style="font-size: 10.00px;">javascript</a><a href="/tags/libvirt/" style="font-size: 17.50px;">libvirt</a><a href="/tags/lighthttpd/" style="font-size: 10.00px;">lighthttpd</a><a href="/tags/lighttpd/" style="font-size: 10.00px;">lighttpd</a><a href="/tags/livecd/" style="font-size: 10.00px;">livecd</a><a href="/tags/mac/" style="font-size: 10.00px;">mac</a><a href="/tags/mbr/" style="font-size: 10.00px;">mbr</a><a href="/tags/md5sum/" style="font-size: 10.00px;">md5sum</a><a href="/tags/mysql/" style="font-size: 12.50px;">mysql</a><a href="/tags/oVirt/" style="font-size: 15.00px;">oVirt</a><a href="/tags/parted/" style="font-size: 10.00px;">parted</a><a href="/tags/pdo/" style="font-size: 10.00px;">pdo</a>
+    <a href="/tags/CIM/" style="font-size: 10.00px;">CIM</a><a href="/tags/CORS/" style="font-size: 10.00px;">CORS</a><a href="/tags/DBPM/" style="font-size: 10.00px;">DBPM</a><a href="/tags/Deploy/" style="font-size: 10.00px;">Deploy</a><a href="/tags/ELI/" style="font-size: 10.00px;">ELI</a><a href="/tags/NUMA/" style="font-size: 10.00px;">NUMA</a><a href="/tags/Nova/" style="font-size: 15.00px;">Nova</a><a href="/tags/OPTIONS/" style="font-size: 10.00px;">OPTIONS</a><a href="/tags/Paste/" style="font-size: 10.00px;">Paste</a><a href="/tags/QEMU/" style="font-size: 20.00px;">QEMU</a><a href="/tags/RabbitMQ/" style="font-size: 10.00px;">RabbitMQ</a><a href="/tags/Stevedore/" style="font-size: 10.00px;">Stevedore</a><a href="/tags/WSGI/" style="font-size: 10.00px;">WSGI</a><a href="/tags/bfc/" style="font-size: 10.00px;">bfc</a><a href="/tags/block-stream/" style="font-size: 10.00px;">block-stream</a><a href="/tags/blockcopy/" style="font-size: 12.50px;">blockcopy</a><a href="/tags/cache/" style="font-size: 10.00px;">cache</a><a href="/tags/css/" style="font-size: 12.50px;">css</a><a href="/tags/dataplane/" style="font-size: 10.00px;">dataplane</a><a href="/tags/device-mapper/" style="font-size: 10.00px;">device-mapper</a><a href="/tags/ervernote/" style="font-size: 10.00px;">ervernote</a><a href="/tags/etag/" style="font-size: 10.00px;">etag</a><a href="/tags/eval/" style="font-size: 10.00px;">eval</a><a href="/tags/fdisk/" style="font-size: 10.00px;">fdisk</a><a href="/tags/fedora/" style="font-size: 10.00px;">fedora</a><a href="/tags/gpt/" style="font-size: 10.00px;">gpt</a><a href="/tags/greasemonkey/" style="font-size: 10.00px;">greasemonkey</a><a href="/tags/http/" style="font-size: 12.50px;">http</a><a href="/tags/isolinux/" style="font-size: 10.00px;">isolinux</a><a href="/tags/javascript/" style="font-size: 10.00px;">javascript</a><a href="/tags/libvirt/" style="font-size: 17.50px;">libvirt</a><a href="/tags/lighthttpd/" style="font-size: 10.00px;">lighthttpd</a><a href="/tags/lighttpd/" style="font-size: 10.00px;">lighttpd</a><a href="/tags/livecd/" style="font-size: 10.00px;">livecd</a><a href="/tags/mac/" style="font-size: 10.00px;">mac</a><a href="/tags/mbr/" style="font-size: 10.00px;">mbr</a><a href="/tags/md5sum/" style="font-size: 10.00px;">md5sum</a><a href="/tags/mysql/" style="font-size: 12.50px;">mysql</a><a href="/tags/oVirt/" style="font-size: 15.00px;">oVirt</a><a href="/tags/parted/" style="font-size: 10.00px;">parted</a>
   </div>
 </div>
 

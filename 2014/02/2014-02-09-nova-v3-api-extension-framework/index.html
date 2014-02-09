@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="baidu-site-verification" content="kZ3lZdC9wn" />
   
-  <title>OpenStack | Technology &amp; Life</title>
+  <title>NOVA V3 API Extension Framework | Technology &amp; Life</title>
   <meta name="author" content="leiqzhang">
   
   <meta name="description" content="Virtualization Related Technologies">
@@ -12,7 +12,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-  
+  <meta property="og:title" content="NOVA V3 API Extension Framework"/>
   <meta property="og:site_name" content="Technology &amp; Life"/>
 
   
@@ -67,12 +67,7 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
 <div class="clearfix"></div>
 </header>
   <div id="content" class="inner">
-    <div id="main-col" class="alignleft"><div id="wrapper">
-<h2 class="archive-title category">OpenStack</h2>
-
-
-  
-    <article class="post">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
   
     <div class="gallery">
   <div class="photoset">
@@ -94,7 +89,7 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
       
       
   
-    <h1 class="title"><a href="/2014/02/2014-02-09-nova-v3-api-extension-framework/">NOVA V3 API Extension Framework</a></h1>
+    <h1 class="title">NOVA V3 API Extension Framework</h1>
   
 
     </header>
@@ -496,129 +491,34 @@ nova<span class="preprocessor">.api</span><span class="preprocessor">.v</span>3<
     <footer>
       
         
+  
+  <div class="categories">
+    <a href="/categories/OpenStack/">OpenStack</a>
+  </div>
+
         
-      
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
   
-    <article class="post">
-  
-    <div class="gallery">
-  <div class="photoset">
-    
-      <img src="">
-    
+  <div class="tags">
+    <a href="/tags/Nova/">Nova</a>, <a href="/tags/Stevedore/">Stevedore</a>
   </div>
-  <div class="control">
-    <div class="prev"></div>
-    <div class="next"></div>
-  </div>
+
+        <!-- Baidu Button BEGIN -->
+<div id="bdshare" class="bdshare_t bds_tools get-codes-bdshare">
+<span class="bds_more">分享到：</span>
+<a class="bds_qzone"></a>
+<a class="bds_tsina"></a>
+<a class="bds_tqq"></a>
+<a class="bds_renren"></a>
+<a class="bds_t163"></a>
+<a class="shareCount"></a>
 </div>
-  
-  <div class="post-content">
-    <header>
-      
-        <div class="icon"></div>
-        <time datetime="2014-01-09T14:40:31.000Z"><a href="/2014/01/2014-01-09-nova-scheduler-service-initialization/">Jan 9 2014</a></time>
-      
-      
-  
-    <h1 class="title"><a href="/2014/01/2014-01-09-nova-scheduler-service-initialization/">NOVA Scheduler Service Initialization Process</a></h1>
-  
+<script type="text/javascript" id="bdshare_js" data="type=tools&amp;uid=17824" ></script>
+<script type="text/javascript" id="bdshell_js"></script>
+<script type="text/javascript">
+document.getElementById("bdshell_js").src = "http://bdimg.share.baidu.com/static/js/shell_v2.js?cdnversion=" + Math.ceil(new Date()/3600000)
+</script>
+<!-- Baidu Button END -->
 
-    </header>
-    <div class="entry">
-      
-        <h1 id="NOVA-SCHEDULER-670d-52a1-542f-52a8-6d41-7a0b-">NOVA-SCHEDULER服务启动流程</h1>
-<p><strong>前提</strong></p>
-<ol>
-<li>对Nova的整体结构已经有所理解</li>
-<li>基于stable/havana分支</li>
-<li>基于Redhat的RDO库进行的环境安装，基于CentOS 6.4</li>
-<li>主机名为controller</li>
-</ol>
-<p><strong>内容</strong></p>
-<ol>
-<li>openstack-nova-scheduler服务启动流程</li>
-<li>MessageQueue的相关知识及在scheduler服务启动过程中的涉及的行为</li>
-</ol>
-<h2 id="-6267-884c-7ed3-679c-">执行结果</h2>
-<p>根据之前对Noah系统结构的理解，在scheduler启动过程中，会和MessageQueue交互，创建相应的Exchange和Consumer。</p>
-<p>启动前的MessageQueue的状态：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre>1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-</pre></td><td class="code"><pre><span class="comment">#rabbitmqctl list_exchanges name type durable internal</span>
-Listing exchanges <span class="keyword">...</span>
-	direct	true	false
-amq.direct	direct	true	false
-amq.fanout	fanout	true	false
-amq.headers	headers	true	false
-amq.match	headers	true	false
-amq.rabbitmq.log	topic	true	false
-amq.rabbitmq.trace	topic	true	false
-amq.topic	topic	true	false
-...done.
-
-<span class="comment">#rabbitmqctl list_bindings source_name source_kind destination_name destination_kind routing_key</span>
-Listing bindings <span class="keyword">...</span>
-...done.
-
-<span class="comment">#rabbitmqctl list_connections pid name  port host peer_port peer_host state channels protocol</span>
-Listing connections <span class="keyword">...</span>
-...done.
-
-<span class="comment">#rabbitmqctl list_channels pid connection name number consumer_count</span>
-Listing channels <span class="keyword">...</span>
-...done.
-
-<span class="comment">#rabbitmqctl list_consumers</span>
-Listing consumers <span class="keyword">...</span>
-...done.
-</pre></td></tr></table></figure>
-
-<p>由上可知，在Scheduler启动前，只有RabbitMQ-Server默认创建的一些exchange，而binding、connection、channel和consumer均为空。</p>
-
-      
-    </div>
-    <footer>
-      
-        
-          <div class="alignleft">
-            <a href="/2014/01/2014-01-09-nova-scheduler-service-initialization/#more" class="more-link">Read More</a>
-          </div>
-        
-        
       
       <div class="clearfix"></div>
     </footer>
@@ -626,136 +526,24 @@ Listing consumers <span class="keyword">...</span>
 </article>
 
 
+<section id="comment">
+<!-- Duoshuo Comment BEGIN -->
+    <div class="ds-thread" data-thread-key="/2014/02/2014-02-09-nova-v3-api-extension-framework/" data-author-key="leiqzhang" data-title="NOVA V3 API Extension Framework"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"leiqzhang"};
+    (function() {
+        var ds = document.createElement('script');
+        ds.type = 'text/javascript';ds.async = true;
+        ds.src = 'http://static.duoshuo.com/embed.js';
+        ds.charset = 'UTF-8';
+        (document.getElementsByTagName('head')[0] 
+        || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+    </script>
+<!-- Duoshuo Comment END -->
+</section>
 
 
-  
-    <article class="post">
-  
-    <div class="gallery">
-  <div class="photoset">
-    
-      <img src="">
-    
-  </div>
-  <div class="control">
-    <div class="prev"></div>
-    <div class="next"></div>
-  </div>
-</div>
-  
-  <div class="post-content">
-    <header>
-      
-        <div class="icon"></div>
-        <time datetime="2014-01-09T14:40:31.000Z"><a href="/2014/01/2014-01-09-nova-api-service-initialization/">Jan 9 2014</a></time>
-      
-      
-  
-    <h1 class="title"><a href="/2014/01/2014-01-09-nova-api-service-initialization/">NOVA API Service Initialization Process</a></h1>
-  
-
-    </header>
-    <div class="entry">
-      
-        <h1 id="NOVA-API-670d-52a1-542f-52a8-6d41-7a0b-">NOVA-API服务启动流程</h1>
-<p><strong>前提</strong></p>
-<ol>
-<li>对Nova的整体结构已经有所理解</li>
-<li>基于stable/havana分支</li>
-<li>基于Redhat的RDO库进行的环境安装，基于CentOS 6.4</li>
-</ol>
-<p><strong>内容</strong></p>
-<ol>
-<li>openstack-nova-api服务启动流程</li>
-<li>Paste、Deploy、WSGI等相关知识</li>
-</ol>
-<h2 id="-6267-884c-7ed3-679c-">执行结果</h2>
-<p>启动API服务时的命令为：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre>1
-</pre></td><td class="code"><pre><span class="comment">service</span> <span class="comment">openstack</span><span class="literal">-</span><span class="comment">nova</span><span class="literal">-</span><span class="comment">api</span> <span class="comment">start</span>
-</pre></td></tr></table></figure>
-
-<p>启动成功后，查看系统进程，发现实际执行结果为一个nova-api父进程，同时其有三个nova-api子进程：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre>1
-2
-3
-4
-</pre></td><td class="code"><pre>nova <span class="number">3438</span> S <span class="number">0</span>:<span class="number">07</span> <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>python <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>nova<span class="attribute">-api</span> <span class="subst">--</span>logfile <span class="subst">/</span><span class="built_in">var</span><span class="subst">/</span><span class="keyword">log</span><span class="subst">/</span>nova<span class="subst">/</span>api<span class="built_in">.</span><span class="keyword">log</span>
-nova <span class="number">3446</span> S <span class="number">0</span>:<span class="number">00</span> <span class="subst">\</span>_ <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>python <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>nova<span class="attribute">-api</span> <span class="subst">--</span>logfile <span class="subst">/</span><span class="built_in">var</span><span class="subst">/</span><span class="keyword">log</span><span class="subst">/</span>nova<span class="subst">/</span>api<span class="built_in">.</span><span class="keyword">log</span>
-nova <span class="number">3447</span> S <span class="number">0</span>:<span class="number">00</span> <span class="subst">\</span>_ <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>python <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>nova<span class="attribute">-api</span> <span class="subst">--</span>logfile <span class="subst">/</span><span class="built_in">var</span><span class="subst">/</span><span class="keyword">log</span><span class="subst">/</span>nova<span class="subst">/</span>api<span class="built_in">.</span><span class="keyword">log</span>
-nova <span class="number">3448</span> S <span class="number">0</span>:<span class="number">00</span> <span class="subst">\</span>_ <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>python <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>nova<span class="attribute">-api</span> <span class="subst">--</span>logfile <span class="subst">/</span><span class="built_in">var</span><span class="subst">/</span><span class="keyword">log</span><span class="subst">/</span>nova<span class="subst">/</span>api<span class="built_in">.</span><span class="keyword">log</span>
-</pre></td></tr></table></figure>
-
-<p>查看监听的端口，发现父进程nova-api同时监听了三个端口：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre>1
-2
-3
-</pre></td><td class="code"><pre><span class="title">tcp</span>        <span class="number">0</span>      <span class="number">0</span> <span class="number">0.0.0.0:8773</span>                <span class="number">0.0.0.0</span>:*                   LISTEN      <span class="number">3438</span>/python         
-tcp        <span class="number">0</span>      <span class="number">0</span> <span class="number">0.0.0.0:8774</span>                <span class="number">0.0.0.0</span>:*                   LISTEN      <span class="number">3438</span>/python         
-tcp        <span class="number">0</span>      <span class="number">0</span> <span class="number">0.0.0.0:8775</span>                <span class="number">0.0.0.0</span>:*                   LISTEN      <span class="number">3438</span>/python
-</pre></td></tr></table></figure>
-
-<h2 id="-4ee3-7801-8def-5f84-">代码路径</h2>
-<h3 id="-4e3b-8981-8def-5f84-">主要路径</h3>
-<p>服务启动脚本为/etc/init.d/openstack-nova-api，查看此脚本发现在启动服务时实际执行的是/usr/bin/nova-api,而/usr/bin/nova-api是一个python脚本，实际执行的是nova.cmd.api.main</p>
-<p>nova.cmd.api.main的主要代码如下：</p>
-<figure class="highlight lang-python"><table><tr><td class="gutter"><pre>1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-</pre></td><td class="code"><pre>    launcher = service.process_launcher()
-    <span class="keyword">for</span> api <span class="keyword">in</span> CONF.enabled_apis:
-        should_use_ssl = api <span class="keyword">in</span> CONF.enabled_ssl_apis
-        <span class="keyword">if</span> api == <span class="string">'ec2'</span>:
-            server = service.WSGIService(api, use_ssl=should_use_ssl,
-                                         max_url_len=<span class="number">16384</span>)
-        <span class="keyword">else</span>:
-            server = service.WSGIService(api, use_ssl=should_use_ssl)
-        launcher.launch_service(server, workers=server.workers <span class="keyword">or</span> <span class="number">1</span>)
-    launcher.wait()
-</pre></td></tr></table></figure>
-
-<p>首先生成一个nova.common.service.Processlauncher类型的launcher, 接着会根据配置中的enabled_apis列表值，依次生成相应的WSGIService:</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre>1
-</pre></td><td class="code"><pre>server = service.WSGIService(<span class="keyword">...</span>)
-</pre></td></tr></table></figure>
-
-<p>然后通过launcher的launch_service方法，将上述的WSGIService和workers数量作为参数传入。</p>
-<p>在luanch_service方法中，会根据传入的workers参数fork出相应个数的子进程，并在各个子进程中调用对应WSGIService的start方法，开始对外服务。</p>
-<h3 id="-6d89-53ca-7684-914d-7f6e-">涉及的配置</h3>
-
-      
-    </div>
-    <footer>
-      
-        
-          <div class="alignleft">
-            <a href="/2014/01/2014-01-09-nova-api-service-initialization/#more" class="more-link">Read More</a>
-          </div>
-        
-        
-      
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-  
-
-  <nav id="pagination">
-  
-  
-  <div class="clearfix"></div>
-</nav>
 </div></div>
     <aside id="sidebar" class="alignright">
   <div class="search">
@@ -831,7 +619,7 @@ var disqus_shortname = 'leiqzhang';
   var dsq = document.createElement('script');
   dsq.type = 'text/javascript';
   dsq.async = true;
-  dsq.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
   (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
 }());
 </script>
