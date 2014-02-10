@@ -151,7 +151,7 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
 <h3 id="-6027-80fd-95ee-9898-">性能问题</h3>
 <p>关于第二个问题，在上文的bugs链接中已经描述的比较清楚，以servers为例，问题主要是指在GET等方法中，各个extension的处理逻辑中往往需要往返回的server信息中追加extension相关的信息，如disk_config扩展需要追加存储在DB中的disk config相关的信息等，故在各个extension中均会分别进行数据库查询操作，从而导致性能问题。</p>
 <p>不过从目前HAVANA的代码来看，此问题已经通过一种方法缓解了，但从commit来看，和V3 API并不属于同一系列的提交。以servers为例，此问题现在的解决办法是，在core API处理时，就将可能需要从db中读取出来的servers相关的信息全部一次性读取出来并放入Cache中的Instance对象，在各个extension处理时只需要从Cache中取出所需的属性即可。在core API中一次性读出的信息除了instances表中一些extension添加的字段外，还会读出关联的instance_metadata、instance_system_metadata等多个表的信息。具体可参考nova.db.sqlalchemy.api:instance_get等相关的方法实现。</p>
-<h2 id="Nova_API_V3-4e2d-Plugin-7684-5b9e-73b0-673a-5236-548c-73b0-72b6-">Nova API V3中Plugin的实现机制和现状</h2>
+<h2 id="Nova_V3_API_Extension_Framework-7684-5b9e-73b0-673a-5236-548c-73b0-72b6-">Nova V3 API Extension Framework的实现机制和现状</h2>
 <h3 id="-5b9e-73b0-673a-5236-">实现机制</h3>
 <p>API V3中的Plugin的实现机制利用的是和Ceilometer一样的Stevedore，此模块主要是对python setuptools中的Entry Points机制进行了封装。</p>
 <h3 id="Setuptools_Entry_Points">Setuptools Entry Points</h3>
