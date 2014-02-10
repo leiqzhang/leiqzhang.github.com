@@ -64,7 +64,7 @@ The development of the Nova v3 API will give us the opportunity to rework the ex
 不过从目前HAVANA的代码来看，此问题已经通过一种方法缓解了，但从commit来看，和V3 API并不属于同一系列的提交。以servers为例，此问题现在的解决办法是，在core API处理时，就将可能需要从db中读取出来的servers相关的信息全部一次性读取出来并放入Cache中的Instance对象，在各个extension处理时只需要从Cache中取出所需的属性即可。在core API中一次性读出的信息除了instances表中一些extension添加的字段外，还会读出关联的instance_metadata、instance_system_metadata等多个表的信息。具体可参考nova.db.sqlalchemy.api:instance_get等相关的方法实现。
 
 
-## Nova API V3中Plugin的实现机制和现状 ##
+## Nova V3 API Extension Framework的实现机制和现状 ##
 
 ### 实现机制 ###
 
