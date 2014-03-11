@@ -51,7 +51,8 @@ nova可执行文件的执行入口是novaclient.shell:main。其主要执行步�
 * 首先进行Authorization
 * 根据子命令名称(boot)，调用相应的方法
 	* 构造启动参数
-	* 
+	* 确定ResourceUrl
+	* 发送POST请求
 
 ### Authorization
 
