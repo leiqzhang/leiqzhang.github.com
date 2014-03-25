@@ -47,6 +47,8 @@
 * 跨rack、idc、site，大规模扩容方案
 * dashboard的可扩展性（session，websocket）
 * 使用哪个LB软件（和HA软件选型结合）
+    * Load Balance FAQ: http://blog.exceliance.fr/loadbalancing-faq/
+    * Load Balance Layer 7 session: http://blog.exceliance.fr/2012/03/29/load-balancing-affinity-persistence-sticky-sessions-what-you-need-to-know/
 
 ### 安全 & 网络
 
