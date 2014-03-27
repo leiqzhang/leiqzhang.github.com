@@ -1,0 +1,422 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="baidu-site-verification" content="kZ3lZdC9wn" />
+  
+  <title>Technology &amp; Life</title>
+  <meta name="author" content="leiqzhang">
+  
+  <meta name="description" content="Virtualization Related Technologies">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+  <meta property="og:site_name" content="Technology &amp; Life"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico">
+  <link rel="alternate" href="/atom.xml" title="Technology &amp; Life" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
+  
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-40319520-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+  <script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3F6f62dffd0688838f0bc52fc65fd62af4' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">Technology &amp; Life</a></h1>
+  <h2><a href="/">blog of leiqzhang</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about">About</a></li>
+    
+      <li><a href="/atom.xml">RSS</a></li>
+    
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2014-03-27T14:52:22.000Z"><a href="/2014/03/2014-03-21-openstack-operations-guide-notes/">Mar 27 2014</a></time>
+      
+      
+  
+    <h1 class="title"></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <h1 id="OpenStack_Operations_Guide_Notes">OpenStack Operations Guide Notes</h1>
+<h2 id="CH1_Provisioning_and_Deployment">CH1 Provisioning and Deployment</h2>
+<p>主要关注的是OS infrastructure的自动化部署和配置</p>
+<h3 id="-81ea-52a8-5316-90e8-7f72-28-Automated_Deployment-29-">自动化部署(Automated Deployment)</h3>
+<p>所谓自动化部署，是指在少量的人工操作（如服务器上架、mac/ip规划、开机等）后，不再需要人工介入，自动化对操作系统进行安装和配置。</p>
+<p>对于操作系统的自动化部署来说，一般会首先通过PXE/TFTP的网络启动，然后通过kickstart/preseed等自动配置技术或者直接使用镜像部署的方式来进行。</p>
+<p>在进行自动化部署之前，必须对一些关键点进行提前规划和考虑。</p>
+<ul>
+<li>磁盘分区和RAID：生产环境，一定要考虑RAID</li>
+<li>网络配置：保证可PXE启动，不使用bond，不VLAN</li>
+</ul>
+<h3 id="-81ea-52a8-5316-914d-7f6e-">自动化配置</h3>
+<p>Puppet</p>
+<h3 id="-8fdc-7a0b-7ba1-7406-">远程管理</h3>
+<p>Out-of-band access</p>
+<p>IPMI</p>
+<h2 id="CH2_Cloud_Controller_Design">CH2 Cloud Controller Design</h2>
+<p>假设： 单独的Controller节点</p>
+<h3 id="Hardware_Considerations">Hardware Considerations</h3>
+<p>Controller上的一些服务是可以虚拟化部署的，如MQ</p>
+<p><em>TODO</em> 还有什么？</p>
+<p>假设：所有服务都非虚拟化部署</p>
+<p><em>问题</em> 根据可预见的规模来决定是否虚拟化部署, 后续扩容怎么办？</p>
+<p>考虑如下几点：</p>
+<ul>
+<li>同时运行的虚拟机数量：数据库大小；数据库水平扩展（虚拟机状态上报、调度）</li>
+<li>同时运行的计算节点数量：消息队列</li>
+<li>访问API的用户数量：CPU</li>
+<li>访问Dashboard的用户数量：CPU</li>
+<li>同时运行nova-api服务的数量：size the controller with a core per service</li>
+<li>一个虚拟机运行的时间</li>
+<li>是否使用外部权限系统:网络；CPU</li>
+</ul>
+<h3 id="Separation_of_Services">Separation of Services</h3>
+<ul>
+<li>glance-* 运行于swfit-proxy 服务器</li>
+<li>独立的数据库服务器</li>
+<li>每个服务均虚拟化部署</li>
+<li>使用LB</li>
+</ul>
+<p>nova-compute、swfit-proxy和swift-object不建议虚拟化部署</p>
+<h3 id="Database">Database</h3>
+<p>重要依赖。建议cluster database来具有容错能力</p>
+<h3 id="MQ">MQ</h3>
+<p>重要依赖。建议Cluster MQ</p>
+<h3 id="API">API</h3>
+<p>是否要提供EC2兼容API？ </p>
+<p>可提供多个API server （LB）</p>
+<h3 id="Extensions">Extensions</h3>
+<h3 id="Scheduler">Scheduler</h3>
+<p>可提供多个scheduler （不依赖LB）</p>
+<h3 id="Images">Images</h3>
+<ul>
+<li>glance-api</li>
+<li>glance-registry: 维护镜像元数据信息，依赖数据库</li>
+</ul>
+<p>Backend的选择</p>
+<h3 id="Dashboard">Dashboard</h3>
+<p>httpd</p>
+<h3 id="Authentication_and_Authorization">Authentication and Authorization</h3>
+<p>Keystone; Policy</p>
+<p>Identity Service Backends:</p>
+<ul>
+<li>In-memory kv存储</li>
+<li>SQL数据库</li>
+<li>PAM</li>
+<li>LDAP</li>
+</ul>
+<h3 id="Network_Considerations">Network Considerations</h3>
+<p>保证带宽</p>
+<p>尤其是Imaging Service在controller时</p>
+<p>10GB NIC / bond 2 10GB NICs</p>
+<h2 id="Scaling">Scaling</h2>
+<h3 id="The_Starting_Point">The Starting Point</h3>
+<p>估算cloud的核心数量和规格：虚拟机最大数量 (超配比例 x cores/virtual cores per instance)，所需ephemeral存储容量(flavor disk size * number instance)</p>
+<p>还需要考虑oS本身服务所占用资源</p>
+<p>还需考虑实际的业务模型，对于实际触发的操作类型的影响，进而对controller等的load</p>
+<p>一般来说，8U8G 可制成一个机架的计算节点</p>
+<h3 id="Adding_Controller_Nodes">Adding Controller Nodes</h3>
+<p>对于只依赖于内部MQ的，可以直接添加服务，如nova-scheduler等等</p>
+<p>对于API服务，需要依赖LB （software：Pound or HAProxy)</p>
+<p>对于DashBoard，需要考虑websocket和session的共享</p>
+<p>对于nova-api, glance-api等，本身可通过配置来使用多进程模式（<em>TODO</em>）</p>
+<p>DB/MQ的LB等，需要单独考虑</p>
+<h3 id="Segregating_Your_Cloud">Segregating Your Cloud</h3>
+<p>cells，regions， zones，host aggregates</p>
+<h4 id="Cells_and_Regions">Cells and Regions</h4>
+<h4 id="AZ_and_Host_Aggregates">AZ and Host Aggregates</h4>
+<h3 id="Scalable_Hardware">Scalable Hardware</h3>
+<h4 id="Hardware_Procurement">Hardware Procurement</h4>
+<p>CPU同型号，支持迁移</p>
+<h4 id="Capacity_Planning">Capacity Planning</h4>
+<p>Monitor resource usage</p>
+<h4 id="Burn-in_Testing">Burn-in Testing</h4>
+<p>Hardware failure</p>
+<h2 id="CH4_Compute_Nodes">CH4 Compute Nodes</h2>
+<h3 id="CPU_Choice">CPU Choice</h3>
+<p>VT / Cores</p>
+<h3 id="Hypervisor_Choice">Hypervisor Choice</h3>
+<h3 id="Instance_Storage_Solutions">Instance Storage Solutions</h3>
+<ul>
+<li>Off compute node storage — shared file system</li>
+<li>On compute node storage — shared file system</li>
+<li>On compute node storage — non-shared file system</li>
+</ul>
+<p>Live Migration (non-share/share)</p>
+<p>Shared Filesystems:</p>
+<ul>
+<li>NFS</li>
+<li>GlusterFS</li>
+<li>MooseFS</li>
+<li>Lustre</li>
+</ul>
+<h3 id="Overcommitting">Overcommitting</h3>
+<p>默认超配比例： CPU 16， RAM 1.5</p>
+<h3 id="Logging">Logging</h3>
+<p>Condiser： 中心logging server； 解析和分析系统 (logstash)</p>
+<h3 id="Networking">Networking</h3>
+<p>see CH6</p>
+<h2 id="CH5_Storage_Decisions">CH5 Storage Decisions</h2>
+<p>Persistent Storage</p>
+<h3 id="Storage_Concepts">Storage Concepts</h3>
+<ul>
+<li>Object Storage</li>
+<li>Block Storage<ul>
+<li>直接访问存储块设备</li>
+<li>基于文件</li>
+</ul>
+</li>
+<li>File-level Storage： 没有直接呈现，但ephemeral实际就是</li>
+</ul>
+<h3 id="Chossing_Storage_Back-ends">Chossing Storage Back-ends</h3>
+<p>List of Questions</p>
+<p>…</p>
+<p>各种开源及以cinder-driver提供的商业存储后端的对比</p>
+<ul>
+<li>Swift</li>
+<li>Ceph： cow(fast boot-from-volume); 统一对象和块存储；支持keystone</li>
+<li>Gluster： UFO （分布式文件系统+对象存储）</li>
+<li>LVM：不支持副本</li>
+<li>Sheepdog</li>
+</ul>
+<h3 id="Notes_on_OpenStack_Object_Storage">Notes on OpenStack Object Storage</h3>
+<h2 id="Network_Design">Network Design</h2>
+<h4 id="Management_Network">Management Network</h4>
+<ul>
+<li>避免虚拟机流量影响系统管理和监控</li>
+<li>可考虑对openstack各组件内部通信配置单独的网络（VLAN）</li>
+</ul>
+<h4 id="Public_Addressing_Options">Public Addressing Options</h4>
+<ul>
+<li>Fixed/Float IP</li>
+</ul>
+<h4 id="IP_Address_Planning">IP Address Planning</h4>
+<p>可分解为一些列的sections:</p>
+<ul>
+<li>subnet router</li>
+<li>control services public interfaces</li>
+<li>object storage cluster internal comm</li>
+<li>compute and storage commu</li>
+<li>out-of-band remote mgt</li>
+<li>in-band remote mgt</li>
+<li>spare space for future growth</li>
+</ul>
+<h3 id="Network_Topology">Network Topology</h3>
+<p>OS 提供了不同的NetworkManager，会对网络拓扑有不同的需求：</p>
+<ul>
+<li>Flat</li>
+<li>FlatDHCP</li>
+<li>VlanManager</li>
+<li>FlatDHCP Multi-host HA</li>
+</ul>
+<p>(<em>TODO</em>) 是不是因为版本原因，未列出GRE Tunel</p>
+<p>VLAN/Multi-NIC (<em>TODO</em>)/Mutli-host and Single-host Networking</p>
+<h3 id="Services_for_Networking">Services for Networking</h3>
+<p>NTP/DNS(dnsmasq)</p>
+<h2 id="CH7_Example_Architecture">CH7 Example Architecture</h2>
+<p>选型考虑</p>
+<p>选择的各个组件及其原因</p>
+<ul>
+<li>…</li>
+<li>RabbitMQ: only option which supports features such as Compute Cells ? (<em>TODO</em>) =&gt; trunk上的op文档也是这么说</li>
+</ul>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+        <!-- Baidu Button BEGIN -->
+<div id="bdshare" class="bdshare_t bds_tools get-codes-bdshare">
+<span class="bds_more">分享到：</span>
+<a class="bds_qzone"></a>
+<a class="bds_tsina"></a>
+<a class="bds_tqq"></a>
+<a class="bds_renren"></a>
+<a class="bds_t163"></a>
+<a class="shareCount"></a>
+</div>
+<script type="text/javascript" id="bdshare_js" data="type=tools&amp;uid=17824" ></script>
+<script type="text/javascript" id="bdshell_js"></script>
+<script type="text/javascript">
+document.getElementById("bdshell_js").src = "http://bdimg.share.baidu.com/static/js/shell_v2.js?cdnversion=" + Math.ceil(new Date()/3600000)
+</script>
+<!-- Baidu Button END -->
+
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+<section id="comment">
+<!-- Duoshuo Comment BEGIN -->
+    <div class="ds-thread" data-thread-key="/2014/03/2014-03-21-openstack-operations-guide-notes/" data-author-key="leiqzhang" data-title=""></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"leiqzhang"};
+    (function() {
+        var ds = document.createElement('script');
+        ds.type = 'text/javascript';ds.async = true;
+        ds.src = 'http://static.duoshuo.com/embed.js';
+        ds.charset = 'UTF-8';
+        (document.getElementsByTagName('head')[0] 
+        || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+    </script>
+<!-- Duoshuo Comment END -->
+</section>
+
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:leiqzhang.com">
+  </form>
+</div>
+
+  
+<div class="widget tag">
+  <h3 class="title">Categories</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/Linux/">Linux</a><small>3</small></li>
+  
+    <li><a href="/categories/OpenStack/">OpenStack</a><small>5</small></li>
+  
+    <li><a href="/categories/VIM/">VIM</a><small>3</small></li>
+  
+    <li><a href="/categories/Virtualization/">Virtualization</a><small>16</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>2</small></li>
+  
+    <li><a href="/categories/miscellaneous/">miscellaneous</a><small>1</small></li>
+  
+    <li><a href="/categories/web_dev/">web_dev</a><small>8</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tagcloud">
+  <h3 class="title">Tag Cloud</h3>
+  <div class="entry">
+    <a href="/tags/CIM/" style="font-size: 10.00px;">CIM</a><a href="/tags/CORS/" style="font-size: 10.00px;">CORS</a><a href="/tags/DBPM/" style="font-size: 10.00px;">DBPM</a><a href="/tags/Deploy/" style="font-size: 10.00px;">Deploy</a><a href="/tags/ELI/" style="font-size: 10.00px;">ELI</a><a href="/tags/IRC/" style="font-size: 10.00px;">IRC</a><a href="/tags/NUMA/" style="font-size: 10.00px;">NUMA</a><a href="/tags/Nova/" style="font-size: 16.00px;">Nova</a><a href="/tags/OPTIONS/" style="font-size: 10.00px;">OPTIONS</a><a href="/tags/Paste/" style="font-size: 10.00px;">Paste</a><a href="/tags/QEMU/" style="font-size: 20.00px;">QEMU</a><a href="/tags/RabbitMQ/" style="font-size: 10.00px;">RabbitMQ</a><a href="/tags/Stevedore/" style="font-size: 10.00px;">Stevedore</a><a href="/tags/WSGI/" style="font-size: 10.00px;">WSGI</a><a href="/tags/bfc/" style="font-size: 10.00px;">bfc</a><a href="/tags/block-stream/" style="font-size: 10.00px;">block-stream</a><a href="/tags/blockcopy/" style="font-size: 12.00px;">blockcopy</a><a href="/tags/cache/" style="font-size: 10.00px;">cache</a><a href="/tags/css/" style="font-size: 12.00px;">css</a><a href="/tags/dataplane/" style="font-size: 10.00px;">dataplane</a><a href="/tags/device-mapper/" style="font-size: 10.00px;">device-mapper</a><a href="/tags/ervernote/" style="font-size: 10.00px;">ervernote</a><a href="/tags/etag/" style="font-size: 10.00px;">etag</a><a href="/tags/eval/" style="font-size: 10.00px;">eval</a><a href="/tags/fdisk/" style="font-size: 10.00px;">fdisk</a><a href="/tags/fedora/" style="font-size: 10.00px;">fedora</a><a href="/tags/gpt/" style="font-size: 10.00px;">gpt</a><a href="/tags/greasemonkey/" style="font-size: 10.00px;">greasemonkey</a><a href="/tags/http/" style="font-size: 12.00px;">http</a><a href="/tags/isolinux/" style="font-size: 10.00px;">isolinux</a><a href="/tags/javascript/" style="font-size: 10.00px;">javascript</a><a href="/tags/libvirt/" style="font-size: 18.00px;">libvirt</a><a href="/tags/lighthttpd/" style="font-size: 10.00px;">lighthttpd</a><a href="/tags/lighttpd/" style="font-size: 10.00px;">lighttpd</a><a href="/tags/livecd/" style="font-size: 10.00px;">livecd</a><a href="/tags/mac/" style="font-size: 10.00px;">mac</a><a href="/tags/mbr/" style="font-size: 10.00px;">mbr</a><a href="/tags/md5sum/" style="font-size: 10.00px;">md5sum</a><a href="/tags/mysql/" style="font-size: 12.00px;">mysql</a><a href="/tags/oVirt/" style="font-size: 14.00px;">oVirt</a>
+  </div>
+</div>
+
+
+  <iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=2&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=0&uid=1644437791&verifier=c45a1931&dpc=1"></iframe>
+
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://blog.csdn.net/luo_brian" title="luo_brian">Luohao</a></li>
+<li><a href="http://blog.csdn.net/defeattroy" title="木马屠城">Defeattroy</a></li>
+<li><a href="http://www.smilgel.com/" title="听雨轩">MrSaxon</a></li>
+<li><a href="http://lanbolee.com/blog/" title="博之博">Rambolee</a></li>
+<li><a href="http://www.haoziyanwo.com/" title="耗子燕窝">浩子</a></li>
+<li><a href="http://blog.csdn.net/u012815727" title="CloudOS">CloudOS</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2014 leiqzhang
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+<script type="text/javascript">
+var disqus_shortname = 'leiqzhang';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+</body>
+</html>

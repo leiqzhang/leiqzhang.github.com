@@ -1,0 +1,454 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="baidu-site-verification" content="kZ3lZdC9wn" />
+  
+  <title>Technology &amp; Life</title>
+  <meta name="author" content="leiqzhang">
+  
+  <meta name="description" content="Virtualization Related Technologies">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+  <meta property="og:site_name" content="Technology &amp; Life"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico">
+  <link rel="alternate" href="/atom.xml" title="Technology &amp; Life" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
+  
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-40319520-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+  <script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3F6f62dffd0688838f0bc52fc65fd62af4' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">Technology &amp; Life</a></h1>
+  <h2><a href="/">blog of leiqzhang</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about">About</a></li>
+    
+      <li><a href="/atom.xml">RSS</a></li>
+    
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2014-03-27T14:52:22.000Z"><a href="/2014/03/2014-03-11-novaclient-boot-process/">Mar 27 2014</a></time>
+      
+      
+  
+    <h1 class="title"></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <h1 id="novaclient-2019-s_boot_process">novaclient’s boot process</h1>
+<h2 id="novaclient">novaclient</h2>
+<p>novaclient是用于在CLI模式下与NOVA进行交互的工具， 其将NOVA的功能封装为多个命令，执行命令时的过程均为构造相应的REST请求和NOVA标准和扩展的REST API进行交互。</p>
+<p>novaclient的可执行文件为nova, 可通过nova help命令来查看其支持的所有命令。每个命令执行时可通过添加—debug选项来将其执行过程中和NOVA及相关Project的REST API进行交互的过程均输出出来，便于分析。</p>
+<p>nova的boot命令主要用于创建一个新的虚拟机(Instance), 其支持的命令行参数很多，这里以几个常见的命令行参数来调用boot，并就其执行流程进行分析。</p>
+<h2 id="-73af-5883-4fe1-606f-">环境信息</h2>
+<p>为了使得novaclient可以获得keystone的授权，一般会在环境中配置如下的RC文件，其中会包含admin tenant的相应信息。</p>
+<p>本例的RC文件内容如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+</pre></td><td class="code"><pre><span class="shebang">#!/bin/bash
+</span>
+<span class="keyword">export</span> OS_AUTH_URL=http://{CONTROLLER_IP}:<span class="number">5000</span>/v2.<span class="number">0</span> <span class="comment">#这里的controller_ip是controller节点的IP</span>
+
+<span class="comment"># With the addition of Keystone we have standardized on the term **tenant**</span>
+<span class="comment"># as the entity that owns the resources.</span>
+<span class="keyword">export</span> OS_TENANT_ID=<span class="number">507667477</span>fd840e1a81c1ca7f6f54f69
+<span class="keyword">export</span> OS_TENANT_NAME=<span class="string">"admin"</span>
+
+<span class="comment"># In addition to the owning entity (tenant), openstack stores the entity</span>
+<span class="comment"># performing the action as the **user**.</span>
+<span class="keyword">export</span> OS_USERNAME=<span class="string">"admin"</span>
+
+<span class="comment"># With Keystone you pass the keystone password.</span>
+<span class="keyword">export</span> OS_PASSWORD=<span class="string">"admin"</span>
+</pre></td></tr></table></figure>
+
+<h2 id="-547d-4ee4-548c-671f-671b-7ed3-679c-">命令和期望结果</h2>
+<p>针对如下命令的执行过程进行分析：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre><span class="comment">nova</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">debug</span> <span class="comment">boot</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">flavor</span> <span class="comment">m1</span><span class="string">.</span><span class="comment">tiny</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">image</span> <span class="comment">cirros</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">swap</span> <span class="comment">100</span> <span class="comment">test2</span>
+</pre></td></tr></table></figure>
+
+<p>其中m1.tiny flavor的swap大小配置为0，通过命令行指定其swap大小为100M，超过了flavor的配置，故此命令期望的结果是NOVA会返回错误。</p>
+<h2 id="-6267-884c-6d41-7a0b-5206-6790-">执行流程分析</h2>
+<p>nova可执行文件的执行入口是novaclient.shell:main。其主要执行步骤如下：</p>
+<ul>
+<li>首先进行Authorization</li>
+<li>根据子命令名称(boot)，调用相应的方法<ul>
+<li>构造启动参数</li>
+<li>确定ResourceUrl</li>
+<li>发送POST请求</li>
+</ul>
+</li>
+</ul>
+<h3 id="Authorization">Authorization</h3>
+<p>首先会进行authorization。从debug的输出也可以看到，在authorization时，会首先根据RC文件中的配置信息，调用novaclient.v1_1.client:authenticate,并最终向keystone发出如上请求获取token。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre><span class="comment">REQ:</span> <span class="comment">curl</span> <span class="literal">-</span><span class="comment">i</span> <span class="comment">http://{CONTROLLER_IP}/v2</span><span class="string">.</span><span class="comment">0/tokens</span> <span class="literal">-</span><span class="comment">X</span> <span class="comment">POST</span> <span class="literal">-</span><span class="comment">H</span> <span class="comment">"Content</span><span class="literal">-</span><span class="comment">Type:</span> <span class="comment">application/json"</span> <span class="literal">-</span><span class="comment">H</span> <span class="comment">"Accept:</span> <span class="comment">application/json"</span> <span class="literal">-</span><span class="comment">H</span> <span class="comment">"User</span><span class="literal">-</span><span class="comment">Agent:</span> <span class="comment">python</span><span class="literal">-</span><span class="comment">novaclient"</span> <span class="literal">-</span><span class="comment">d</span> <span class="comment">'{"auth":</span> <span class="comment">{"passwordCredentials":</span> <span class="comment">{"username":</span> <span class="comment">"admin"</span><span class="string">,</span> <span class="comment">"password":</span> <span class="comment">"admin"}</span><span class="string">,</span> <span class="comment">"tenantId":</span> <span class="comment">"507667477fd840e1a81c1ca7f6f54f69"}}'</span>
+</pre></td></tr></table></figure>
+
+<p>最终的返回结果如下，返回结果中会包含token、tenant列表以及所有的endpoints等等(有省略）。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+</pre></td><td class="code"><pre>DEBUG (connectionpool:<span class="number">295</span>) <span class="string">"POST /v2.0/tokens HTTP/1.1"</span> <span class="number">200</span> <span class="number">3302</span>
+RESP: [<span class="number">200</span>] {<span class="string">'date'</span>: <span class="string">'Tue, 11 Mar 2014 07:17:54 GMT'</span>, <span class="string">'content-type'</span>: <span class="string">'application/json'</span>, <span class="string">'content-length'</span>: <span class="string">'3302'</span>, <span class="string">''</span>}
+RESP BODY: {<span class="string">"access"</span>: {<span class="string">"token"</span>: {<span class="keyword">...</span>}}, <span class="string">"serviceCatalog"</span>: [<span class="keyword">...</span>], <span class="string">"user"</span>: {<span class="keyword">...</span>}, <span class="string">"metadata"</span>: {<span class="keyword">...</span>}}}
+</pre></td></tr></table></figure>
+
+<h3 id="-542f-52a8-Instance">启动Instance</h3>
+<p>boot命令对应的方法为novaclient.v1_1.shell:do_boot，在此方法中会首先调用novaclient.v1_1.shell:_boot方法，来构造启动参数。</p>
+<h4 id="-6784-9020-542f-52a8-53c2-6570-28-_boot_-65b9-6cd5-29-">构造启动参数(_boot 方法)</h4>
+<p>此方法负责初始化所有相关的启动参数，所支持的启动参数及其含义如下：</p>
+<ul>
+<li>name: instance name</li>
+<li>image: Image to boot with</li>
+<li>flavor: Flavor to boot onto</li>
+<li>meta: dict of arbitrary key/value metadata to store for this instance</li>
+<li>files: dict of files to overwrite on the instance upon boot. key: file name, value: file content</li>
+<li>reservation_id: a UUID for the set of servers being requested</li>
+<li>min_count</li>
+<li>max_count</li>
+<li>security_groups</li>
+<li>userdata: user data to pass to be exposed by the metadata server. file type object / string</li>
+<li>key_name: name of previously created keypair to inject into the instance</li>
+<li>availability_zone</li>
+<li>block_device_mapping</li>
+<li>block_device_mapping_v2</li>
+<li>nics: nics to be added to this instance</li>
+<li>scheduler_hints: arbitrary key-value pairs specified by the client to help boot an instance</li>
+<li>config_drive</li>
+<li>disk_config: control how the disk is partitioned when the server is created. AUTO / MANUAL</li>
+<li>others</li>
+</ul>
+<p>对于本例执行的命令行，其涉及到的处理逻辑如下所述。</p>
+<p><strong> 验证并获取Image和Flavor信息 </strong></p>
+<p>首先根据参数验证给定的image和flavor是否合法，并获取image和flavor的详细信息。</p>
+<p>对于Image的验证，是由novaclient.v1_1.images:ImageManager来负责的。在boot命令中—image可以给定image的uuid或名称。</p>
+<p>对于给定uuid的情况，ImageManager:get会被调用，根据上一步骤keystone返回的glance的endpoint来构造类似”/images/{image_uuid}”的URL来访问glance验证此Image是否存在并获取Image的详细信息。</p>
+<p>对于给定名称的情况，ImageManager.list会首先被调用来通过访问”/images”来获取image列表，然后从结果中确定给定Image的uuid，然后再通过ImageManager:get方法来获取Image的信息。 </p>
+<p>对于flavor参数的验证和信息获取与之类似。</p>
+<p>下面是获取给定Image信息时，涉及的API交互信息(有省略）：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+</pre></td><td class="code"><pre><span class="comment">REQ:</span> <span class="comment">curl</span> <span class="literal">-</span><span class="comment">i</span> <span class="comment">http://{CONTROLLER_IP}:8774/v2/507667477fd840e1a81c1ca7f6f54f69/images</span> <span class="literal">-</span><span class="comment">X</span> <span class="comment">GET</span> <span class="literal">-</span><span class="comment">H</span> <span class="comment">"X</span><span class="literal">-</span><span class="comment">Auth</span><span class="literal">-</span><span class="comment">Project</span><span class="literal">-</span><span class="comment">Id:</span> <span class="comment">admin"</span> <span class="literal">-</span><span class="comment">H</span> <span class="comment">"User</span><span class="literal">-</span><span class="comment">Agent:</span> <span class="comment">python</span><span class="literal">-</span><span class="comment">novaclient"</span> <span class="literal">-</span><span class="comment">H</span> <span class="comment">"Accept:</span> <span class="comment">application/json"</span> <span class="literal">-</span><span class="comment">H</span> <span class="comment">"X</span><span class="literal">-</span><span class="comment">Auth</span><span class="literal">-</span><span class="comment">Token:</span> <span class="comment">1c8848a651a24e35ad74cea8eeba1cd3"</span>
+
+<span class="comment">DEBUG</span> <span class="comment">(connectionpool:295)</span> <span class="comment">"GET</span> <span class="comment">/v2/507667477fd840e1a81c1ca7f6f54f69/images</span> <span class="comment">HTTP/1</span><span class="string">.</span><span class="comment">1"</span> <span class="comment">200</span> <span class="comment">3724</span>
+<span class="comment">RESP:</span> <span class="title">[</span><span class="comment">200</span><span class="title">]</span> <span class="comment">{'date':</span> <span class="comment">'Tue</span><span class="string">,</span> <span class="comment">11</span> <span class="comment">Mar</span> <span class="comment">2014</span> <span class="comment">09:28:55</span> <span class="comment">GMT'</span><span class="string">,</span> <span class="comment">'content</span><span class="literal">-</span><span class="comment">length':</span> <span class="comment">'3724'</span><span class="string">,</span> <span class="comment">'content</span><span class="literal">-</span><span class="comment">type':</span> <span class="comment">'application/json'</span><span class="string">,</span> <span class="comment">'x</span><span class="literal">-</span><span class="comment">compute</span><span class="literal">-</span><span class="comment">request</span><span class="literal">-</span><span class="comment">id':</span> <span class="comment">'req</span><span class="literal">-</span><span class="comment">fb8f0a9e</span><span class="literal">-</span><span class="comment">0caf</span><span class="literal">-</span><span class="comment">4e34</span><span class="literal">-</span><span class="comment">bbe6</span><span class="literal">-</span><span class="comment">abb0513ae2e2'}</span>
+<span class="comment">RESP</span> <span class="comment">BODY:</span> <span class="comment">{"images":</span> <span class="title">[</span><span class="string">.</span><span class="string">.</span><span class="string">.</span><span class="string">,</span> <span class="comment">{"id":</span> <span class="comment">"ad559bb4</span><span class="literal">-</span><span class="comment">31d5</span><span class="literal">-</span><span class="comment">469f</span><span class="literal">-</span><span class="comment">93b7</span><span class="literal">-</span><span class="comment">0a67546c4a96"</span><span class="string">,</span> <span class="comment">"links":</span> <span class="title">[</span><span class="comment">{"href":</span> <span class="comment">"http://186</span><span class="string">.</span><span class="comment">100</span><span class="string">.</span><span class="comment">8</span><span class="string">.</span><span class="comment">144:8774/v2/507667477fd840e1a81c1ca7f6f54f69/images/ad559bb4</span><span class="literal">-</span><span class="comment">31d5</span><span class="literal">-</span><span class="comment">469f</span><span class="literal">-</span><span class="comment">93b7</span><span class="literal">-</span><span class="comment">0a67546c4a96"</span><span class="string">,</span> <span class="comment">"rel":</span> <span class="comment">"self"}</span><span class="string">,</span> <span class="comment">{"href":</span> <span class="comment">"http://186</span><span class="string">.</span><span class="comment">100</span><span class="string">.</span><span class="comment">8</span><span class="string">.</span><span class="comment">144:8774/507667477fd840e1a81c1ca7f6f54f69/images/ad559bb4</span><span class="literal">-</span><span class="comment">31d5</span><span class="literal">-</span><span class="comment">469f</span><span class="literal">-</span><span class="comment">93b7</span><span class="literal">-</span><span class="comment">0a67546c4a96"</span><span class="string">,</span> <span class="comment">"rel":</span> <span class="comment">"bookmark"}</span><span class="string">,</span> <span class="comment">{"href":</span> <span class="comment">"http://186</span><span class="string">.</span><span class="comment">100</span><span class="string">.</span><span class="comment">8</span><span class="string">.</span><span class="comment">144:9292/507667477fd840e1a81c1ca7f6f54f69/images/ad559bb4</span><span class="literal">-</span><span class="comment">31d5</span><span class="literal">-</span><span class="comment">469f</span><span class="literal">-</span><span class="comment">93b7</span><span class="literal">-</span><span class="comment">0a67546c4a96"</span><span class="string">,</span> <span class="comment">"type":</span> <span class="comment">"application/vnd</span><span class="string">.</span><span class="comment">openstack</span><span class="string">.</span><span class="comment">image"</span><span class="string">,</span> <span class="comment">"rel":</span> <span class="comment">"alternate"}</span><span class="title">]</span><span class="string">,</span> <span class="comment">"name":</span> <span class="comment">"cirros"}</span><span class="title">]</span><span class="comment">}</span>
+
+
+<span class="comment">REQ:</span> <span class="comment">curl</span> <span class="literal">-</span><span class="comment">i</span> <span class="comment">http://{CONTROLLER_IP}:8774/v2/507667477fd840e1a81c1ca7f6f54f69/images/ad559bb4</span><span class="literal">-</span><span class="comment">31d5</span><span class="literal">-</span><span class="comment">469f</span><span class="literal">-</span><span class="comment">93b7</span><span class="literal">-</span><span class="comment">0a67546c4a96</span> <span class="literal">-</span><span class="comment">X</span> <span class="comment">GET</span> <span class="literal">-</span><span class="comment">H</span> <span class="comment">"X</span><span class="literal">-</span><span class="comment">Auth</span><span class="literal">-</span><span class="comment">Project</span><span class="literal">-</span><span class="comment">Id:</span> <span class="comment">admin"</span> <span class="literal">-</span><span class="comment">H</span> <span class="comment">"User</span><span class="literal">-</span><span class="comment">Agent:</span> <span class="comment">python</span><span class="literal">-</span><span class="comment">novaclient"</span> <span class="literal">-</span><span class="comment">H</span> <span class="comment">"Accept:</span> <span class="comment">application/json"</span> <span class="literal">-</span><span class="comment">H</span> <span class="comment">"X</span><span class="literal">-</span><span class="comment">Auth</span><span class="literal">-</span><span class="comment">Token:</span> <span class="comment">1c8848a651a24e35ad74cea8eeba1cd3"</span>
+
+<span class="comment">DEBUG</span> <span class="comment">(connectionpool:295)</span> <span class="comment">"GET</span> <span class="comment">/v2/507667477fd840e1a81c1ca7f6f54f69/images/ad559bb4</span><span class="literal">-</span><span class="comment">31d5</span><span class="literal">-</span><span class="comment">469f</span><span class="literal">-</span><span class="comment">93b7</span><span class="literal">-</span><span class="comment">0a67546c4a96</span> <span class="comment">HTTP/1</span><span class="string">.</span><span class="comment">1"</span> <span class="comment">200</span> <span class="comment">720</span>
+<span class="comment">RESP:</span> <span class="title">[</span><span class="comment">200</span><span class="title">]</span> <span class="comment">{'date':</span> <span class="comment">'Tue</span><span class="string">,</span> <span class="comment">11</span> <span class="comment">Mar</span> <span class="comment">2014</span> <span class="comment">09:28:55</span> <span class="comment">GMT'</span><span class="string">,</span> <span class="comment">'content</span><span class="literal">-</span><span class="comment">length':</span> <span class="comment">'720'</span><span class="string">,</span> <span class="comment">'content</span><span class="literal">-</span><span class="comment">type':</span> <span class="comment">'application/json'</span><span class="string">,</span> <span class="comment">'x</span><span class="literal">-</span><span class="comment">compute</span><span class="literal">-</span><span class="comment">request</span><span class="literal">-</span><span class="comment">id':</span> <span class="comment">'req</span><span class="literal">-</span><span class="comment">c636e7d0</span><span class="literal">-</span><span class="comment">b74c</span><span class="literal">-</span><span class="comment">42d6</span><span class="literal">-</span><span class="comment">8635</span><span class="literal">-</span><span class="comment">e24076f9aeff'}</span>
+<span class="comment">RESP</span> <span class="comment">BODY:</span> <span class="comment">{"image":</span> <span class="comment">{"status":</span> <span class="comment">"ACTIVE"</span><span class="string">,</span> <span class="comment">"updated":</span> <span class="comment">"2014</span><span class="literal">-</span><span class="comment">02</span><span class="literal">-</span><span class="comment">26T08:18:39Z"</span><span class="string">,</span> <span class="comment">"links":</span> <span class="title">[</span><span class="string">.</span><span class="string">.</span><span class="string">.</span><span class="title">]</span><span class="string">,</span> <span class="comment">"id":</span> <span class="comment">"ad559bb4</span><span class="literal">-</span><span class="comment">31d5</span><span class="literal">-</span><span class="comment">469f</span><span class="literal">-</span><span class="comment">93b7</span><span class="literal">-</span><span class="comment">0a67546c4a96"</span><span class="string">,</span> <span class="comment">"OS</span><span class="literal">-</span><span class="comment">EXT</span><span class="literal">-</span><span class="comment">IMG</span><span class="literal">-</span><span class="comment">SIZE:size":</span> <span class="comment">13147648</span><span class="string">,</span> <span class="comment">"name":</span> <span class="comment">"cirros"</span><span class="string">,</span> <span class="comment">"created":</span> <span class="comment">"2014</span><span class="literal">-</span><span class="comment">02</span><span class="literal">-</span><span class="comment">26T08:03:29Z"</span><span class="string">,</span> <span class="comment">"minDisk":</span> <span class="comment">1</span><span class="string">,</span> <span class="comment">"progress":</span> <span class="comment">100</span><span class="string">,</span> <span class="comment">"minRam":</span> <span class="comment">512</span><span class="string">,</span> <span class="comment">"metadata":</span> <span class="comment">{}}}</span>
+</pre></td></tr></table></figure>
+
+<p><strong> swap的处理 </strong></p>
+<p>然后会处理block_device_mapping配置，本例中不涉及—block-device-mapping命令行参数，无影响。 </p>
+<p>下面是处理bdm的代码，做参考：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+</pre></td><td class="code"><pre>    block_device_mapping = <span class="cell">{}</span>
+    <span class="keyword">for</span> bdm in <span class="transposed_variable">args.</span>block_device_mapping:
+        device_name, mapping = <span class="transposed_variable">bdm.</span>split(<span class="string">'='</span>, <span class="number">1</span>)
+        block_device_mapping<span class="matrix">[device_name]</span> = mapping
+</pre></td></tr></table></figure>
+
+<p>本例中命令行添加了-swap参数，在后面调用的_parse_block_device_mapping_v2中会在启动参数中生成相应的block_device_mapping_v2信息。</p>
+<p>打开_parse_block_device_mapping_v2方法，可以看到，其处理的命令行参数包括：</p>
+<ul>
+<li>—boot-volume</li>
+<li>—snapshot</li>
+<li>—block-device</li>
+<li>—ephemeral</li>
+<li>—swap</li>
+</ul>
+<p>其中对于本例涉及的—swap，其处理逻辑如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+</pre></td><td class="code"><pre>    <span class="keyword">if</span> args.swap:
+        bdm_dict = {<span class="comment">'source_type': 'blank', 'destination_type': 'local',</span>
+                    <span class="comment">'boot_index': -1, 'delete_on_termination': True,</span>
+                    <span class="comment">'guest_format': 'swap', 'volume_size': args.swap}</span>
+        bdm.append(bdm_dict)
+</pre></td></tr></table></figure>
+
+<p>即会生成相应的block_device_mapping_v2信息，并附加到启动参数中。</p>
+<h4 id="-8bbe-7f6e-ResourceUrl">设置ResourceUrl</h4>
+<p>do_boot方法,接着会调用novaclient.v1_1.servers.ServerManager:create方法，其接收的参数就是前文提到的各个启动参数。</p>
+<p>由此方法的代码可知，如果启动参数包含block_device_mapping(_v2),则设置resource_url为/os-volumes_boot, 否则设置为/servers。并最终会用此resource_url为参数调用novaclient.v1_1.servers.ServerManager:_boot进行后续操作。</p>
+<p>如前所述，在本例中，block_device_mapping_v2已经被设置，故resource_url为/os-volumes_boot</p>
+<h3 id="-6784-9020-REST-8bf7-6c42-">构造REST请求</h3>
+<p>在ServerManager:_boot方法中，其会构造相应的body，不同启动参数和body的内容对应关系如下：</p>
+<ul>
+<li>name: server.name</li>
+<li>image: getid =&gt; server.imageRef</li>
+<li>flavor: getid =&gt; server.flavorRef</li>
+<li>userdata: (read)+base64encode =&gt; server.user_data</li>
+<li>meta: server.metadata</li>
+<li>reservation_id: server.reservation_id</li>
+<li>key_name: server.key_name</li>
+<li>scheduler_hints: os:scheduler_hints</li>
+<li>config_drive: server.config_drive</li>
+<li>admin_pass: server.adminPass</li>
+<li>min_count: server.min_count</li>
+<li>max_count: server.max_count</li>
+<li>security_group: [{‘name’: sg} … ] =&gt; server.security_group</li>
+<li>files: [{“path”:filepath, “contents”: base64encode(data)}, …] =&gt; server.personality</li>
+<li>availability_zone: server.availability_zone</li>
+<li>block_device_mapping: server.block_device_mapping</li>
+<li>block_device_mapping_v2: server.block_device_mapping_v2</li>
+<li>nics: [{‘uuid’:get(‘net-id’), ‘fixed_ip’:get(‘v4-fixed-ip’),’port’:get(‘port-id’)},…]=&gt; server.networks</li>
+<li>disk_config: server.OS-DCF:diskConfig</li>
+</ul>
+<p>接着调用base.Manager:_create方法来发送POST请求并返回结果，对应如下debug信息：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+</pre></td><td class="code"><pre><span class="comment">REQ:</span> <span class="comment">curl</span> <span class="literal">-</span><span class="comment">i</span> <span class="comment">http://{CONTROLLER_IP}:8774/v2/507667477fd840e1a81c1ca7f6f54f69/os</span><span class="literal">-</span><span class="comment">volumes_boot</span> <span class="literal">-</span><span class="comment">X</span> <span class="comment">POST</span> <span class="literal">-</span><span class="comment">H</span> <span class="comment">"X</span><span class="literal">-</span><span class="comment">Auth</span><span class="literal">-</span><span class="comment">Project</span><span class="literal">-</span><span class="comment">Id:</span> <span class="comment">admin"</span> <span class="literal">-</span><span class="comment">H</span> <span class="comment">"User</span><span class="literal">-</span><span class="comment">Agent:</span> <span class="comment">python</span><span class="literal">-</span><span class="comment">novaclient"</span> <span class="literal">-</span><span class="comment">H</span> <span class="comment">"Content</span><span class="literal">-</span><span class="comment">Type:</span> <span class="comment">application/json"</span> <span class="literal">-</span><span class="comment">H</span> <span class="comment">"Accept:</span> <span class="comment">application/json"</span> <span class="literal">-</span><span class="comment">H</span> <span class="comment">"X</span><span class="literal">-</span><span class="comment">Auth</span><span class="literal">-</span><span class="comment">Token:</span> <span class="comment">7e1e6458f641473cb048c685e6795411"</span> <span class="literal">-</span><span class="comment">d</span> <span class="comment">'{"server":</span> <span class="comment">{"name":</span> <span class="comment">"test2"</span><span class="string">,</span> <span class="comment">"imageRef":</span> <span class="comment">"ad559bb4</span><span class="literal">-</span><span class="comment">31d5</span><span class="literal">-</span><span class="comment">469f</span><span class="literal">-</span><span class="comment">93b7</span><span class="literal">-</span><span class="comment">0a67546c4a96"</span><span class="string">,</span> <span class="comment">"block_device_mapping_v2":</span> <span class="title">[</span><span class="comment">{"source_type":</span> <span class="comment">"image"</span><span class="string">,</span> <span class="comment">"delete_on_termination":</span> <span class="comment">true</span><span class="string">,</span> <span class="comment">"boot_index":</span> <span class="comment">0</span><span class="string">,</span> <span class="comment">"uuid":</span> <span class="comment">"ad559bb4</span><span class="literal">-</span><span class="comment">31d5</span><span class="literal">-</span><span class="comment">469f</span><span class="literal">-</span><span class="comment">93b7</span><span class="literal">-</span><span class="comment">0a67546c4a96"</span><span class="string">,</span> <span class="comment">"destination_type":</span> <span class="comment">"local"}</span><span class="string">,</span> <span class="comment">{"guest_format":</span> <span class="comment">"swap"</span><span class="string">,</span> <span class="comment">"boot_index":</span> <span class="literal">-</span><span class="comment">1</span><span class="string">,</span> <span class="comment">"volume_size":</span> <span class="comment">"100"</span><span class="string">,</span> <span class="comment">"source_type":</span> <span class="comment">"blank"</span><span class="string">,</span> <span class="comment">"destination_type":</span> <span class="comment">"local"</span><span class="string">,</span> <span class="comment">"delete_on_termination":</span> <span class="comment">true}</span><span class="title">]</span><span class="string">,</span> <span class="comment">"flavorRef":</span> <span class="comment">"1"</span><span class="string">,</span> <span class="comment">"max_count":</span> <span class="comment">1</span><span class="string">,</span> <span class="comment">"min_count":</span> <span class="comment">1}}'</span>
+
+<span class="comment">DEBUG</span> <span class="comment">(connectionpool:295)</span> <span class="comment">"POST</span> <span class="comment">/v2/507667477fd840e1a81c1ca7f6f54f69/os</span><span class="literal">-</span><span class="comment">volumes_boot</span> <span class="comment">HTTP/1</span><span class="string">.</span><span class="comment">1"</span> <span class="comment">400</span> <span class="comment">101</span>
+<span class="comment">RESP:</span> <span class="title">[</span><span class="comment">400</span><span class="title">]</span> <span class="comment">{'date':</span> <span class="comment">'Tue</span><span class="string">,</span> <span class="comment">11</span> <span class="comment">Mar</span> <span class="comment">2014</span> <span class="comment">13:35:35</span> <span class="comment">GMT'</span><span class="string">,</span> <span class="comment">'content</span><span class="literal">-</span><span class="comment">length':</span> <span class="comment">'101'</span><span class="string">,</span> <span class="comment">'content</span><span class="literal">-</span><span class="comment">type':</span> <span class="comment">'application/json;</span> <span class="comment">charset=UTF</span><span class="literal">-</span><span class="comment">8'</span><span class="string">,</span> <span class="comment">'x</span><span class="literal">-</span><span class="comment">compute</span><span class="literal">-</span><span class="comment">request</span><span class="literal">-</span><span class="comment">id':</span> <span class="comment">'req</span><span class="literal">-</span><span class="comment">9628ca64</span><span class="literal">-</span><span class="comment">dc0f</span><span class="literal">-</span><span class="comment">4ce0</span><span class="literal">-</span><span class="comment">b4b8</span><span class="literal">-</span><span class="comment">9295c15f5995'}</span>
+<span class="comment">RESP</span> <span class="comment">BODY:</span> <span class="comment">{"badRequest":</span> <span class="comment">{"message":</span> <span class="comment">"Swap</span> <span class="comment">drive</span> <span class="comment">requested</span> <span class="comment">is</span> <span class="comment">larger</span> <span class="comment">than</span> <span class="comment">instance</span> <span class="comment">type</span> <span class="comment">allows</span><span class="string">.</span><span class="comment">"</span><span class="string">,</span> <span class="comment">"code":</span> <span class="comment">400}}</span>
+
+<span class="comment">DEBUG</span> <span class="comment">(shell:740)</span> <span class="comment">Swap</span> <span class="comment">drive</span> <span class="comment">requested</span> <span class="comment">is</span> <span class="comment">larger</span> <span class="comment">than</span> <span class="comment">instance</span> <span class="comment">type</span> <span class="comment">allows</span><span class="string">.</span> <span class="comment">(HTTP</span> <span class="comment">400)</span> <span class="comment">(Request</span><span class="literal">-</span><span class="comment">ID:</span> <span class="comment">req</span><span class="literal">-</span><span class="comment">9628ca64</span><span class="literal">-</span><span class="comment">dc0f</span><span class="literal">-</span><span class="comment">4ce0</span><span class="literal">-</span><span class="comment">b4b8</span><span class="literal">-</span><span class="comment">9295c15f5995)</span>
+</pre></td></tr></table></figure>
+
+<p>如之前的期望结果，这里NOVA会返回相应的错误。</p>
+<h2 id="-540e-7eed-5de5-4f5c-">后续工作</h2>
+<p>对NOVA侧接收到此POST请求后，真正的内部处理逻辑进行进一步的分析。</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+        <!-- Baidu Button BEGIN -->
+<div id="bdshare" class="bdshare_t bds_tools get-codes-bdshare">
+<span class="bds_more">分享到：</span>
+<a class="bds_qzone"></a>
+<a class="bds_tsina"></a>
+<a class="bds_tqq"></a>
+<a class="bds_renren"></a>
+<a class="bds_t163"></a>
+<a class="shareCount"></a>
+</div>
+<script type="text/javascript" id="bdshare_js" data="type=tools&amp;uid=17824" ></script>
+<script type="text/javascript" id="bdshell_js"></script>
+<script type="text/javascript">
+document.getElementById("bdshell_js").src = "http://bdimg.share.baidu.com/static/js/shell_v2.js?cdnversion=" + Math.ceil(new Date()/3600000)
+</script>
+<!-- Baidu Button END -->
+
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+<section id="comment">
+<!-- Duoshuo Comment BEGIN -->
+    <div class="ds-thread" data-thread-key="/2014/03/2014-03-11-novaclient-boot-process/" data-author-key="leiqzhang" data-title=""></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"leiqzhang"};
+    (function() {
+        var ds = document.createElement('script');
+        ds.type = 'text/javascript';ds.async = true;
+        ds.src = 'http://static.duoshuo.com/embed.js';
+        ds.charset = 'UTF-8';
+        (document.getElementsByTagName('head')[0] 
+        || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+    </script>
+<!-- Duoshuo Comment END -->
+</section>
+
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:leiqzhang.com">
+  </form>
+</div>
+
+  
+<div class="widget tag">
+  <h3 class="title">Categories</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/Linux/">Linux</a><small>3</small></li>
+  
+    <li><a href="/categories/OpenStack/">OpenStack</a><small>5</small></li>
+  
+    <li><a href="/categories/VIM/">VIM</a><small>3</small></li>
+  
+    <li><a href="/categories/Virtualization/">Virtualization</a><small>16</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>2</small></li>
+  
+    <li><a href="/categories/miscellaneous/">miscellaneous</a><small>1</small></li>
+  
+    <li><a href="/categories/web_dev/">web_dev</a><small>8</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tagcloud">
+  <h3 class="title">Tag Cloud</h3>
+  <div class="entry">
+    <a href="/tags/CIM/" style="font-size: 10.00px;">CIM</a><a href="/tags/CORS/" style="font-size: 10.00px;">CORS</a><a href="/tags/DBPM/" style="font-size: 10.00px;">DBPM</a><a href="/tags/Deploy/" style="font-size: 10.00px;">Deploy</a><a href="/tags/ELI/" style="font-size: 10.00px;">ELI</a><a href="/tags/IRC/" style="font-size: 10.00px;">IRC</a><a href="/tags/NUMA/" style="font-size: 10.00px;">NUMA</a><a href="/tags/Nova/" style="font-size: 16.00px;">Nova</a><a href="/tags/OPTIONS/" style="font-size: 10.00px;">OPTIONS</a><a href="/tags/Paste/" style="font-size: 10.00px;">Paste</a><a href="/tags/QEMU/" style="font-size: 20.00px;">QEMU</a><a href="/tags/RabbitMQ/" style="font-size: 10.00px;">RabbitMQ</a><a href="/tags/Stevedore/" style="font-size: 10.00px;">Stevedore</a><a href="/tags/WSGI/" style="font-size: 10.00px;">WSGI</a><a href="/tags/bfc/" style="font-size: 10.00px;">bfc</a><a href="/tags/block-stream/" style="font-size: 10.00px;">block-stream</a><a href="/tags/blockcopy/" style="font-size: 12.00px;">blockcopy</a><a href="/tags/cache/" style="font-size: 10.00px;">cache</a><a href="/tags/css/" style="font-size: 12.00px;">css</a><a href="/tags/dataplane/" style="font-size: 10.00px;">dataplane</a><a href="/tags/device-mapper/" style="font-size: 10.00px;">device-mapper</a><a href="/tags/ervernote/" style="font-size: 10.00px;">ervernote</a><a href="/tags/etag/" style="font-size: 10.00px;">etag</a><a href="/tags/eval/" style="font-size: 10.00px;">eval</a><a href="/tags/fdisk/" style="font-size: 10.00px;">fdisk</a><a href="/tags/fedora/" style="font-size: 10.00px;">fedora</a><a href="/tags/gpt/" style="font-size: 10.00px;">gpt</a><a href="/tags/greasemonkey/" style="font-size: 10.00px;">greasemonkey</a><a href="/tags/http/" style="font-size: 12.00px;">http</a><a href="/tags/isolinux/" style="font-size: 10.00px;">isolinux</a><a href="/tags/javascript/" style="font-size: 10.00px;">javascript</a><a href="/tags/libvirt/" style="font-size: 18.00px;">libvirt</a><a href="/tags/lighthttpd/" style="font-size: 10.00px;">lighthttpd</a><a href="/tags/lighttpd/" style="font-size: 10.00px;">lighttpd</a><a href="/tags/livecd/" style="font-size: 10.00px;">livecd</a><a href="/tags/mac/" style="font-size: 10.00px;">mac</a><a href="/tags/mbr/" style="font-size: 10.00px;">mbr</a><a href="/tags/md5sum/" style="font-size: 10.00px;">md5sum</a><a href="/tags/mysql/" style="font-size: 12.00px;">mysql</a><a href="/tags/oVirt/" style="font-size: 14.00px;">oVirt</a>
+  </div>
+</div>
+
+
+  <iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=2&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=0&uid=1644437791&verifier=c45a1931&dpc=1"></iframe>
+
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://blog.csdn.net/luo_brian" title="luo_brian">Luohao</a></li>
+<li><a href="http://blog.csdn.net/defeattroy" title="木马屠城">Defeattroy</a></li>
+<li><a href="http://www.smilgel.com/" title="听雨轩">MrSaxon</a></li>
+<li><a href="http://lanbolee.com/blog/" title="博之博">Rambolee</a></li>
+<li><a href="http://www.haoziyanwo.com/" title="耗子燕窝">浩子</a></li>
+<li><a href="http://blog.csdn.net/u012815727" title="CloudOS">CloudOS</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2014 leiqzhang
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+<script type="text/javascript">
+var disqus_shortname = 'leiqzhang';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+</body>
+</html>

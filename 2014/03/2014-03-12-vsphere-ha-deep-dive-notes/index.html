@@ -1,0 +1,455 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="baidu-site-verification" content="kZ3lZdC9wn" />
+  
+  <title>Technology &amp; Life</title>
+  <meta name="author" content="leiqzhang">
+  
+  <meta name="description" content="Virtualization Related Technologies">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+  <meta property="og:site_name" content="Technology &amp; Life"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico">
+  <link rel="alternate" href="/atom.xml" title="Technology &amp; Life" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
+  
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-40319520-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+  <script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3F6f62dffd0688838f0bc52fc65fd62af4' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">Technology &amp; Life</a></h1>
+  <h2><a href="/">blog of leiqzhang</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about">About</a></li>
+    
+      <li><a href="/atom.xml">RSS</a></li>
+    
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2014-03-27T14:52:22.000Z"><a href="/2014/03/2014-03-12-vsphere-ha-deep-dive-notes/">Mar 27 2014</a></time>
+      
+      
+  
+    <h1 class="title"></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <h1 id="-5b-Notes-5d-_VMWare_vSphere_5-1_Clustering_Deepdive_-_HA">[Notes] VMWare vSphere 5.1 Clustering Deepdive - HA</h1>
+<h2 id="HA-4ecb-7ecd-">HA介绍</h2>
+<h3 id="HA">HA</h3>
+<p>云计算或虚拟化环境中的高可用性（High Available/HA)的目标是针对运行在VM中应用的。典型的场景是将多个Host组成一个HA集群，当其中的VM所在的主机故障的时候，可以自动的在集群中其它Host上将VM重新拉起。</p>
+<p>更进一步，除了VM所在主机故障的情形外，还可以在VM中Guest OS乃至特定应用的状态发生故障时，触发HA。当然，对于GuestOS相关的监控则会依赖于VMWare Tools。</p>
+<h3 id="-548c-MSCS-5bf9-6bd4-">和MSCS对比</h3>
+<p>MSCS集群方案的目标之一也是提供应用的高可用性，虚拟化场景下的HA和MSCS的区别主要有：</p>
+<ul>
+<li>MSCS只保证在一个节点故障的时候，将其上没得APP迁移到其它节点上，至于服务在此之后是否正常运转，则要求运行在其上面的APP有特定设计</li>
+<li>相比HA,MSCS使用和配置起来更为复杂</li>
+</ul>
+<h3 id="5-x-7684-HA-65b0-7279-70b9-">5.x的HA新特点</h3>
+<p><strong>5.0版本</strong></p>
+<ul>
+<li>新的HA Agent：FDM</li>
+<li>不再依赖DNS</li>
+<li>支持管理网分区的情况</li>
+<li>引入Primary 和 Slave Node的概念</li>
+<li>强化隔离验证：避免管理网完全故障时的误报</li>
+<li>引入基于存储的datastore心跳</li>
+<li>强化Admission Control Polices</li>
+</ul>
+<p><strong>5.1版本</strong></p>
+<ul>
+<li>进一步强化和增强Admission Control Policies</li>
+<li>强化对PDL(Permanent Device Loss)的处理</li>
+<li>支持Guest OS休眠模式</li>
+<li>在VMWare Tools SDK中引入APP监控SDK</li>
+<li>FDM VIB自动加入Auto-Deploy image profile</li>
+<li>支持通过配置延迟触发isolation response（具体含义在后文中解释）</li>
+</ul>
+<h2 id="HA-67b6-6784-">HA架构</h2>
+<p>[[TODO HA涉及的组件和架构图]]</p>
+<p>其主要的组件包括：</p>
+<ul>
+<li>FDM</li>
+<li>HOSTD</li>
+<li>vCenter</li>
+</ul>
+<h3 id="FDM">FDM</h3>
+<p><strong>职责</strong></p>
+<ol>
+<li>向集群中其它host传播信息：host resource info；vm state；HA properties</li>
+<li>处理心跳机制</li>
+<li>vm placement</li>
+<li>vm restarts</li>
+<li>logging （单独的fdm.log日志）</li>
+</ol>
+<p><strong>自身的可靠性</strong></p>
+<ol>
+<li>watchdog</li>
+<li>resilient to network interruptions and “all paths down” (APD) conditions</li>
+<li>在网络故障时，各主机间的通信可自动使用其它的通信路径（支持冗余路径）</li>
+</ol>
+<h3 id="HOSTD_Agent">HOSTD Agent</h3>
+<p><strong>职责</strong></p>
+<p>many of the tasks we take for granted like powering on vm</p>
+<p><strong>和FDM的关系</strong></p>
+<ul>
+<li>FDM直接和HOSTD和vCenter通信，使得HA可更快的响应power-on request，降低VM的启动时间</li>
+<li>FDM依赖HOSTD获取host上注册的vm信息，管理VM也是通过HOSTD APIs</li>
+<li>如果HOSTD失效，则FDM也会失效</li>
+</ul>
+<h3 id="vCenter">vCenter</h3>
+<p><strong>职责</strong></p>
+<ol>
+<li>部署和配置HA Agents（支持并发部署）</li>
+<li>通知集群配置变更到选举出的master，变更包括调整高级设置、添加新host等等</li>
+<li>启用和停止虚拟机的保护 (场景：比如vm开关机、master所在ESX断连等场景）</li>
+</ol>
+<p><strong>和HA的关系</strong></p>
+<p>需要注意的是，在HA处理故障时，并不需要vCenter的参与，但HA依赖vCenter来配置或监控集群。在vCenter故障时，HA Cluster的配置变更不可用。</p>
+<p>HA依赖vCenter提供的信息包括：</p>
+<ol>
+<li>保护的vm列表</li>
+<li>集群配置</li>
+<li>vm-to-host兼容性信息</li>
+<li>host membership</li>
+</ol>
+<p>vCenter及提供其依赖的服务的VM，需要在HA时具有高优先级来进行恢复</p>
+<h2 id="-57fa-672c-6982-5ff5-">基本概念</h2>
+<p>HA涉及到的基本概念包括：</p>
+<ul>
+<li>Master/Slave agents<ul>
+<li>除了网络分区的场景外，cluster中只有一个master HA agent</li>
+<li>master负责监控其负责的VM的健康状态，并且在其失败时进行重启</li>
+<li>slave负责转发信息到master，以及在master的指导下重启VM</li>
+</ul>
+</li>
+<li>Heartbeating</li>
+<li>Isolated vs Network partitioned</li>
+<li>VM Protection</li>
+</ul>
+<h3 id="Master_Agent">Master Agent</h3>
+<p><strong>职责</strong></p>
+<ul>
+<li>跟踪监控自己负责的VM，并在需要HA的条件下触发相应的行为。</li>
+<li>负责监控slave状态且向vCenter上报slave host的状态，如果slave故障了，Master会决定哪些VM需要重启，且决定其placement</li>
+</ul>
+<p><strong>Master的确定</strong></p>
+<p>Master是由Cluster中的HA Agents来进行选举出来的，可触发选举的场景包括如下几种：</p>
+<ul>
+<li>初始配置Cluster</li>
+<li>当之前的Master所在主机<ul>
+<li>故障</li>
+<li>网络分区或隔离</li>
+<li>从vCenter断开</li>
+<li>进入维护或standby模式</li>
+<li>HA被重配置</li>
+</ul>
+</li>
+</ul>
+<p>满足如下条件的HA Agent会被选举为Master：</p>
+<ul>
+<li>连接datastore数目最多</li>
+<li>具有最大的Managed Object Id</li>
+</ul>
+<p>选举通过UDP协议，大概时间为15s。选举过程中不能处理故障，这些故障需要在选举完毕后，由Master进行处理。</p>
+<p>在选举出Master后，其余Agent就是Slave。各Slave会通过管理平面，和Master建立安全、加密的TCP连接(SSL)，在有Master的情况下，Slaves相互之间不会通信，除非重新进行选举。</p>
+<p><strong>Master的工作原理</strong></p>
+<p>Master will claim responsibility for a vm by taking “ownership” of the datastore on which the virtual machine’s configuration file is stored。 </p>
+<p>所谓获取”ownership”，是指在相应datastore中如下位置建立protectedlist文件，并进行lock:</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre><span class="comment">/</span>&lt;<span class="comment">root</span> <span class="comment">of</span> <span class="comment">datastore</span>&gt;<span class="comment">/</span><span class="string">.</span><span class="comment">vSphere</span><span class="literal">-</span><span class="comment">HA/</span>&lt;<span class="comment">cluster</span><span class="literal">-</span><span class="comment">specific</span><span class="literal">-</span><span class="comment">dir</span>&gt;<span class="comment">/protectedlist</span>
+</pre></td></tr></table></figure>
+
+<p>其中”protectedlist”文件的内容包括：</p>
+<ul>
+<li>被HA保护的VM列表</li>
+<li>VM的 cpu reservation and memory overhead</li>
+</ul>
+<p>Master会在集群中VM所使用的各个datastores中放置此文件</p>
+<p>另外，Master会试图获取满足如下任一条件的datastore的ownership：</p>
+<ul>
+<li>自己可以直接访问到的</li>
+<li>可以通过slave中转请求访问到的</li>
+<li>自己后续发现的</li>
+<li>对于之前没有获取成功的datastore会周期性进行重试</li>
+</ul>
+<p><strong>Master异常</strong></p>
+<p>如上节所述，Master会lock datastore，如果Master故障或者隔离的情况下，如何处理呢？ 可分为如下几种异常场景进行分析：</p>
+<ul>
+<li>master fail：lock会expire，新master会relock</li>
+<li>master isolation: master会release lock，至于如何判断自己处于隔离状态，可参考[[TODO]]）</li>
+<li>fail while isolation：restart of vms will be delayed until a new master has been elected</li>
+</ul>
+<p>而Slave通过到Master点对点的心跳判断Master是否异常来决定是否重新选举新的Master。</p>
+<h3 id="Slaves">Slaves</h3>
+<p><strong>职责</strong></p>
+<ul>
+<li>监控host上运行的VM状态，并通知master状态变化</li>
+<li>监控到master的心跳</li>
+<li>到master不可达后，发起并参与选举；</li>
+<li>发送心跳到master</li>
+</ul>
+<h3 id="Files_for_both_slave_and_master">Files for both slave and master</h3>
+<p>Master和Slave不仅使用文件来存储状态数据，也会使用文件（Remote File）作为一种通信机制。</p>
+<p><strong>Remote Files</strong></p>
+<p>放置在共享存储上的文件主要是poweron文件，其有俩作用：</p>
+<ul>
+<li>tracking vm power-on state</li>
+<li>Slaves会通过此文件来标记其是否处于和管理网隔离的状态，Master会通过此文件获知此信息</li>
+</ul>
+<p><strong>Local Files</strong></p>
+<p>Master/Slave均会放置一些文件在本地存储上，主要包括：</p>
+<ul>
+<li>clusterconfig</li>
+<li>vmmetadata/compatlist</li>
+<li>fdm.cfg(logging cfg)</li>
+<li>hostlist(IP,hostname,mac) </li>
+</ul>
+<h3 id="Heartbeating">Heartbeating</h3>
+<p>在5.x的HA中有两种心跳：</p>
+<ul>
+<li>网络心跳</li>
+<li>存储心跳</li>
+</ul>
+<p><strong>网络心跳</strong></p>
+<p>网络心跳均为点到点的,非广播或组播，心跳周期为1秒，会在如下部件间存在：</p>
+<ul>
+<li>slave到master</li>
+<li>master到所有的slaves</li>
+</ul>
+<p><strong>存储心跳</strong></p>
+<p>存储心跳，也叫Datastore Heartbeating，仅会在master和Slave之间管理网不通时，才会用于进一步判断主机是否已经故障或者仅仅是隔离/分区。</p>
+<p>默认HA会选择两个用作存储心跳的datastore，且会优先选择集群中能被尽可能多主机访问的datastore，另外相对NFS datastore，会优先选择VMFS datastore。</p>
+<p>VMFS的datastore，存储心跳是通过VNFS的heartbeat region机制来实现的。只要一个Host打开了VMFS datastore上的文件，就会自动在heartbeat region中有心跳。HA会在VMFS datastore上创建特定的per-host file来由各个Host打开。</p>
+<p>对于NFS的datastore，由个主机负责每隔5s中更新本主机对应的心跳文件。</p>
+<p>如果之前用于hb的datastore不可用或者被移除了，HA会检测到并重新选择新的datastore用于心跳</p>
+<p>Isolation: through “poweron” file</p>
+<p>host failed (no datastore hb) =&gt; restart the failed host’s vms<br>host isolated/np =&gt; only take action when it is appropriate to. (只有vm被down or power down/shutdown by a triggered isolation resp) (后续章节内容，TODO）</p>
+<h3 id="Isolated_versus_Partitioned">Isolated versus Partitioned</h3>
+<p>[[TODO: 配图]]<br>[[TODO: isolation address]]</p>
+<p>需要注意的是，从上层Admisitrator和从HA的FDM的视角来看，可能会看到不同的故障场景。</p>
+<p>Administrator’s perspective:<br>partitioned: 俩主机可以操作但是通过管理网络和对方不通<br>Isolated： 主机不能在管理网络上observe任何HA管理traffic，而且不能ping通配置的isolation address</p>
+<p>FDM perspective当FDM无法和master通信，就会选举新的master如果网络分区了，a master election will occur so that a host failure or network isolation with this partition will result in appropriate action on the impacted vms每一个网络分区中，均会有自己的master，分区恢复后，任何一个master都可以作为新的master一个master可以负责另一个网络分区的VM，VM状态的监控通过datastore communication mechanism<br>在HA架构中，一个主机是否被分区了， is determinated by the master reporting the condition。比如分区发生后，各自分区的master均会上报vCenter当前哪些主机被分区了，vCenter会进行展示。master仅根据管理网不通可以确定host是partition或isolate，但不能区分。一个host只有它自己通过datastore通知master自己隔离了，master才可以上报此主机是isolated （问题：host和datastore断连了咋办？）<br>俩视图可能会有不一致的情况，比如host到存储也断了，管理网和master也不通了，则从HA看，此host是故障了，但从Administrato看此host是隔离了。</p>
+<p>HA基于host的state来触发相应的action。<br>[ ]Host Failed： will initiate restart of vms<br>[ ]Host Isolated: might initiate restart<br>A virtual machine will only be shutdown or powered off when the isolated host knows there is a master out there that has taken ownership for the vm or when the isolated host loses access to the home datastore of the vm<br>[ ]在主机对于其上面VM所在的datastore无Access能力时（APD)，HA会触发isolation response来保证原VM被关机并安全重启，避免脑裂 （问题：HA咋触发？）（问题：Isolation Response）</p>
+<h3 id="VM_Protection">VM Protection</h3>
+<p>虚拟机状态变化后，vCenter会通知master来启用或禁用此VM的HA保护。 启用或禁用保护的操作，master需要保证将虚拟机状态更新到disk上后才可以返回成功</p>
+<h2 id="CH4_Restarting_VMs">CH4 Restarting VMs</h2>
+<p>HA响应VM故障的场景：<br>Failed Host<br>Isolated Host<br>Failed guest os</p>
+<h3 id="Restart_Priority_and_Order">Restart Priority and Order</h3>
+<p>Agent VM<br>FT secondary vm<br>priority of high<br>priority of medium<br>priority of low</p>
+<h3 id="Restart_Retries">Restart Retries</h3>
+<p>可配置 （0 2 6 14 30m -&gt; 5次重试）</p>
+<h3 id="-573a-666f-ff1a-Failed_Host">场景：Failed Host</h3>
+<p>Failed Slave<br>T0-fail；T3s-master 监控datastore hb持续15s；T10s-host被宣布为不可达，master开始ping host的管理网，持续5s；T15s-如果host没有配置datastore hb，则host被宣布为dead；T18s-如果host配置了datastore hb，主机被宣布为dead</p>
+<p>处理： (5.1) master会从protectedlist中，也可以向vCenter获取vm列表，进行重启。 后者是避免在网络分区情况下，其中一个master那分区中没有足够资源拉起vm，5.1允许多个master同时试图重启同一台VM<br>Failed master<br>T0-fail; T10s-Master election process initiated; T25s-新选举出的master读取protectedlist; T35s-新master对于protectedlist中未运行的vm发起重启</p>
+<p>Isolation Resp and Detection</p>
+<p>Isolation Resp: HA在主机lost its conn with the network and the remaining nodes in the cluster 后所会采取的行为。<br>Power Off 、 Leave Power on、Shut down<br>如果选择的是关机，但是否会触发，还依赖于host判断是否有own vm所在datastore的master可以restart此vm<br>如果触发了resp，会首先将vm重poweron文件中移除，并在poweredoff文件夹下建立相应的vm file<br>选择关机的一种场景：vm可以访问vm网络但是不能访问它的存储，如果它维持开机，则会出现俩相同IP的vm（问题：为什么？）</p>
+<p>Isolation DetectionIsolation Slave：<br>5.1：<br>期间有任何状态变化，均不会再触发isolation response。</p>
+<p>如果Isolation Resp被触发了：</p>
+<p>Isolation Master：</p>
+<p>Restarting VM<br>Placement； DRS Relation</p>
+<h3 id="Split-Brain">Split-Brain</h3>
+<h3 id="Permanent_Device_Loss">Permanent Device Loss</h3>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+        <!-- Baidu Button BEGIN -->
+<div id="bdshare" class="bdshare_t bds_tools get-codes-bdshare">
+<span class="bds_more">分享到：</span>
+<a class="bds_qzone"></a>
+<a class="bds_tsina"></a>
+<a class="bds_tqq"></a>
+<a class="bds_renren"></a>
+<a class="bds_t163"></a>
+<a class="shareCount"></a>
+</div>
+<script type="text/javascript" id="bdshare_js" data="type=tools&amp;uid=17824" ></script>
+<script type="text/javascript" id="bdshell_js"></script>
+<script type="text/javascript">
+document.getElementById("bdshell_js").src = "http://bdimg.share.baidu.com/static/js/shell_v2.js?cdnversion=" + Math.ceil(new Date()/3600000)
+</script>
+<!-- Baidu Button END -->
+
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+<section id="comment">
+<!-- Duoshuo Comment BEGIN -->
+    <div class="ds-thread" data-thread-key="/2014/03/2014-03-12-vsphere-ha-deep-dive-notes/" data-author-key="leiqzhang" data-title=""></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"leiqzhang"};
+    (function() {
+        var ds = document.createElement('script');
+        ds.type = 'text/javascript';ds.async = true;
+        ds.src = 'http://static.duoshuo.com/embed.js';
+        ds.charset = 'UTF-8';
+        (document.getElementsByTagName('head')[0] 
+        || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+    </script>
+<!-- Duoshuo Comment END -->
+</section>
+
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:leiqzhang.com">
+  </form>
+</div>
+
+  
+<div class="widget tag">
+  <h3 class="title">Categories</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/Linux/">Linux</a><small>3</small></li>
+  
+    <li><a href="/categories/OpenStack/">OpenStack</a><small>5</small></li>
+  
+    <li><a href="/categories/VIM/">VIM</a><small>3</small></li>
+  
+    <li><a href="/categories/Virtualization/">Virtualization</a><small>16</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>2</small></li>
+  
+    <li><a href="/categories/miscellaneous/">miscellaneous</a><small>1</small></li>
+  
+    <li><a href="/categories/web_dev/">web_dev</a><small>8</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tagcloud">
+  <h3 class="title">Tag Cloud</h3>
+  <div class="entry">
+    <a href="/tags/CIM/" style="font-size: 10.00px;">CIM</a><a href="/tags/CORS/" style="font-size: 10.00px;">CORS</a><a href="/tags/DBPM/" style="font-size: 10.00px;">DBPM</a><a href="/tags/Deploy/" style="font-size: 10.00px;">Deploy</a><a href="/tags/ELI/" style="font-size: 10.00px;">ELI</a><a href="/tags/IRC/" style="font-size: 10.00px;">IRC</a><a href="/tags/NUMA/" style="font-size: 10.00px;">NUMA</a><a href="/tags/Nova/" style="font-size: 16.00px;">Nova</a><a href="/tags/OPTIONS/" style="font-size: 10.00px;">OPTIONS</a><a href="/tags/Paste/" style="font-size: 10.00px;">Paste</a><a href="/tags/QEMU/" style="font-size: 20.00px;">QEMU</a><a href="/tags/RabbitMQ/" style="font-size: 10.00px;">RabbitMQ</a><a href="/tags/Stevedore/" style="font-size: 10.00px;">Stevedore</a><a href="/tags/WSGI/" style="font-size: 10.00px;">WSGI</a><a href="/tags/bfc/" style="font-size: 10.00px;">bfc</a><a href="/tags/block-stream/" style="font-size: 10.00px;">block-stream</a><a href="/tags/blockcopy/" style="font-size: 12.00px;">blockcopy</a><a href="/tags/cache/" style="font-size: 10.00px;">cache</a><a href="/tags/css/" style="font-size: 12.00px;">css</a><a href="/tags/dataplane/" style="font-size: 10.00px;">dataplane</a><a href="/tags/device-mapper/" style="font-size: 10.00px;">device-mapper</a><a href="/tags/ervernote/" style="font-size: 10.00px;">ervernote</a><a href="/tags/etag/" style="font-size: 10.00px;">etag</a><a href="/tags/eval/" style="font-size: 10.00px;">eval</a><a href="/tags/fdisk/" style="font-size: 10.00px;">fdisk</a><a href="/tags/fedora/" style="font-size: 10.00px;">fedora</a><a href="/tags/gpt/" style="font-size: 10.00px;">gpt</a><a href="/tags/greasemonkey/" style="font-size: 10.00px;">greasemonkey</a><a href="/tags/http/" style="font-size: 12.00px;">http</a><a href="/tags/isolinux/" style="font-size: 10.00px;">isolinux</a><a href="/tags/javascript/" style="font-size: 10.00px;">javascript</a><a href="/tags/libvirt/" style="font-size: 18.00px;">libvirt</a><a href="/tags/lighthttpd/" style="font-size: 10.00px;">lighthttpd</a><a href="/tags/lighttpd/" style="font-size: 10.00px;">lighttpd</a><a href="/tags/livecd/" style="font-size: 10.00px;">livecd</a><a href="/tags/mac/" style="font-size: 10.00px;">mac</a><a href="/tags/mbr/" style="font-size: 10.00px;">mbr</a><a href="/tags/md5sum/" style="font-size: 10.00px;">md5sum</a><a href="/tags/mysql/" style="font-size: 12.00px;">mysql</a><a href="/tags/oVirt/" style="font-size: 14.00px;">oVirt</a>
+  </div>
+</div>
+
+
+  <iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=2&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=0&uid=1644437791&verifier=c45a1931&dpc=1"></iframe>
+
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://blog.csdn.net/luo_brian" title="luo_brian">Luohao</a></li>
+<li><a href="http://blog.csdn.net/defeattroy" title="木马屠城">Defeattroy</a></li>
+<li><a href="http://www.smilgel.com/" title="听雨轩">MrSaxon</a></li>
+<li><a href="http://lanbolee.com/blog/" title="博之博">Rambolee</a></li>
+<li><a href="http://www.haoziyanwo.com/" title="耗子燕窝">浩子</a></li>
+<li><a href="http://blog.csdn.net/u012815727" title="CloudOS">CloudOS</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2014 leiqzhang
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+<script type="text/javascript">
+var disqus_shortname = 'leiqzhang';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+</body>
+</html>
