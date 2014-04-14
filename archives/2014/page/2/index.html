@@ -1,0 +1,296 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="baidu-site-verification" content="kZ3lZdC9wn" />
+  
+  <title>Page 2 | Archives: 2014 | Technology &amp; Life</title>
+  <meta name="author" content="leiqzhang">
+  
+  <meta name="description" content="Virtualization Related Technologies">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+  <meta property="og:site_name" content="Technology &amp; Life"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico">
+  <link rel="alternate" href="/atom.xml" title="Technology &amp; Life" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
+  
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-40319520-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+  <script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3F6f62dffd0688838f0bc52fc65fd62af4' type='text/javascript'%3E%3C/script%3E"));
+</script>
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div class="alignleft">
+  <h1><a href="/">Technology &amp; Life</a></h1>
+  <h2><a href="/">blog of leiqzhang</a></h2>
+</div>
+<nav id="main-nav" class="alignright">
+  <ul>
+    
+      <li><a href="/">Home</a></li>
+    
+      <li><a href="/archives">Archives</a></li>
+    
+      <li><a href="/about">About</a></li>
+    
+      <li><a href="/atom.xml">RSS</a></li>
+    
+  </ul>
+  <div class="clearfix"></div>
+</nav>
+<div class="clearfix"></div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper">
+<h2 class="archive-title">2014</h2>
+
+
+  
+    <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2014-01-09T14:40:31.000Z"><a href="/2014/01/2014-01-09-nova-api-service-initialization/">Jan 9 2014</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2014/01/2014-01-09-nova-api-service-initialization/">NOVA API Service Initialization Process</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <h1 id="NOVA-API-670d-52a1-542f-52a8-6d41-7a0b-">NOVA-API服务启动流程</h1>
+<p><strong>前提</strong></p>
+<ol>
+<li>对Nova的整体结构已经有所理解</li>
+<li>基于stable/havana分支</li>
+<li>基于Redhat的RDO库进行的环境安装，基于CentOS 6.4</li>
+</ol>
+<p><strong>内容</strong></p>
+<ol>
+<li>openstack-nova-api服务启动流程</li>
+<li>Paste、Deploy、WSGI等相关知识</li>
+</ol>
+<h2 id="-6267-884c-7ed3-679c-">执行结果</h2>
+<p>启动API服务时的命令为：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre><span class="comment">service</span> <span class="comment">openstack</span><span class="literal">-</span><span class="comment">nova</span><span class="literal">-</span><span class="comment">api</span> <span class="comment">start</span>
+</pre></td></tr></table></figure>
+
+<p>启动成功后，查看系统进程，发现实际执行结果为一个nova-api父进程，同时其有三个nova-api子进程：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+</pre></td><td class="code"><pre>nova <span class="number">3438</span> S <span class="number">0</span>:<span class="number">07</span> <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>python <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>nova<span class="attribute">-api</span> <span class="subst">--</span>logfile <span class="subst">/</span><span class="built_in">var</span><span class="subst">/</span><span class="keyword">log</span><span class="subst">/</span>nova<span class="subst">/</span>api<span class="built_in">.</span><span class="keyword">log</span>
+nova <span class="number">3446</span> S <span class="number">0</span>:<span class="number">00</span> <span class="subst">\</span>_ <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>python <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>nova<span class="attribute">-api</span> <span class="subst">--</span>logfile <span class="subst">/</span><span class="built_in">var</span><span class="subst">/</span><span class="keyword">log</span><span class="subst">/</span>nova<span class="subst">/</span>api<span class="built_in">.</span><span class="keyword">log</span>
+nova <span class="number">3447</span> S <span class="number">0</span>:<span class="number">00</span> <span class="subst">\</span>_ <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>python <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>nova<span class="attribute">-api</span> <span class="subst">--</span>logfile <span class="subst">/</span><span class="built_in">var</span><span class="subst">/</span><span class="keyword">log</span><span class="subst">/</span>nova<span class="subst">/</span>api<span class="built_in">.</span><span class="keyword">log</span>
+nova <span class="number">3448</span> S <span class="number">0</span>:<span class="number">00</span> <span class="subst">\</span>_ <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>python <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>nova<span class="attribute">-api</span> <span class="subst">--</span>logfile <span class="subst">/</span><span class="built_in">var</span><span class="subst">/</span><span class="keyword">log</span><span class="subst">/</span>nova<span class="subst">/</span>api<span class="built_in">.</span><span class="keyword">log</span>
+</pre></td></tr></table></figure>
+
+<p>查看监听的端口，发现父进程nova-api同时监听了三个端口：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+</pre></td><td class="code"><pre><span class="title">tcp</span>        <span class="number">0</span>      <span class="number">0</span> <span class="number">0.0.0.0:8773</span>                <span class="number">0.0.0.0</span>:*                   LISTEN      <span class="number">3438</span>/python         
+tcp        <span class="number">0</span>      <span class="number">0</span> <span class="number">0.0.0.0:8774</span>                <span class="number">0.0.0.0</span>:*                   LISTEN      <span class="number">3438</span>/python         
+tcp        <span class="number">0</span>      <span class="number">0</span> <span class="number">0.0.0.0:8775</span>                <span class="number">0.0.0.0</span>:*                   LISTEN      <span class="number">3438</span>/python
+</pre></td></tr></table></figure>
+
+<h2 id="-4ee3-7801-8def-5f84-">代码路径</h2>
+<h3 id="-4e3b-8981-8def-5f84-">主要路径</h3>
+<p>服务启动脚本为/etc/init.d/openstack-nova-api，查看此脚本发现在启动服务时实际执行的是/usr/bin/nova-api,而/usr/bin/nova-api是一个python脚本，实际执行的是nova.cmd.api.main</p>
+<p>nova.cmd.api.main的主要代码如下：</p>
+<figure class="highlight lang-python"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+</pre></td><td class="code"><pre>    launcher = service.process_launcher()
+    <span class="keyword">for</span> api <span class="keyword">in</span> CONF.enabled_apis:
+        should_use_ssl = api <span class="keyword">in</span> CONF.enabled_ssl_apis
+        <span class="keyword">if</span> api == <span class="string">'ec2'</span>:
+            server = service.WSGIService(api, use_ssl=should_use_ssl,
+                                         max_url_len=<span class="number">16384</span>)
+        <span class="keyword">else</span>:
+            server = service.WSGIService(api, use_ssl=should_use_ssl)
+        launcher.launch_service(server, workers=server.workers <span class="keyword">or</span> <span class="number">1</span>)
+    launcher.wait()
+</pre></td></tr></table></figure>
+
+<p>首先生成一个nova.common.service.Processlauncher类型的launcher, 接着会根据配置中的enabled_apis列表值，依次生成相应的WSGIService:</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre>server = service.WSGIService(<span class="keyword">...</span>)
+</pre></td></tr></table></figure>
+
+<p>然后通过launcher的launch_service方法，将上述的WSGIService和workers数量作为参数传入。</p>
+<p>在luanch_service方法中，会根据传入的workers参数fork出相应个数的子进程，并在各个子进程中调用对应WSGIService的start方法，开始对外服务。</p>
+<h3 id="-6d89-53ca-7684-914d-7f6e-">涉及的配置</h3>
+
+      
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/2014/01/2014-01-09-nova-api-service-initialization/#more" class="more-link">Read More</a>
+          </div>
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  
+
+  <nav id="pagination">
+  
+    <a href="/archives/2014/" class="alignleft prev">Prev</a>
+  
+  
+  <div class="clearfix"></div>
+</nav>
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:leiqzhang.com">
+  </form>
+</div>
+
+  
+<div class="widget tag">
+  <h3 class="title">Categories</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/Linux/">Linux</a><small>3</small></li>
+  
+    <li><a href="/categories/OpenStack/">OpenStack</a><small>6</small></li>
+  
+    <li><a href="/categories/VIM/">VIM</a><small>3</small></li>
+  
+    <li><a href="/categories/Virtualization/">Virtualization</a><small>16</small></li>
+  
+    <li><a href="/categories/WordPress/">WordPress</a><small>2</small></li>
+  
+    <li><a href="/categories/miscellaneous/">miscellaneous</a><small>1</small></li>
+  
+    <li><a href="/categories/web_dev/">web_dev</a><small>8</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tagcloud">
+  <h3 class="title">Tag Cloud</h3>
+  <div class="entry">
+    <a href="/tags/CIM/" style="font-size: 10.00px;">CIM</a><a href="/tags/CORS/" style="font-size: 10.00px;">CORS</a><a href="/tags/DBPM/" style="font-size: 10.00px;">DBPM</a><a href="/tags/Deploy/" style="font-size: 10.00px;">Deploy</a><a href="/tags/ELI/" style="font-size: 10.00px;">ELI</a><a href="/tags/HAProxy/" style="font-size: 10.00px;">HAProxy</a><a href="/tags/Horizon/" style="font-size: 10.00px;">Horizon</a><a href="/tags/IRC/" style="font-size: 10.00px;">IRC</a><a href="/tags/NUMA/" style="font-size: 10.00px;">NUMA</a><a href="/tags/Nova/" style="font-size: 15.00px;">Nova</a><a href="/tags/OPTIONS/" style="font-size: 10.00px;">OPTIONS</a><a href="/tags/Paste/" style="font-size: 10.00px;">Paste</a><a href="/tags/QEMU/" style="font-size: 20.00px;">QEMU</a><a href="/tags/RabbitMQ/" style="font-size: 10.00px;">RabbitMQ</a><a href="/tags/SSL/" style="font-size: 10.00px;">SSL</a><a href="/tags/Stevedore/" style="font-size: 10.00px;">Stevedore</a><a href="/tags/WSGI/" style="font-size: 10.00px;">WSGI</a><a href="/tags/Websocket/" style="font-size: 10.00px;">Websocket</a><a href="/tags/bfc/" style="font-size: 10.00px;">bfc</a><a href="/tags/block-stream/" style="font-size: 10.00px;">block-stream</a><a href="/tags/blockcopy/" style="font-size: 12.50px;">blockcopy</a><a href="/tags/cache/" style="font-size: 10.00px;">cache</a><a href="/tags/css/" style="font-size: 12.50px;">css</a><a href="/tags/dataplane/" style="font-size: 10.00px;">dataplane</a><a href="/tags/device-mapper/" style="font-size: 10.00px;">device-mapper</a><a href="/tags/ervernote/" style="font-size: 10.00px;">ervernote</a><a href="/tags/etag/" style="font-size: 10.00px;">etag</a><a href="/tags/eval/" style="font-size: 10.00px;">eval</a><a href="/tags/fdisk/" style="font-size: 10.00px;">fdisk</a><a href="/tags/fedora/" style="font-size: 10.00px;">fedora</a><a href="/tags/gpt/" style="font-size: 10.00px;">gpt</a><a href="/tags/greasemonkey/" style="font-size: 10.00px;">greasemonkey</a><a href="/tags/http/" style="font-size: 12.50px;">http</a><a href="/tags/isolinux/" style="font-size: 10.00px;">isolinux</a><a href="/tags/javascript/" style="font-size: 10.00px;">javascript</a><a href="/tags/libvirt/" style="font-size: 17.50px;">libvirt</a><a href="/tags/lighthttpd/" style="font-size: 10.00px;">lighthttpd</a><a href="/tags/lighttpd/" style="font-size: 10.00px;">lighttpd</a><a href="/tags/livecd/" style="font-size: 10.00px;">livecd</a><a href="/tags/mac/" style="font-size: 10.00px;">mac</a>
+  </div>
+</div>
+
+
+  <iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=2&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=0&uid=1644437791&verifier=c45a1931&dpc=1"></iframe>
+
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://blog.csdn.net/luo_brian" title="luo_brian">Luohao</a></li>
+<li><a href="http://blog.csdn.net/defeattroy" title="木马屠城">Defeattroy</a></li>
+<li><a href="http://www.smilgel.com/" title="听雨轩">MrSaxon</a></li>
+<li><a href="http://lanbolee.com/blog/" title="博之博">Rambolee</a></li>
+<li><a href="http://www.haoziyanwo.com/" title="耗子燕窝">浩子</a></li>
+<li><a href="http://blog.csdn.net/u012815727" title="CloudOS">CloudOS</a></li>
+</ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="alignleft">
+  
+  &copy; 2014 leiqzhang
+  
+</div>
+<div class="clearfix"></div></footer>
+  <script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+<script type="text/javascript">
+var disqus_shortname = 'leiqzhang';
+
+(function(){
+  var dsq = document.createElement('script');
+  dsq.type = 'text/javascript';
+  dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/count.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+}());
+</script>
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+</body>
+</html>

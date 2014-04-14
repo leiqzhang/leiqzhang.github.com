@@ -86,6 +86,165 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
     <header>
       
         <div class="icon"></div>
+        <time datetime="2011-01-05T13:58:32.000Z"><a href="/2011/01/2011-01-05-md5sum-check-with-file/">Jan 5 2011</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2011/01/2011-01-05-md5sum-check-with-file/">md5sum的--check用法</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>项目开发过程中，有时会批量更新替换一系列其他人提供的文件，文件提供者会给出各文件的路径和md5，在将文件替换后，也需要对md5进行校验。此时可以使用md5sum的—check参数进行批量验证：</p>
+<p>用法是</p>
+<figure class="highlight lang-bash"><figcaption><span>md5sum_check </span></figcaption><table><tr><td class="gutter"><pre>1
+2
+</pre></td><td class="code"><pre>
+md5sum --check ~/data_md5
+</pre></td></tr></table></figure>
+
+
+<p>其中data_md5文件的内容如下：</p>
+<figure class="highlight lang-bash"><figcaption><span>md5sum_data </span></figcaption><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+</pre></td><td class="code"><pre>
+
+MD5值[空格][空格]文件<span class="number">1</span>路径
+MD5值[空格][空格]文件<span class="number">2</span>路径
+...
+
+</pre></td></tr></table></figure>
+
+
+<p>需要注意的是，每一行中的MD5值和路径之间必须是两个空格，否则md5sum会报文件不存在之类的错误。</p>
+<p>检测的输出结果的格式如下：</p>
+<figure class="highlight lang-bash"><figcaption><span>md5sum_data </span></figcaption><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+</pre></td><td class="code"><pre>
+
+文件<span class="number">1</span>路径： OK
+文件<span class="number">2</span>路径： FAILED
+
+</pre></td></tr></table></figure>
+
+
+<p>其中OK表示验证通过（文件md5和文件中给定的md5一直），FAILED表示验证失败</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+  <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2010-12-06T09:37:57.000Z"><a href="/2010/12/2010-12-06-vim-tips-incresing-list-substitute-replace/">Dec 6 2010</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2010/12/2010-12-06-vim-tips-incresing-list-substitute-replace/">VIM中通过substitute/replace快速生成一系列连续的IP地址</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <p>今天有这么一个操作，需要快速添加一个IP段，如220.181.50.206～220.181.50.254，我需要快速生成该段中一个所有IP地址的列表，以进行IP地址的导入。</p>
+<p>在VIM中可以这样：</p>
+<p>首先输入第一行:</p>
+<figure class="highlight lang-linux"><figcaption><span>first_step </span></figcaption><table><tr><td class="gutter"><pre>1
+2
+3
+4
+</pre></td><td class="code"><pre>
+
+<span class="undefined">220.181.50.206
+</span>
+</pre></td></tr></table></figure>
+
+
+<p>然后yy复制第一行，并48p复制出49行”220.181.50.206”, 然后执行以下命令即可</p>
+<figure class="highlight lang-linux"><figcaption><span>substitute </span></figcaption><table><tr><td class="gutter"><pre>1
+2
+3
+4
+</pre></td><td class="code"><pre>
+
+<span class="brainfuck"><span class="comment">：%s/50</span><span class="string">.</span><span class="comment">\zs\(\d\</span><span class="literal">+</span><span class="comment">\)\ze$/\=eval(submatch(1)</span><span class="literal">+</span><span class="comment">line("</span><span class="string">.</span><span class="comment">")</span><span class="literal">-</span><span class="comment">1)/g</span>
+</span>
+</pre></td></tr></table></figure>
+
+
+<p>该命令是指对于所有匹配的部分（ip最后一个段），加上当前行号减一，这样就生成了一个从206到254的连续ip地址列表。</p>
+<p>Just Enjoy It！</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+  <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
         <time datetime="2010-11-30T13:27:24.000Z"><a href="/2010/11/2010-11-30-http-proxy-request-uri/">Nov 30 2010</a></time>
       
       
@@ -747,122 +906,6 @@ xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" SOAP-ENV:encodingStyl
 
 
 
-  <article class="post">
-  
-    <div class="gallery">
-  <div class="photoset">
-    
-      <img src="">
-    
-  </div>
-  <div class="control">
-    <div class="prev"></div>
-    <div class="next"></div>
-  </div>
-</div>
-  
-  <div class="post-content">
-    <header>
-      
-        <div class="icon"></div>
-        <time datetime="2010-11-14T15:18:45.000Z"><a href="/2010/11/2010-11-14-vim-force-overwrite/">Nov 14 2010</a></time>
-      
-      
-  
-    <h1 class="title"><a href="/2010/11/2010-11-14-vim-force-overwrite/">VIM overwrite read-only file</a></h1>
-  
-
-    </header>
-    <div class="entry">
-      
-        <p>今天在使用vim编辑一个read-only的文件（权限为r— r— r—)，在保存时虽然提示只读不能保存，但是通过w!可以强制覆盖原文件内容，难道VIM可以绕过权限限制么？</p>
-<p>后来发现是在使用w！时，vim会强制删除原文件，并新建一个新的同名文件，并写入新的内容，所以，使用w！强制保存时，就要求当前用户有删除原文件的权限，即：</p>
-<ol>
-<li>该文件所在的目录必须具有w权限</li>
-<li>如果所在目录设置了t标志，还需要当前文件的所有者为自己</li>
-</ol>
-<p>其实这也可以从vim的帮助中看到：</p>
-<blockquote><p><em>write-readonly</em></p>
-<p>When the ‘cpoptions’ option contains ‘W’, Vim will refuse to overwrite a</p>
-<p>readonly file.  When ‘W’ is not present, “:w!” will overwrite a readonly file,</p>
-<p>if the system allows it (the directory must be writable).</p>
-<footer><strong>vim</strong></footer></blockquote>
-
-
-      
-    </div>
-    <footer>
-      
-        
-        
-      
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-  <article class="post">
-  
-    <div class="gallery">
-  <div class="photoset">
-    
-      <img src="">
-    
-  </div>
-  <div class="control">
-    <div class="prev"></div>
-    <div class="next"></div>
-  </div>
-</div>
-  
-  <div class="post-content">
-    <header>
-      
-        <div class="icon"></div>
-        <time datetime="2010-11-12T06:44:38.000Z"><a href="/2010/11/2010-11-12-wget-mirror/">Nov 12 2010</a></time>
-      
-      
-  
-    <h1 class="title"><a href="/2010/11/2010-11-12-wget-mirror/">wget下载整个网站的镜像</a></h1>
-  
-
-    </header>
-    <div class="entry">
-      
-        <p><span style="background-color: #ffff00;">$ wget —mirror -p —convert-links -P ./LOCAL-DIR WEBSITE-URL</span></p>
-<ul>
-<li>–mirror : 下载镜像</li>
-</ul>
-<ul>
-<li>-p : 下载gif等显示html必须的资源</li>
-</ul>
-<ul>
-<li>–convert-links : 下载后，将文档中所有的链接进行转换，以支持本地查看</li>
-</ul>
-<ul>
-<li>-P ./LOCAL-DIR : 需要保存下载文档的目录</li>
-</ul>
-
-      
-    </div>
-    <footer>
-      
-        
-        
-      
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
 
 <nav id="pagination">
   
@@ -888,7 +931,7 @@ xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" SOAP-ENV:encodingStyl
   
     <li><a href="/categories/Linux/">Linux</a><small>3</small></li>
   
-    <li><a href="/categories/OpenStack/">OpenStack</a><small>5</small></li>
+    <li><a href="/categories/OpenStack/">OpenStack</a><small>6</small></li>
   
     <li><a href="/categories/VIM/">VIM</a><small>3</small></li>
   
@@ -908,7 +951,7 @@ xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" SOAP-ENV:encodingStyl
 <div class="widget tagcloud">
   <h3 class="title">Tag Cloud</h3>
   <div class="entry">
-    <a href="/tags/CIM/" style="font-size: 10.00px;">CIM</a><a href="/tags/CORS/" style="font-size: 10.00px;">CORS</a><a href="/tags/DBPM/" style="font-size: 10.00px;">DBPM</a><a href="/tags/Deploy/" style="font-size: 10.00px;">Deploy</a><a href="/tags/ELI/" style="font-size: 10.00px;">ELI</a><a href="/tags/IRC/" style="font-size: 10.00px;">IRC</a><a href="/tags/NUMA/" style="font-size: 10.00px;">NUMA</a><a href="/tags/Nova/" style="font-size: 16.00px;">Nova</a><a href="/tags/OPTIONS/" style="font-size: 10.00px;">OPTIONS</a><a href="/tags/Paste/" style="font-size: 10.00px;">Paste</a><a href="/tags/QEMU/" style="font-size: 20.00px;">QEMU</a><a href="/tags/RabbitMQ/" style="font-size: 10.00px;">RabbitMQ</a><a href="/tags/Stevedore/" style="font-size: 10.00px;">Stevedore</a><a href="/tags/WSGI/" style="font-size: 10.00px;">WSGI</a><a href="/tags/bfc/" style="font-size: 10.00px;">bfc</a><a href="/tags/block-stream/" style="font-size: 10.00px;">block-stream</a><a href="/tags/blockcopy/" style="font-size: 12.00px;">blockcopy</a><a href="/tags/cache/" style="font-size: 10.00px;">cache</a><a href="/tags/css/" style="font-size: 12.00px;">css</a><a href="/tags/dataplane/" style="font-size: 10.00px;">dataplane</a><a href="/tags/device-mapper/" style="font-size: 10.00px;">device-mapper</a><a href="/tags/ervernote/" style="font-size: 10.00px;">ervernote</a><a href="/tags/etag/" style="font-size: 10.00px;">etag</a><a href="/tags/eval/" style="font-size: 10.00px;">eval</a><a href="/tags/fdisk/" style="font-size: 10.00px;">fdisk</a><a href="/tags/fedora/" style="font-size: 10.00px;">fedora</a><a href="/tags/gpt/" style="font-size: 10.00px;">gpt</a><a href="/tags/greasemonkey/" style="font-size: 10.00px;">greasemonkey</a><a href="/tags/http/" style="font-size: 12.00px;">http</a><a href="/tags/isolinux/" style="font-size: 10.00px;">isolinux</a><a href="/tags/javascript/" style="font-size: 10.00px;">javascript</a><a href="/tags/libvirt/" style="font-size: 18.00px;">libvirt</a><a href="/tags/lighthttpd/" style="font-size: 10.00px;">lighthttpd</a><a href="/tags/lighttpd/" style="font-size: 10.00px;">lighttpd</a><a href="/tags/livecd/" style="font-size: 10.00px;">livecd</a><a href="/tags/mac/" style="font-size: 10.00px;">mac</a><a href="/tags/mbr/" style="font-size: 10.00px;">mbr</a><a href="/tags/md5sum/" style="font-size: 10.00px;">md5sum</a><a href="/tags/mysql/" style="font-size: 12.00px;">mysql</a><a href="/tags/oVirt/" style="font-size: 14.00px;">oVirt</a>
+    <a href="/tags/CIM/" style="font-size: 10.00px;">CIM</a><a href="/tags/CORS/" style="font-size: 10.00px;">CORS</a><a href="/tags/DBPM/" style="font-size: 10.00px;">DBPM</a><a href="/tags/Deploy/" style="font-size: 10.00px;">Deploy</a><a href="/tags/ELI/" style="font-size: 10.00px;">ELI</a><a href="/tags/HAProxy/" style="font-size: 10.00px;">HAProxy</a><a href="/tags/Horizon/" style="font-size: 10.00px;">Horizon</a><a href="/tags/IRC/" style="font-size: 10.00px;">IRC</a><a href="/tags/NUMA/" style="font-size: 10.00px;">NUMA</a><a href="/tags/Nova/" style="font-size: 15.00px;">Nova</a><a href="/tags/OPTIONS/" style="font-size: 10.00px;">OPTIONS</a><a href="/tags/Paste/" style="font-size: 10.00px;">Paste</a><a href="/tags/QEMU/" style="font-size: 20.00px;">QEMU</a><a href="/tags/RabbitMQ/" style="font-size: 10.00px;">RabbitMQ</a><a href="/tags/SSL/" style="font-size: 10.00px;">SSL</a><a href="/tags/Stevedore/" style="font-size: 10.00px;">Stevedore</a><a href="/tags/WSGI/" style="font-size: 10.00px;">WSGI</a><a href="/tags/Websocket/" style="font-size: 10.00px;">Websocket</a><a href="/tags/bfc/" style="font-size: 10.00px;">bfc</a><a href="/tags/block-stream/" style="font-size: 10.00px;">block-stream</a><a href="/tags/blockcopy/" style="font-size: 12.50px;">blockcopy</a><a href="/tags/cache/" style="font-size: 10.00px;">cache</a><a href="/tags/css/" style="font-size: 12.50px;">css</a><a href="/tags/dataplane/" style="font-size: 10.00px;">dataplane</a><a href="/tags/device-mapper/" style="font-size: 10.00px;">device-mapper</a><a href="/tags/ervernote/" style="font-size: 10.00px;">ervernote</a><a href="/tags/etag/" style="font-size: 10.00px;">etag</a><a href="/tags/eval/" style="font-size: 10.00px;">eval</a><a href="/tags/fdisk/" style="font-size: 10.00px;">fdisk</a><a href="/tags/fedora/" style="font-size: 10.00px;">fedora</a><a href="/tags/gpt/" style="font-size: 10.00px;">gpt</a><a href="/tags/greasemonkey/" style="font-size: 10.00px;">greasemonkey</a><a href="/tags/http/" style="font-size: 12.50px;">http</a><a href="/tags/isolinux/" style="font-size: 10.00px;">isolinux</a><a href="/tags/javascript/" style="font-size: 10.00px;">javascript</a><a href="/tags/libvirt/" style="font-size: 17.50px;">libvirt</a><a href="/tags/lighthttpd/" style="font-size: 10.00px;">lighthttpd</a><a href="/tags/lighttpd/" style="font-size: 10.00px;">lighttpd</a><a href="/tags/livecd/" style="font-size: 10.00px;">livecd</a><a href="/tags/mac/" style="font-size: 10.00px;">mac</a>
   </div>
 </div>
 

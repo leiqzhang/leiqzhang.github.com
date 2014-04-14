@@ -90,6 +90,384 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
     <header>
       
         <div class="icon"></div>
+        <time datetime="2014-04-14T15:10:31.000Z"><a href="/2014/04/2014-04-14-openstack-dashboard-load-balance/">Apr 14 2014</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2014/04/2014-04-14-openstack-dashboard-load-balance/">OpenStack Dashboard Load Balance</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <h1 id="DashBoard-7684-LoadBalance">DashBoard的LoadBalance</h1>
+<h2 id="-95ee-9898-63cf-8ff0-">问题描述</h2>
+<p>对于OpenStack的DashBoard来说，为水平扩展其处理能力，就需要对多个DashBoard进行Load Balance。DashBoard和OpenStack各组件对外的API服务不同，其是有状态的，且会涉及特定的问题，本文会对其涉及的问题及解决办法进行分析和记录。</p>
+<h2 id="-95ee-9898-5206-6790-">问题分析</h2>
+<p>OpenStack的DashBoard对外提供Portal和noVNCProxy两个服务，使用Django框架实现。其中noVNCProxy还涉及到提供websocket服务器的能力。要做到DashBoard的LoadBalance，有如下几个问题需要考虑。</p>
+<h3 id="Session_Sticky">Session Sticky</h3>
+<p>DashBoard涉及到用户登陆和session管理，当使用多个DashBoard后端做LoadBalance时，需要保持多DashBoard后端session数据的一致性。可以通过将DashBoard所在主机添加到一个memcache集群中，并配置Django使用此memcache来作为session后端来完成这一点。当然，也可以通过由LB软件提供session sticky能力来完成这一点。所谓的session sticky，是指LB需要在第一次接收到请求并分发到后端时，记录其session信息，在后续收到同一个session的请求到来时，将请求转发到相同的后端上。作为L7 Level的LB软件，HAProxy具备session sticky的能力。可通过类似如下Backend配置来开启session sticky：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+</pre></td><td class="code"><pre>back<span class="operator"><span class="keyword">end</span> dashboard-backend
+    mode http
+    balance     roundrobin
+    cookie SERVERID <span class="keyword">insert</span> indirect nocache
+    server  server01 controller01:<span class="number">80</span> <span class="keyword">check</span> cookie server01
+    server  server02 controller02:<span class="number">80</span> <span class="keyword">check</span> cookie server02
+    server  server03 controller03:<span class="number">80</span> <span class="keyword">check</span> cookie server03</span>
+</pre></td></tr></table></figure>
+
+<h3 id="WebSocket">WebSocket</h3>
+<p>NoVncProxy服务涉及使用websocket，会对LB软件有如下挑战：</p>
+<ol>
+<li>LB软件作为反向代理，会对HTTP连接进行监控，并关闭长时间空闲的HTTP连接，而websocket就是作为长连接存在的，故需要LB软件避免错误的关闭websocket；</li>
+<li>websocket连接的建立，是首先通过HTTP协议进行握手，然后“Upgrade”而来的，这就需要LB软件可以从HTTP通信中识别到websocket请求，从而正确的对其进行处理；</li>
+<li>LB软件需要能够检测各个websocket后端的健康情况，以进行LoadBalance。</li>
+</ol>
+<p>常用的LB软件HAProxy对websocket提供了相应的支持，对于第一个问题，可通过设置“option http-server-close”来做到，对于第二个问题，HAProxy可以自动检测HTTP的“Upgrade”请求，从而可以识别到websocket连接请求，对于第三个问题，HAProxy本身没有提供支持，不过可以结果业务实际，设置HAProxy的httpchk值，以实现各websocket后端的健康检查。可参考[1]中提到的设置方式。</p>
+<h3 id="-5b89-5168-">安全</h3>
+<p>DashBoard需要通过public平面提供，从安全角度考虑，需要以HTTPS方式提供服务。而VNCProxy涉及到Websocket，一方面从安全角度考虑，Websocket通信也要采用Secure  Websocket的方式，另一方面，由于VNCProxy页面是作为iframe嵌入到DashBoard的，DashBoard本身是HTTPS方式，也要求了VNCProxy页面以及其发起的Websocket连接必须是HTTPS和Secure Websocket的。下面一节对此问题的解决进行详细说明。</p>
+<h2 id="SSL-53cd-5411-4ee3-7406-">SSL反向代理</h2>
+<p>上节提到的安全问题需要LB软件可提供对HTTPS和Secure Websocket的支持。当前HAProxy的稳定版本(1.4)尚不直接提供对HTTPS的支持，故这里采用业界比较通用的方式，即作为Backend的DashBoard提供不加密的HTTP和Websocket服务，然后在HAProxy之前再部署一个SSL反向代理(SSL Reverse Proxy)，由此反向代理负责将从frontend接收到的HTTPS信息解密为HTTP信息并传递到backend，将backend发送的HTTP回应加密为HTTPS消息回复到frontend。反向代理提供的这种能力也就是所谓的SSL Termination。</p>
+<p>对于SSL反向代理来说，还有一个需要注意的问题就是对Backend发送的301和302 Redirect响应信息的处理。由于作为Backend的DashBoard提供的是HTTP服务，当其发送Redirect响应时，Header中的Location是一个HTTP地址，此时浏览器就会直接跳转到Location地址上，从而会访问HTTP服务。故要么SSL反向代理具有检测并更改Redirect Location的能力，要么配置HTTP服务器对Redirect进行相应的处理。</p>
+<p>结合实际的系统部署，SSL反向代理需要作为HA组件(PaceMaker)管理的对象，最好其本身可对外暴露为一个系统服务，以更好的和HA组件进行集成。如前所述，DashBoard实际对外会暴露Portal和noVNCProxy两个服务，这两个服务是独立的后端，需要监听各自不同的端口。</p>
+<h2 id="SSL-53cd-5411-4ee3-7406-8f6f-4ef6-5bf9-6bd4-">SSL反向代理软件对比</h2>
+<p>当前可提供HTTPS的SSL Termination能力且流行的反向代理软件有Pound、Stunnel和Stud等。其中Stunnel未部署成功，对于Pound和Stud进行了实际部署验证，两者的功能对比如下：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Pound</th>
+<th>Stud</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HTTPS的SSL Termination</td>
+<td>支持</td>
+<td>支持</td>
+</tr>
+<tr>
+<td>Websocket的SSL Termination</td>
+<td>不支持</td>
+<td>支持</td>
+</tr>
+<tr>
+<td>HTTP Redirection    透明</td>
+<td>支持</td>
+<td>不支持</td>
+</tr>
+<tr>
+<td>多后端是否暴露一个服务</td>
+<td>是</td>
+<td>不是</td>
+</tr>
+<tr>
+<td>有无CentOS官方RPM包</td>
+<td>无</td>
+<td>有</td>
+</tr>
+</tbody>
+</table>
+<p>由于Pound不支持Secure Websocket的SSL Termination，故选择Stud。对于上表提到的Stud缺失的功能，进行如下处理：</p>
+<ol>
+<li>HTTP Redirection可交由后端HTTPD服务器处理，通过配置其Redirect规则和Header的Edit动作，可在HTTPD侧避免直接到HTTP的Redirection</li>
+<li>需要二次开发的工作包括RPM包的封装，系统服务的封装，基于Stud不支持一个进程同时对不同后端端口反向代理的能力，这里需要将其封装为两个系统服务，分别代理portal和novncproxy</li>
+</ol>
+<h2 id="-90e8-7f72-7ed3-6784-">部署结构</h2>
+<p>综上，DashBoard的LoadBalance涉及的组件结构图如下所示：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+</pre></td><td class="code"><pre> <span class="literal">+</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">+</span>
+ <span class="comment">|</span>                        <span class="comment">Browser</span>                              <span class="comment">|</span>
+ <span class="literal">+</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">+</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">+</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">+</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">+</span>
+           <span class="comment">|</span>                           <span class="comment">|</span>          <span class="comment">|</span> <span class="comment">HTTPS</span>
+           <span class="comment">|</span> <span class="comment">HTTPS</span>               <span class="comment">HTTPS</span> <span class="comment">|</span>          <span class="comment">|</span>      <span class="comment">(Upgrage)</span>
+           <span class="comment">v</span>                           <span class="comment">v</span>          <span class="comment">v</span> <span class="comment">WSS</span>
+ <span class="literal">+</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">+</span>             <span class="literal">+</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">+</span>
+ <span class="comment">|</span>      <span class="comment">Stud</span><span class="literal">-</span><span class="comment">HTTPS</span>   <span class="comment">|</span>             <span class="comment">|</span>     <span class="comment">Stub</span><span class="literal">-</span><span class="comment">Proxy</span>    <span class="comment">|</span>
+ <span class="comment">|</span>        <span class="comment">(443)</span>      <span class="comment">|</span>             <span class="comment">|</span>       <span class="comment">(6080)</span>      <span class="comment">|</span>
+ <span class="literal">+</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">+</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">+</span>             <span class="literal">+</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">+</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">+</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">+</span>
+           <span class="comment">|</span> <span class="comment">HTTP</span>                 <span class="comment">HTTP</span> <span class="comment">|</span>          <span class="comment">|</span> <span class="comment">WS</span>
+           <span class="comment">v</span>                           <span class="comment">v</span>          <span class="comment">v</span>
+ <span class="literal">+</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">+</span>             <span class="literal">+</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">+</span>
+ <span class="comment">|</span>      <span class="comment">HAProxy</span>      <span class="comment">|</span>             <span class="comment">|</span>      <span class="comment">HAProxy</span>      <span class="comment">|</span>
+ <span class="comment">|</span>  <span class="comment">(localhost:80)</span>   <span class="comment">|</span>             <span class="comment">|</span> <span class="comment">(localhost:6080)</span>  <span class="comment">|</span>
+ <span class="literal">+</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">+</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">+</span>             <span class="literal">+</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">+</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">+</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">+</span>
+           <span class="comment">|</span> <span class="comment">HTTP</span>                 <span class="comment">HTTP</span> <span class="comment">|</span>          <span class="comment">|</span> <span class="comment">WS</span>
+ <span class="literal">+</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">+</span>                       <span class="literal">+</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">+</span>          <span class="literal">+</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">+</span>
+ <span class="comment">|</span>                                 <span class="comment">|</span>                          <span class="comment">|</span>
+ <span class="comment">|</span>   <span class="literal">+</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">+</span>           <span class="comment">|</span>   <span class="literal">+</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">+</span>    <span class="comment">|</span>
+ <span class="literal">+</span><span class="literal">-</span><span class="literal">-</span>&gt;<span class="comment">|</span>    <span class="comment">Portal01:80</span>  <span class="comment">|</span>           <span class="literal">+</span><span class="literal">-</span><span class="literal">-</span>&gt;<span class="comment">|noVncProxy01:6080|</span>&lt;<span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">+</span>
+ <span class="comment">|</span>   <span class="literal">+</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">+</span>           <span class="comment">|</span>   <span class="literal">+</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">+</span>    <span class="comment">|</span>
+ <span class="comment">|</span>                                 <span class="comment">|</span>                          <span class="comment">|</span>
+ <span class="comment">|</span>   <span class="literal">+</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">+</span>           <span class="comment">|</span>   <span class="literal">+</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">+</span>    <span class="comment">|</span>
+ <span class="literal">+</span><span class="literal">-</span><span class="literal">-</span>&gt;<span class="comment">|</span>    <span class="comment">Portal02:80</span>  <span class="comment">|</span>           <span class="literal">+</span><span class="literal">-</span><span class="literal">-</span>&gt;<span class="comment">|noVncProxy02:6080|</span>&lt;<span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">+</span>
+ <span class="comment">|</span>   <span class="literal">+</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">+</span>           <span class="comment">|</span>   <span class="literal">+</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">+</span>    <span class="comment">|</span>
+ <span class="comment">|</span>                                 <span class="comment">|</span>                          <span class="comment">|</span>
+ <span class="comment">|</span>   <span class="literal">+</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">+</span>           <span class="comment">|</span>   <span class="literal">+</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">+</span>    <span class="comment">|</span>
+ <span class="literal">+</span><span class="literal">-</span><span class="literal">-</span>&gt;<span class="comment">|</span>    <span class="comment">Portal03:80</span>  <span class="comment">|</span>           <span class="literal">+</span><span class="literal">-</span><span class="literal">-</span>&gt;<span class="comment">|noVncProxy03:6080|</span>&lt;<span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">+</span>
+     <span class="literal">+</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">+</span>               <span class="literal">+</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">+</span>
+</pre></td></tr></table></figure>
+
+<h2 id="-5177-4f53-914d-7f6e-">具体配置</h2>
+<p>首先配置HTTPD，对Dashboard的重定向进行相应的设置，以配合Stud进行使用：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+</pre></td><td class="code"><pre>#/etc/httpd/conf.d/openstack-dashboard-setting.conf
+
+<span class="class">RedirectMatch</span> permanent ^/<span class="char">$ </span><span class="method">https:</span>//<span class="number">186.100</span><span class="number">.11</span><span class="number">.229</span>/dashboard/
+<span class="class">Header</span> edit <span class="class">Location</span> ^<span class="method">http:</span>//(.*)<span class="char">$ </span><span class="method">https:</span>//<span class="char">$1</span>
+</pre></td></tr></table></figure>
+
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+</pre></td><td class="code"><pre>
+<span class="comment">如下是HAProxy中关于DashBoard相应的配置，其中websocket后端的健康检查尚未实现：</span>
+
+<span class="comment">#</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span>
+<span class="comment">#</span> <span class="comment">horizon</span> <span class="comment">frontend</span> <span class="comment">which</span> <span class="comment">proxys</span> <span class="comment">to</span> <span class="comment">the</span> <span class="comment">backends</span>
+<span class="comment">#</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span>
+<span class="comment">frontend</span>  <span class="comment">dashboard</span> <span class="comment">controller</span><span class="literal">-</span><span class="comment">public:80</span>
+    <span class="comment">default_backend</span>             <span class="comment">dashboard</span><span class="literal">-</span><span class="comment">backend</span>
+
+<span class="comment">frontend</span> <span class="comment">novncproxy</span> <span class="comment">controller</span><span class="literal">-</span><span class="comment">public:6080</span>
+    <span class="comment">acl</span> <span class="comment">is_websocket</span> <span class="comment">hdr(Upgrade)</span> <span class="literal">-</span><span class="comment">i</span> <span class="comment">WebSocket</span>
+    <span class="comment">use_backend</span> <span class="comment">websocket</span><span class="literal">-</span><span class="comment">backend</span> <span class="comment">if</span> <span class="comment">is_websocket</span>
+<span class="comment">	</span>
+<span class="comment">	default_backend	novncproxy</span><span class="literal">-</span><span class="comment">backend</span>
+
+
+<span class="comment">#</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span>
+<span class="comment">#</span> <span class="comment">round</span> <span class="comment">robin</span> <span class="comment">balancing</span> <span class="comment">between</span> <span class="comment">the</span> <span class="comment">various</span> <span class="comment">backends</span>
+<span class="comment">#</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span><span class="literal">-</span>
+<span class="comment">backend</span> <span class="comment">dashboard</span><span class="literal">-</span><span class="comment">backend</span>
+    <span class="comment">mode</span> <span class="comment">http</span>
+    <span class="comment">balance</span>     <span class="comment">roundrobin</span>
+    <span class="comment">cookie</span> <span class="comment">SERVERID</span> <span class="comment">insert</span> <span class="comment">indirect</span> <span class="comment">nocache</span>
+    <span class="comment">server</span>  <span class="comment">server01</span> <span class="comment">controller01:80</span> <span class="comment">check</span> <span class="comment">cookie</span> <span class="comment">server01</span>
+    <span class="comment">server</span>  <span class="comment">server02</span> <span class="comment">controller02:80</span> <span class="comment">check</span> <span class="comment">cookie</span> <span class="comment">server02</span>
+    <span class="comment">server</span>  <span class="comment">server03</span> <span class="comment">controller03:80</span> <span class="comment">check</span> <span class="comment">cookie</span> <span class="comment">server03</span>
+
+<span class="comment">backend</span> <span class="comment">websocket</span><span class="literal">-</span><span class="comment">backend</span>
+<span class="comment">	mode</span> <span class="comment">http</span>
+<span class="comment">	option</span> <span class="comment">forwardfor</span>
+<span class="comment">	option</span> <span class="comment">http</span><span class="literal">-</span><span class="comment">server</span><span class="literal">-</span><span class="comment">close</span>
+<span class="comment">	option</span> <span class="comment">forceclose</span>
+<span class="comment">	no</span> <span class="comment">option</span> <span class="comment">httpclose</span>
+<span class="comment">	</span>
+<span class="comment">	#TODO:</span> <span class="comment">Add</span> <span class="comment">httpchk</span> <span class="comment">and</span> <span class="comment">rr</span> <span class="comment">support</span> <span class="comment">for</span> <span class="comment">websocket</span><span class="literal">-</span><span class="comment">backend</span>
+<span class="comment">	server</span> <span class="comment">app1</span> <span class="comment">controller01:6080</span> <span class="comment">weight</span> <span class="comment">1</span> <span class="comment">maxconn</span> <span class="comment">8192</span> <span class="comment">check</span>
+
+<span class="comment">backend</span> <span class="comment">novncproxy</span><span class="literal">-</span><span class="comment">backend</span>
+<span class="comment">	mode</span> <span class="comment">http</span>
+<span class="comment">	balance</span>     <span class="comment">roundrobin</span>
+    <span class="comment">cookie</span> <span class="comment">SERVERID</span> <span class="comment">insert</span> <span class="comment">indirect</span> <span class="comment">nocache</span>
+    <span class="comment">server</span>  <span class="comment">server01</span> <span class="comment">controller01:6080</span> <span class="comment">check</span> <span class="comment">cookie</span> <span class="comment">server01</span>
+    <span class="comment">server</span>  <span class="comment">server02</span> <span class="comment">controller02:6080</span> <span class="comment">check</span> <span class="comment">cookie</span> <span class="comment">server02</span>
+    <span class="comment">server</span>  <span class="comment">server03</span> <span class="comment">controller03:6080</span> <span class="comment">check</span> <span class="comment">cookie</span> <span class="comment">server03</span>
+</pre></td></tr></table></figure>
+
+<h2 id="-53c2-8003-8d44-6599-">参考资料</h2>
+<ul>
+<li>[1] <a href="http://blog.exceliance.fr/2012/11/07/websockets-load-balancing-with-haproxy/" target="_blank">http://blog.exceliance.fr/2012/11/07/websockets-load-balancing-with-haproxy/</a> </li>
+</ul>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  
+    <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2014-04-14T14:45:12.000Z"><a href="/2014/04/2014-04-08-notes-rally-benchmark/">Apr 14 2014</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2014/04/2014-04-08-notes-rally-benchmark/"></a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <h1 id="Notes-3a-_Benchmarking_OpenStack_at_megascale-3a-_How_we_tested_Mirantis_OpenStack_at_SoftLayer">Notes: Benchmarking OpenStack at megascale: How we tested Mirantis OpenStack at SoftLayer</h1>
+<h2 id="-6d4b-8bd5-76ee-7684-">测试目的</h2>
+<p>测试一个OpenStack集群可承受的并发创建Ephemeral虚拟机的最大数量，作为此集群的一个性能基线。</p>
+<p>测试指标：</p>
+<ol>
+<li>平均启动时间</li>
+<li>启动成功率</li>
+<li>最大并发请求规模</li>
+</ol>
+<p>测试样本：</p>
+<ol>
+<li>flavor： 1 vCPU， 64MB RAM， 2GB disk</li>
+</ol>
+<h2 id="-6d4b-8bd5-73af-5883-">测试环境</h2>
+<ol>
+<li>OpenStack HAVANA</li>
+<li>CPU超分配： 1:32</li>
+<li>内存超分配： 1:1.5</li>
+<li>物理服务器： 4物理core（HT），16GB内存，250GB硬盘</li>
+<li>controller： 128GB内存，SSD</li>
+<li>controller和compute在不同机房，但之间延迟为40ms</li>
+<li>Nova-network， FlatDHCP</li>
+<li>参数调整：调整SQLAlchemy</li>
+<li>controller的数据库为MySQL+Galera主主，HAProxy LB， Corosycn/Pacemaker IP level HA</li>
+<li>测试引擎： Rally</li>
+</ol>
+<h2 id="-6d4b-8bd5-4e2d-7684-4e00-4e9b-8c03-6574-548c-95ee-9898-">测试中的一些调整和问题</h2>
+<ol>
+<li>增加sqlalchemy的连接池</li>
+<li>增加haproxy的连接数</li>
+<li>Pacemaker会有positive detection of haproxy，主要是因为haproxy连接池耗尽</li>
+</ol>
+<h2 id="-6d4b-8bd5-7ed3-8bba-">测试结论</h2>
+<ol>
+<li>支持并发请求未500</li>
+<li>并发请求为250时系统最稳定</li>
+<li>单集群支持75000虚拟机</li>
+</ol>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  
+    <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
         <time datetime="2014-03-27T14:55:31.000Z"><a href="/2014/03/2014-03-27-openstack-irc-meeting-agenda/">Mar 27 2014</a></time>
       
       
@@ -1492,130 +1870,11 @@ Listing consumers <span class="keyword">...</span>
 
 
   
-    <article class="post">
-  
-    <div class="gallery">
-  <div class="photoset">
-    
-      <img src="">
-    
-  </div>
-  <div class="control">
-    <div class="prev"></div>
-    <div class="next"></div>
-  </div>
-</div>
-  
-  <div class="post-content">
-    <header>
-      
-        <div class="icon"></div>
-        <time datetime="2014-01-09T14:40:31.000Z"><a href="/2014/01/2014-01-09-nova-api-service-initialization/">Jan 9 2014</a></time>
-      
-      
-  
-    <h1 class="title"><a href="/2014/01/2014-01-09-nova-api-service-initialization/">NOVA API Service Initialization Process</a></h1>
-  
-
-    </header>
-    <div class="entry">
-      
-        <h1 id="NOVA-API-670d-52a1-542f-52a8-6d41-7a0b-">NOVA-API服务启动流程</h1>
-<p><strong>前提</strong></p>
-<ol>
-<li>对Nova的整体结构已经有所理解</li>
-<li>基于stable/havana分支</li>
-<li>基于Redhat的RDO库进行的环境安装，基于CentOS 6.4</li>
-</ol>
-<p><strong>内容</strong></p>
-<ol>
-<li>openstack-nova-api服务启动流程</li>
-<li>Paste、Deploy、WSGI等相关知识</li>
-</ol>
-<h2 id="-6267-884c-7ed3-679c-">执行结果</h2>
-<p>启动API服务时的命令为：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre>1
-</pre></td><td class="code"><pre><span class="comment">service</span> <span class="comment">openstack</span><span class="literal">-</span><span class="comment">nova</span><span class="literal">-</span><span class="comment">api</span> <span class="comment">start</span>
-</pre></td></tr></table></figure>
-
-<p>启动成功后，查看系统进程，发现实际执行结果为一个nova-api父进程，同时其有三个nova-api子进程：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre>1
-2
-3
-4
-</pre></td><td class="code"><pre>nova <span class="number">3438</span> S <span class="number">0</span>:<span class="number">07</span> <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>python <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>nova<span class="attribute">-api</span> <span class="subst">--</span>logfile <span class="subst">/</span><span class="built_in">var</span><span class="subst">/</span><span class="keyword">log</span><span class="subst">/</span>nova<span class="subst">/</span>api<span class="built_in">.</span><span class="keyword">log</span>
-nova <span class="number">3446</span> S <span class="number">0</span>:<span class="number">00</span> <span class="subst">\</span>_ <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>python <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>nova<span class="attribute">-api</span> <span class="subst">--</span>logfile <span class="subst">/</span><span class="built_in">var</span><span class="subst">/</span><span class="keyword">log</span><span class="subst">/</span>nova<span class="subst">/</span>api<span class="built_in">.</span><span class="keyword">log</span>
-nova <span class="number">3447</span> S <span class="number">0</span>:<span class="number">00</span> <span class="subst">\</span>_ <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>python <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>nova<span class="attribute">-api</span> <span class="subst">--</span>logfile <span class="subst">/</span><span class="built_in">var</span><span class="subst">/</span><span class="keyword">log</span><span class="subst">/</span>nova<span class="subst">/</span>api<span class="built_in">.</span><span class="keyword">log</span>
-nova <span class="number">3448</span> S <span class="number">0</span>:<span class="number">00</span> <span class="subst">\</span>_ <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>python <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>nova<span class="attribute">-api</span> <span class="subst">--</span>logfile <span class="subst">/</span><span class="built_in">var</span><span class="subst">/</span><span class="keyword">log</span><span class="subst">/</span>nova<span class="subst">/</span>api<span class="built_in">.</span><span class="keyword">log</span>
-</pre></td></tr></table></figure>
-
-<p>查看监听的端口，发现父进程nova-api同时监听了三个端口：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre>1
-2
-3
-</pre></td><td class="code"><pre><span class="title">tcp</span>        <span class="number">0</span>      <span class="number">0</span> <span class="number">0.0.0.0:8773</span>                <span class="number">0.0.0.0</span>:*                   LISTEN      <span class="number">3438</span>/python         
-tcp        <span class="number">0</span>      <span class="number">0</span> <span class="number">0.0.0.0:8774</span>                <span class="number">0.0.0.0</span>:*                   LISTEN      <span class="number">3438</span>/python         
-tcp        <span class="number">0</span>      <span class="number">0</span> <span class="number">0.0.0.0:8775</span>                <span class="number">0.0.0.0</span>:*                   LISTEN      <span class="number">3438</span>/python
-</pre></td></tr></table></figure>
-
-<h2 id="-4ee3-7801-8def-5f84-">代码路径</h2>
-<h3 id="-4e3b-8981-8def-5f84-">主要路径</h3>
-<p>服务启动脚本为/etc/init.d/openstack-nova-api，查看此脚本发现在启动服务时实际执行的是/usr/bin/nova-api,而/usr/bin/nova-api是一个python脚本，实际执行的是nova.cmd.api.main</p>
-<p>nova.cmd.api.main的主要代码如下：</p>
-<figure class="highlight lang-python"><table><tr><td class="gutter"><pre>1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-</pre></td><td class="code"><pre>    launcher = service.process_launcher()
-    <span class="keyword">for</span> api <span class="keyword">in</span> CONF.enabled_apis:
-        should_use_ssl = api <span class="keyword">in</span> CONF.enabled_ssl_apis
-        <span class="keyword">if</span> api == <span class="string">'ec2'</span>:
-            server = service.WSGIService(api, use_ssl=should_use_ssl,
-                                         max_url_len=<span class="number">16384</span>)
-        <span class="keyword">else</span>:
-            server = service.WSGIService(api, use_ssl=should_use_ssl)
-        launcher.launch_service(server, workers=server.workers <span class="keyword">or</span> <span class="number">1</span>)
-    launcher.wait()
-</pre></td></tr></table></figure>
-
-<p>首先生成一个nova.common.service.Processlauncher类型的launcher, 接着会根据配置中的enabled_apis列表值，依次生成相应的WSGIService:</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre>1
-</pre></td><td class="code"><pre>server = service.WSGIService(<span class="keyword">...</span>)
-</pre></td></tr></table></figure>
-
-<p>然后通过launcher的launch_service方法，将上述的WSGIService和workers数量作为参数传入。</p>
-<p>在luanch_service方法中，会根据传入的workers参数fork出相应个数的子进程，并在各个子进程中调用对应WSGIService的start方法，开始对外服务。</p>
-<h3 id="-6d89-53ca-7684-914d-7f6e-">涉及的配置</h3>
-
-      
-    </div>
-    <footer>
-      
-        
-          <div class="alignleft">
-            <a href="/2014/01/2014-01-09-nova-api-service-initialization/#more" class="more-link">Read More</a>
-          </div>
-        
-        
-      
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-  
 
   <nav id="pagination">
   
+  
+    <a href="/archives/2014/page/2/" class="alignright next">Next</a>
   
   <div class="clearfix"></div>
 </nav>
@@ -1635,7 +1894,7 @@ tcp        <span class="number">0</span>      <span class="number">0</span> <spa
   
     <li><a href="/categories/Linux/">Linux</a><small>3</small></li>
   
-    <li><a href="/categories/OpenStack/">OpenStack</a><small>5</small></li>
+    <li><a href="/categories/OpenStack/">OpenStack</a><small>6</small></li>
   
     <li><a href="/categories/VIM/">VIM</a><small>3</small></li>
   
@@ -1655,7 +1914,7 @@ tcp        <span class="number">0</span>      <span class="number">0</span> <spa
 <div class="widget tagcloud">
   <h3 class="title">Tag Cloud</h3>
   <div class="entry">
-    <a href="/tags/CIM/" style="font-size: 10.00px;">CIM</a><a href="/tags/CORS/" style="font-size: 10.00px;">CORS</a><a href="/tags/DBPM/" style="font-size: 10.00px;">DBPM</a><a href="/tags/Deploy/" style="font-size: 10.00px;">Deploy</a><a href="/tags/ELI/" style="font-size: 10.00px;">ELI</a><a href="/tags/IRC/" style="font-size: 10.00px;">IRC</a><a href="/tags/NUMA/" style="font-size: 10.00px;">NUMA</a><a href="/tags/Nova/" style="font-size: 16.00px;">Nova</a><a href="/tags/OPTIONS/" style="font-size: 10.00px;">OPTIONS</a><a href="/tags/Paste/" style="font-size: 10.00px;">Paste</a><a href="/tags/QEMU/" style="font-size: 20.00px;">QEMU</a><a href="/tags/RabbitMQ/" style="font-size: 10.00px;">RabbitMQ</a><a href="/tags/Stevedore/" style="font-size: 10.00px;">Stevedore</a><a href="/tags/WSGI/" style="font-size: 10.00px;">WSGI</a><a href="/tags/bfc/" style="font-size: 10.00px;">bfc</a><a href="/tags/block-stream/" style="font-size: 10.00px;">block-stream</a><a href="/tags/blockcopy/" style="font-size: 12.00px;">blockcopy</a><a href="/tags/cache/" style="font-size: 10.00px;">cache</a><a href="/tags/css/" style="font-size: 12.00px;">css</a><a href="/tags/dataplane/" style="font-size: 10.00px;">dataplane</a><a href="/tags/device-mapper/" style="font-size: 10.00px;">device-mapper</a><a href="/tags/ervernote/" style="font-size: 10.00px;">ervernote</a><a href="/tags/etag/" style="font-size: 10.00px;">etag</a><a href="/tags/eval/" style="font-size: 10.00px;">eval</a><a href="/tags/fdisk/" style="font-size: 10.00px;">fdisk</a><a href="/tags/fedora/" style="font-size: 10.00px;">fedora</a><a href="/tags/gpt/" style="font-size: 10.00px;">gpt</a><a href="/tags/greasemonkey/" style="font-size: 10.00px;">greasemonkey</a><a href="/tags/http/" style="font-size: 12.00px;">http</a><a href="/tags/isolinux/" style="font-size: 10.00px;">isolinux</a><a href="/tags/javascript/" style="font-size: 10.00px;">javascript</a><a href="/tags/libvirt/" style="font-size: 18.00px;">libvirt</a><a href="/tags/lighthttpd/" style="font-size: 10.00px;">lighthttpd</a><a href="/tags/lighttpd/" style="font-size: 10.00px;">lighttpd</a><a href="/tags/livecd/" style="font-size: 10.00px;">livecd</a><a href="/tags/mac/" style="font-size: 10.00px;">mac</a><a href="/tags/mbr/" style="font-size: 10.00px;">mbr</a><a href="/tags/md5sum/" style="font-size: 10.00px;">md5sum</a><a href="/tags/mysql/" style="font-size: 12.00px;">mysql</a><a href="/tags/oVirt/" style="font-size: 14.00px;">oVirt</a>
+    <a href="/tags/CIM/" style="font-size: 10.00px;">CIM</a><a href="/tags/CORS/" style="font-size: 10.00px;">CORS</a><a href="/tags/DBPM/" style="font-size: 10.00px;">DBPM</a><a href="/tags/Deploy/" style="font-size: 10.00px;">Deploy</a><a href="/tags/ELI/" style="font-size: 10.00px;">ELI</a><a href="/tags/HAProxy/" style="font-size: 10.00px;">HAProxy</a><a href="/tags/Horizon/" style="font-size: 10.00px;">Horizon</a><a href="/tags/IRC/" style="font-size: 10.00px;">IRC</a><a href="/tags/NUMA/" style="font-size: 10.00px;">NUMA</a><a href="/tags/Nova/" style="font-size: 15.00px;">Nova</a><a href="/tags/OPTIONS/" style="font-size: 10.00px;">OPTIONS</a><a href="/tags/Paste/" style="font-size: 10.00px;">Paste</a><a href="/tags/QEMU/" style="font-size: 20.00px;">QEMU</a><a href="/tags/RabbitMQ/" style="font-size: 10.00px;">RabbitMQ</a><a href="/tags/SSL/" style="font-size: 10.00px;">SSL</a><a href="/tags/Stevedore/" style="font-size: 10.00px;">Stevedore</a><a href="/tags/WSGI/" style="font-size: 10.00px;">WSGI</a><a href="/tags/Websocket/" style="font-size: 10.00px;">Websocket</a><a href="/tags/bfc/" style="font-size: 10.00px;">bfc</a><a href="/tags/block-stream/" style="font-size: 10.00px;">block-stream</a><a href="/tags/blockcopy/" style="font-size: 12.50px;">blockcopy</a><a href="/tags/cache/" style="font-size: 10.00px;">cache</a><a href="/tags/css/" style="font-size: 12.50px;">css</a><a href="/tags/dataplane/" style="font-size: 10.00px;">dataplane</a><a href="/tags/device-mapper/" style="font-size: 10.00px;">device-mapper</a><a href="/tags/ervernote/" style="font-size: 10.00px;">ervernote</a><a href="/tags/etag/" style="font-size: 10.00px;">etag</a><a href="/tags/eval/" style="font-size: 10.00px;">eval</a><a href="/tags/fdisk/" style="font-size: 10.00px;">fdisk</a><a href="/tags/fedora/" style="font-size: 10.00px;">fedora</a><a href="/tags/gpt/" style="font-size: 10.00px;">gpt</a><a href="/tags/greasemonkey/" style="font-size: 10.00px;">greasemonkey</a><a href="/tags/http/" style="font-size: 12.50px;">http</a><a href="/tags/isolinux/" style="font-size: 10.00px;">isolinux</a><a href="/tags/javascript/" style="font-size: 10.00px;">javascript</a><a href="/tags/libvirt/" style="font-size: 17.50px;">libvirt</a><a href="/tags/lighthttpd/" style="font-size: 10.00px;">lighthttpd</a><a href="/tags/lighttpd/" style="font-size: 10.00px;">lighttpd</a><a href="/tags/livecd/" style="font-size: 10.00px;">livecd</a><a href="/tags/mac/" style="font-size: 10.00px;">mac</a>
   </div>
 </div>
 

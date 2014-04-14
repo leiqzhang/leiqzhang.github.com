@@ -90,6 +90,187 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
     <header>
       
         <div class="icon"></div>
+        <time datetime="2014-01-09T14:40:31.000Z"><a href="/2014/01/2014-01-09-nova-api-service-initialization/">Jan 9 2014</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2014/01/2014-01-09-nova-api-service-initialization/">NOVA API Service Initialization Process</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <h1 id="NOVA-API-670d-52a1-542f-52a8-6d41-7a0b-">NOVA-API服务启动流程</h1>
+<p><strong>前提</strong></p>
+<ol>
+<li>对Nova的整体结构已经有所理解</li>
+<li>基于stable/havana分支</li>
+<li>基于Redhat的RDO库进行的环境安装，基于CentOS 6.4</li>
+</ol>
+<p><strong>内容</strong></p>
+<ol>
+<li>openstack-nova-api服务启动流程</li>
+<li>Paste、Deploy、WSGI等相关知识</li>
+</ol>
+<h2 id="-6267-884c-7ed3-679c-">执行结果</h2>
+<p>启动API服务时的命令为：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre><span class="comment">service</span> <span class="comment">openstack</span><span class="literal">-</span><span class="comment">nova</span><span class="literal">-</span><span class="comment">api</span> <span class="comment">start</span>
+</pre></td></tr></table></figure>
+
+<p>启动成功后，查看系统进程，发现实际执行结果为一个nova-api父进程，同时其有三个nova-api子进程：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+</pre></td><td class="code"><pre>nova <span class="number">3438</span> S <span class="number">0</span>:<span class="number">07</span> <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>python <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>nova<span class="attribute">-api</span> <span class="subst">--</span>logfile <span class="subst">/</span><span class="built_in">var</span><span class="subst">/</span><span class="keyword">log</span><span class="subst">/</span>nova<span class="subst">/</span>api<span class="built_in">.</span><span class="keyword">log</span>
+nova <span class="number">3446</span> S <span class="number">0</span>:<span class="number">00</span> <span class="subst">\</span>_ <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>python <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>nova<span class="attribute">-api</span> <span class="subst">--</span>logfile <span class="subst">/</span><span class="built_in">var</span><span class="subst">/</span><span class="keyword">log</span><span class="subst">/</span>nova<span class="subst">/</span>api<span class="built_in">.</span><span class="keyword">log</span>
+nova <span class="number">3447</span> S <span class="number">0</span>:<span class="number">00</span> <span class="subst">\</span>_ <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>python <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>nova<span class="attribute">-api</span> <span class="subst">--</span>logfile <span class="subst">/</span><span class="built_in">var</span><span class="subst">/</span><span class="keyword">log</span><span class="subst">/</span>nova<span class="subst">/</span>api<span class="built_in">.</span><span class="keyword">log</span>
+nova <span class="number">3448</span> S <span class="number">0</span>:<span class="number">00</span> <span class="subst">\</span>_ <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>python <span class="subst">/</span>usr<span class="subst">/</span>bin<span class="subst">/</span>nova<span class="attribute">-api</span> <span class="subst">--</span>logfile <span class="subst">/</span><span class="built_in">var</span><span class="subst">/</span><span class="keyword">log</span><span class="subst">/</span>nova<span class="subst">/</span>api<span class="built_in">.</span><span class="keyword">log</span>
+</pre></td></tr></table></figure>
+
+<p>查看监听的端口，发现父进程nova-api同时监听了三个端口：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+</pre></td><td class="code"><pre><span class="title">tcp</span>        <span class="number">0</span>      <span class="number">0</span> <span class="number">0.0.0.0:8773</span>                <span class="number">0.0.0.0</span>:*                   LISTEN      <span class="number">3438</span>/python         
+tcp        <span class="number">0</span>      <span class="number">0</span> <span class="number">0.0.0.0:8774</span>                <span class="number">0.0.0.0</span>:*                   LISTEN      <span class="number">3438</span>/python         
+tcp        <span class="number">0</span>      <span class="number">0</span> <span class="number">0.0.0.0:8775</span>                <span class="number">0.0.0.0</span>:*                   LISTEN      <span class="number">3438</span>/python
+</pre></td></tr></table></figure>
+
+<h2 id="-4ee3-7801-8def-5f84-">代码路径</h2>
+<h3 id="-4e3b-8981-8def-5f84-">主要路径</h3>
+<p>服务启动脚本为/etc/init.d/openstack-nova-api，查看此脚本发现在启动服务时实际执行的是/usr/bin/nova-api,而/usr/bin/nova-api是一个python脚本，实际执行的是nova.cmd.api.main</p>
+<p>nova.cmd.api.main的主要代码如下：</p>
+<figure class="highlight lang-python"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+</pre></td><td class="code"><pre>    launcher = service.process_launcher()
+    <span class="keyword">for</span> api <span class="keyword">in</span> CONF.enabled_apis:
+        should_use_ssl = api <span class="keyword">in</span> CONF.enabled_ssl_apis
+        <span class="keyword">if</span> api == <span class="string">'ec2'</span>:
+            server = service.WSGIService(api, use_ssl=should_use_ssl,
+                                         max_url_len=<span class="number">16384</span>)
+        <span class="keyword">else</span>:
+            server = service.WSGIService(api, use_ssl=should_use_ssl)
+        launcher.launch_service(server, workers=server.workers <span class="keyword">or</span> <span class="number">1</span>)
+    launcher.wait()
+</pre></td></tr></table></figure>
+
+<p>首先生成一个nova.common.service.Processlauncher类型的launcher, 接着会根据配置中的enabled_apis列表值，依次生成相应的WSGIService:</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre>server = service.WSGIService(<span class="keyword">...</span>)
+</pre></td></tr></table></figure>
+
+<p>然后通过launcher的launch_service方法，将上述的WSGIService和workers数量作为参数传入。</p>
+<p>在luanch_service方法中，会根据传入的workers参数fork出相应个数的子进程，并在各个子进程中调用对应WSGIService的start方法，开始对外服务。</p>
+<h3 id="-6d89-53ca-7684-914d-7f6e-">涉及的配置</h3>
+
+      
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/2014/01/2014-01-09-nova-api-service-initialization/#more" class="more-link">Read More</a>
+          </div>
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  
+    <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
+        <time datetime="2013-08-07T14:40:31.000Z"><a href="/2013/08/2013-08-07-virtual-disk-unmap-shrink/">Aug 7 2013</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2013/08/2013-08-07-virtual-disk-unmap-shrink/">虚拟磁盘的空间回收: Virtual Disk UNMAP/Shrink</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <h2 id="-95ee-9898-">问题</h2>
+<p>在虚拟化场景下，瘦分配(Thin-provisioning)磁盘应用场景非常广泛。目前主流的虚拟磁盘镜像格式，如Dynamic VHD、Sparse Raw、Qcow2、VMDK等均只具有随着虚拟机读写而动态增长的能力，一般来说是按需每次分配一个固定大小的块，如VHD的块是2M为单位。</p>
+<p>当Guest OS删除了文件，已经分配的空间在虚拟磁盘上可否进行空间回收呢？</p>
+<p>空间回收主要包括两步，一是获取到可以回收的空间，二是在虚拟磁盘文件中对相应空间进行回收。</p>
+<p>根据获取所需回收空间时虚拟磁盘的IO情况来讲，回收主要有在线回收和离线回收，在线和离线的区别在于虚拟磁盘是否在有Guest持续写IO的情况下进行空间回收。也即离线回收不单单指虚拟机关机情形下的回收，也包括虚拟磁盘只有读IO的情况（如虚拟磁盘为某个ROW快照的父镜像）。</p>
+<p>就虚拟磁盘文件来说，空间回收的结果可以是如下两种</p>
+<ol>
+<li>在Host上实际占用的空间减少</li>
+<li>在Host上实际占用的空间减少，但是后续Guest的写入可以复用之前需要回收的空间，从而使得虚拟磁盘文件不会随着Guest的写入立即分配新块</li>
+</ol>
+<p>下文首先分别对离线和在线可回收空间获取方法进行讨论，然后对虚拟磁盘文件的空间回收方式进行讨论，最后以Qemu当前的实现为例进行说明。</p>
+
+      
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/2013/08/2013-08-07-virtual-disk-unmap-shrink/#more" class="more-link">Read More</a>
+          </div>
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  
+    <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
         <time datetime="2013-06-27T14:40:31.000Z"><a href="/2013/06/2013-06-27-merge-linear-dm-disks-into-single-disk-as-partitions/">Jun 27 2013</a></time>
       
       
@@ -671,135 +852,6 @@ XMLHttpRequest Cannot load <span class="attribute">http</span>:<span class="rege
 
 
   
-    <article class="post">
-  
-    <div class="gallery">
-  <div class="photoset">
-    
-      <img src="">
-    
-  </div>
-  <div class="control">
-    <div class="prev"></div>
-    <div class="next"></div>
-  </div>
-</div>
-  
-  <div class="post-content">
-    <header>
-      
-        <div class="icon"></div>
-        <time datetime="2013-04-19T03:30:31.000Z"><a href="/2013/04/2013-04-19-qemu-block-features-libvirt-blockcopy-pivot/">Apr 19 2013</a></time>
-      
-      
-  
-    <h1 class="title"><a href="/2013/04/2013-04-19-qemu-block-features-libvirt-blockcopy-pivot/">QEMU Block Fetures: libvirt blockcopy switch to dest when complete</a></h1>
-  
-
-    </header>
-    <div class="entry">
-      
-        <h2 id="libvirt_blockcopy_switch_to_dest_when_complete">libvirt blockcopy switch to dest when complete</h2>
-<ol>
-<li><p>create vm</p>
-<figure class="highlight"><figcaption><span>create vm</span></figcaption><table><tr><td class="gutter"><pre>1
-2
-</pre></td><td class="code"><pre>
-<span class="title">virsh</span> create /pkgs/imgs/win2003.xml
-</pre></td></tr></table></figure>
-</li>
-<li><p>start blockcopy</p>
-<figure class="highlight"><figcaption><span>start blockcopy</span></figcaption><table><tr><td class="gutter"><pre>1
-2
-</pre></td><td class="code"><pre>
-<span class="comment">virsh</span> <span class="comment">blockcopy</span> <span class="comment">win2003</span> <span class="comment">/pkgs/imgs/win2003</span><span class="string">.</span><span class="comment">img</span> <span class="comment">/pkgs/imgs/t322</span><span class="string">.</span><span class="comment">img</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">pivot</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">wait</span>
-</pre></td></tr></table></figure>
-</li>
-<li><p>query blockcopy info<br>
-      
-    </div>
-    <footer>
-      
-        
-          <div class="alignleft">
-            <a href="/2013/04/2013-04-19-qemu-block-features-libvirt-blockcopy-pivot/#more" class="more-link">Read More</a>
-          </div>
-        
-        
-      
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-  
-    <article class="post">
-  
-    <div class="gallery">
-  <div class="photoset">
-    
-      <img src="">
-    
-  </div>
-  <div class="control">
-    <div class="prev"></div>
-    <div class="next"></div>
-  </div>
-</div>
-  
-  <div class="post-content">
-    <header>
-      
-        <div class="icon"></div>
-        <time datetime="2013-04-18T05:00:31.000Z"><a href="/2013/04/2013-04-18-qemu-block-features-dataplane-perf/">Apr 18 2013</a></time>
-      
-      
-  
-    <h1 class="title"><a href="/2013/04/2013-04-18-qemu-block-features-dataplane-perf/">QEMU Block Fetures: dataplane perf</a></h1>
-  
-
-    </header>
-    <div class="entry">
-      
-        <h3 id="Dataplane_vs_Non-dataplane_Perf">Dataplane vs Non-dataplane Perf</h3>
-<ol>
-<li>Envrionment<ol>
-<li>Qemu 1.4 master branch</li>
-<li>kernel: 3.5.0-2.fc17.x86-64</li>
-<li>virtual disks location: the same local SATA harddisk with ext4 fs</li>
-<li>VM start cmd (os: win7/qed, disk1: raw/non-dataplane/10G/NTFS, disk2: raw/dataplane/10G/NTFS) :</li>
-</ol>
-</li>
-<li>Testing Tool And Testing Params:<ol>
-<li>Only IOMeter App Running in VM, and no other IO in Host (Dom0)</li>
-<li>Main Testing VM: 8 worker, 16K IO size, 0% Read,  100% Random,  and 50 outstanding IO </li>
-<li>Pression VM: 8 worker, 16K IO size, 25% Read, 100% Random,  and 50 outstanding IO</li>
-</ol>
-</li>
-<li><p>Testing Results:</p>
-<p> |                | IOPS | MBPS  |<br> |   :———:     | :———: | :——-:   |<br> |dataplane       |  230.956328  |   3.608693  |<br> |non-dataplane   |  178.324867  |   2.786326  |</p>
-</li>
-</ol>
-
-      
-    </div>
-    <footer>
-      
-        
-        
-      
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-  
 
   <nav id="pagination">
   
@@ -826,7 +878,7 @@ XMLHttpRequest Cannot load <span class="attribute">http</span>:<span class="rege
   
     <li><a href="/categories/Linux/">Linux</a><small>3</small></li>
   
-    <li><a href="/categories/OpenStack/">OpenStack</a><small>5</small></li>
+    <li><a href="/categories/OpenStack/">OpenStack</a><small>6</small></li>
   
     <li><a href="/categories/VIM/">VIM</a><small>3</small></li>
   
@@ -846,7 +898,7 @@ XMLHttpRequest Cannot load <span class="attribute">http</span>:<span class="rege
 <div class="widget tagcloud">
   <h3 class="title">Tag Cloud</h3>
   <div class="entry">
-    <a href="/tags/CIM/" style="font-size: 10.00px;">CIM</a><a href="/tags/CORS/" style="font-size: 10.00px;">CORS</a><a href="/tags/DBPM/" style="font-size: 10.00px;">DBPM</a><a href="/tags/Deploy/" style="font-size: 10.00px;">Deploy</a><a href="/tags/ELI/" style="font-size: 10.00px;">ELI</a><a href="/tags/IRC/" style="font-size: 10.00px;">IRC</a><a href="/tags/NUMA/" style="font-size: 10.00px;">NUMA</a><a href="/tags/Nova/" style="font-size: 16.00px;">Nova</a><a href="/tags/OPTIONS/" style="font-size: 10.00px;">OPTIONS</a><a href="/tags/Paste/" style="font-size: 10.00px;">Paste</a><a href="/tags/QEMU/" style="font-size: 20.00px;">QEMU</a><a href="/tags/RabbitMQ/" style="font-size: 10.00px;">RabbitMQ</a><a href="/tags/Stevedore/" style="font-size: 10.00px;">Stevedore</a><a href="/tags/WSGI/" style="font-size: 10.00px;">WSGI</a><a href="/tags/bfc/" style="font-size: 10.00px;">bfc</a><a href="/tags/block-stream/" style="font-size: 10.00px;">block-stream</a><a href="/tags/blockcopy/" style="font-size: 12.00px;">blockcopy</a><a href="/tags/cache/" style="font-size: 10.00px;">cache</a><a href="/tags/css/" style="font-size: 12.00px;">css</a><a href="/tags/dataplane/" style="font-size: 10.00px;">dataplane</a><a href="/tags/device-mapper/" style="font-size: 10.00px;">device-mapper</a><a href="/tags/ervernote/" style="font-size: 10.00px;">ervernote</a><a href="/tags/etag/" style="font-size: 10.00px;">etag</a><a href="/tags/eval/" style="font-size: 10.00px;">eval</a><a href="/tags/fdisk/" style="font-size: 10.00px;">fdisk</a><a href="/tags/fedora/" style="font-size: 10.00px;">fedora</a><a href="/tags/gpt/" style="font-size: 10.00px;">gpt</a><a href="/tags/greasemonkey/" style="font-size: 10.00px;">greasemonkey</a><a href="/tags/http/" style="font-size: 12.00px;">http</a><a href="/tags/isolinux/" style="font-size: 10.00px;">isolinux</a><a href="/tags/javascript/" style="font-size: 10.00px;">javascript</a><a href="/tags/libvirt/" style="font-size: 18.00px;">libvirt</a><a href="/tags/lighthttpd/" style="font-size: 10.00px;">lighthttpd</a><a href="/tags/lighttpd/" style="font-size: 10.00px;">lighttpd</a><a href="/tags/livecd/" style="font-size: 10.00px;">livecd</a><a href="/tags/mac/" style="font-size: 10.00px;">mac</a><a href="/tags/mbr/" style="font-size: 10.00px;">mbr</a><a href="/tags/md5sum/" style="font-size: 10.00px;">md5sum</a><a href="/tags/mysql/" style="font-size: 12.00px;">mysql</a><a href="/tags/oVirt/" style="font-size: 14.00px;">oVirt</a>
+    <a href="/tags/CIM/" style="font-size: 10.00px;">CIM</a><a href="/tags/CORS/" style="font-size: 10.00px;">CORS</a><a href="/tags/DBPM/" style="font-size: 10.00px;">DBPM</a><a href="/tags/Deploy/" style="font-size: 10.00px;">Deploy</a><a href="/tags/ELI/" style="font-size: 10.00px;">ELI</a><a href="/tags/HAProxy/" style="font-size: 10.00px;">HAProxy</a><a href="/tags/Horizon/" style="font-size: 10.00px;">Horizon</a><a href="/tags/IRC/" style="font-size: 10.00px;">IRC</a><a href="/tags/NUMA/" style="font-size: 10.00px;">NUMA</a><a href="/tags/Nova/" style="font-size: 15.00px;">Nova</a><a href="/tags/OPTIONS/" style="font-size: 10.00px;">OPTIONS</a><a href="/tags/Paste/" style="font-size: 10.00px;">Paste</a><a href="/tags/QEMU/" style="font-size: 20.00px;">QEMU</a><a href="/tags/RabbitMQ/" style="font-size: 10.00px;">RabbitMQ</a><a href="/tags/SSL/" style="font-size: 10.00px;">SSL</a><a href="/tags/Stevedore/" style="font-size: 10.00px;">Stevedore</a><a href="/tags/WSGI/" style="font-size: 10.00px;">WSGI</a><a href="/tags/Websocket/" style="font-size: 10.00px;">Websocket</a><a href="/tags/bfc/" style="font-size: 10.00px;">bfc</a><a href="/tags/block-stream/" style="font-size: 10.00px;">block-stream</a><a href="/tags/blockcopy/" style="font-size: 12.50px;">blockcopy</a><a href="/tags/cache/" style="font-size: 10.00px;">cache</a><a href="/tags/css/" style="font-size: 12.50px;">css</a><a href="/tags/dataplane/" style="font-size: 10.00px;">dataplane</a><a href="/tags/device-mapper/" style="font-size: 10.00px;">device-mapper</a><a href="/tags/ervernote/" style="font-size: 10.00px;">ervernote</a><a href="/tags/etag/" style="font-size: 10.00px;">etag</a><a href="/tags/eval/" style="font-size: 10.00px;">eval</a><a href="/tags/fdisk/" style="font-size: 10.00px;">fdisk</a><a href="/tags/fedora/" style="font-size: 10.00px;">fedora</a><a href="/tags/gpt/" style="font-size: 10.00px;">gpt</a><a href="/tags/greasemonkey/" style="font-size: 10.00px;">greasemonkey</a><a href="/tags/http/" style="font-size: 12.50px;">http</a><a href="/tags/isolinux/" style="font-size: 10.00px;">isolinux</a><a href="/tags/javascript/" style="font-size: 10.00px;">javascript</a><a href="/tags/libvirt/" style="font-size: 17.50px;">libvirt</a><a href="/tags/lighthttpd/" style="font-size: 10.00px;">lighthttpd</a><a href="/tags/lighttpd/" style="font-size: 10.00px;">lighttpd</a><a href="/tags/livecd/" style="font-size: 10.00px;">livecd</a><a href="/tags/mac/" style="font-size: 10.00px;">mac</a>
   </div>
 </div>
 
