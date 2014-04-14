@@ -121,10 +121,9 @@ RedirectMatch permanent ^/$ https://186.100.11.229/dashboard/
 Header edit Location ^http://(.*)$ https://$1
 ```
 
-```
-
 如下是HAProxy中关于DashBoard相应的配置，其中websocket后端的健康检查尚未实现：
 
+```
 #---------------------------------------------------------------------
 # horizon frontend which proxys to the backends
 #---------------------------------------------------------------------
