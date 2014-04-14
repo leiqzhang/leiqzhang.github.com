@@ -245,10 +245,12 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
 2
 3
 4
-</pre></td><td class="code"><pre>#/etc/httpd/conf.d/openstack-dashboard-setting.conf
+5
+</pre></td><td class="code"><pre><span class="comment">#/etc/httpd/conf</span><span class="string">.</span><span class="comment">d/openstack</span><span class="literal">-</span><span class="comment">dashboard</span><span class="literal">-</span><span class="comment">setting</span><span class="string">.</span><span class="comment">conf</span>
+<span class="comment">#{public</span><span class="literal">-</span><span class="comment">server</span><span class="literal">-</span><span class="comment">name}:</span> <span class="comment">public</span> <span class="comment">domain</span> <span class="comment">name</span>
 
-<span class="class">RedirectMatch</span> permanent ^/<span class="char">$ </span><span class="method">https:</span>//<span class="number">186.100</span><span class="number">.11</span><span class="number">.229</span>/dashboard/
-<span class="class">Header</span> edit <span class="class">Location</span> ^<span class="method">http:</span>//(.*)<span class="char">$ </span><span class="method">https:</span>//<span class="char">$1</span>
+<span class="comment">RedirectMatch</span> <span class="comment">permanent</span> <span class="comment">^/$</span> <span class="comment">https://{public</span><span class="literal">-</span><span class="comment">server</span><span class="literal">-</span><span class="comment">name}/dashboard/</span>
+<span class="comment">Header</span> <span class="comment">edit</span> <span class="comment">Location</span> <span class="comment">^http://(</span><span class="string">.</span><span class="comment">*)$</span> <span class="comment">https://$1</span>
 </pre></td></tr></table></figure>
 
 <p>如下是HAProxy中关于DashBoard相应的配置，其中websocket后端的健康检查尚未实现：</p>
