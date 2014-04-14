@@ -116,8 +116,9 @@ DashBoard需要通过public平面提供，从安全角度考虑，需要以HTTPS
 
 ```
 #/etc/httpd/conf.d/openstack-dashboard-setting.conf
+#{public-server-name}: public domain name
 
-RedirectMatch permanent ^/$ https://186.100.11.229/dashboard/
+RedirectMatch permanent ^/$ https://{public-server-name}/dashboard/
 Header edit Location ^http://(.*)$ https://$1
 ```
 
