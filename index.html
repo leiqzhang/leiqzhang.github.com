@@ -144,7 +144,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
 11
 12
 13
-14
 </pre></td><td class="code"><pre><span class="comment">#1. nova.compute.api.create</span>
 <span class="comment">#2. nova.compute.api._create_instance</span>
 
@@ -158,7 +157,6 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
         boot_meta[<span class="string">'properties'</span>] = \
             <span class="keyword">self</span>._get_bdm_image_metadata(context,
                 block_device_mapping, legacy_bdm)
-<span class="comment"># 最终到达virt driver，对于libvirt，会根据这些Properties生成对应的xml配置</span>
 </pre></td></tr></table></figure>
 
 <p>之后，Nova会将这些Image Properties存入Nova数据库的instance_system_metadata表：</p>
