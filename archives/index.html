@@ -90,6 +90,229 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3
     <header>
       
         <div class="icon"></div>
+        <time datetime="2014-05-04T14:59:31.000Z"><a href="/2014/05/2014-05-03-devstack-upgrade-python-setup-ut/">May 4 2014</a></time>
+      
+      
+  
+    <h1 class="title"><a href="/2014/05/2014-05-03-devstack-upgrade-python-setup-ut/">DevStack环境的Python版本升级和UT环境搭建</a></h1>
+  
+
+    </header>
+    <div class="entry">
+      
+        <h1 id="DevStack-73af-5883-7684-Python-7248-672c-5347-7ea7-548c-UT-73af-5883-642d-5efa-">DevStack环境的Python版本升级和UT环境搭建</h1>
+<h2 id="-80cc-666f-">背景</h2>
+<p>在CentOS 6.5上面安装了devstack，由于6.5默认的python是2.6.6版本，在进行UT时，只能采用nosetests的方式，而此种方式和gerrit检测粒度不一致，往往造成在本地执行测试用例全部通过而上传到社区后测试用例不通过的情况。</p>
+<p>通过执行run_tests.sh的方式，可以保持和gerrit检测粒度一致，但其需要python 2.7版本。</p>
+<p>本文记录了直接在现有环境上升级python版本，并保证devstack相应升级及UT环境正常搭建的过程。</p>
+<h2 id="-5347-7ea7-Python-7248-672c-">升级Python版本</h2>
+<p>CentOS 6.5还没有现成的Python 2.7版本的RPM包，故需要从源码编译安装。由于系统中还存在Python 2.6.6，为了不与其产生环境冲突，会通过virtualenv的方式对不同版本的Python进行环境隔离。</p>
+<h3 id="-5b89-88c5-6e90-7801-7f16-8bd1-6240-9700-7684-5305-">安装源码编译所需的包</h3>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+</pre></td><td class="code"><pre><span class="comment">yum</span> <span class="comment">groupinstall</span> <span class="comment">"Development</span> <span class="comment">tools"</span>
+<span class="comment">yum</span> <span class="comment">install</span> <span class="comment">zlib</span><span class="literal">-</span><span class="comment">devel</span> <span class="comment">bzip2</span><span class="literal">-</span><span class="comment">devel</span> <span class="comment">openssl</span><span class="literal">-</span><span class="comment">devel</span> <span class="comment">ncurses</span><span class="literal">-</span><span class="comment">devel</span> <span class="comment">sqlite</span><span class="literal">-</span><span class="comment">devel</span> <span class="comment">readline</span><span class="literal">-</span><span class="comment">devel</span> <span class="comment">tk</span><span class="literal">-</span><span class="comment">devel</span>
+</pre></td></tr></table></figure>
+
+<h3 id="-4e0b-8f7d-Python_2-7-6e90-7801-5e76-7f16-8bd1-5b89-88c5-">下载Python 2.7源码并编译安装</h3>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+</pre></td><td class="code"><pre><span class="comment">wget</span> <span class="comment">http://python</span><span class="string">.</span><span class="comment">org/ftp/python/2</span><span class="string">.</span><span class="comment">7</span><span class="string">.</span><span class="comment">6/Python</span><span class="literal">-</span><span class="comment">2</span><span class="string">.</span><span class="comment">7</span><span class="string">.</span><span class="comment">6</span><span class="string">.</span><span class="comment">tar</span><span class="string">.</span><span class="comment">xz</span>
+<span class="comment">tar</span> <span class="comment">xvf</span> <span class="comment">Python</span><span class="literal">-</span><span class="comment">2</span><span class="string">.</span><span class="comment">7</span><span class="string">.</span><span class="comment">6</span><span class="string">.</span><span class="comment">tar</span><span class="string">.</span><span class="comment">xz</span>
+<span class="comment">cd</span> <span class="comment">Python</span><span class="literal">-</span><span class="comment">2</span><span class="string">.</span><span class="comment">7</span><span class="string">.</span><span class="comment">6</span>
+<span class="string">.</span><span class="comment">/configure</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">prefix=/usr/local</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">enable</span><span class="literal">-</span><span class="comment">unicode=ucs4</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">enable</span><span class="literal">-</span><span class="comment">shared</span> <span class="comment">LDFLAGS="</span><span class="literal">-</span><span class="comment">Wl</span><span class="string">,</span><span class="literal">-</span><span class="comment">rpath</span> <span class="comment">/usr/local/lib"</span>
+<span class="comment">make</span> <span class="comment">&&</span> <span class="comment">make</span> <span class="comment">altinstall</span>
+</pre></td></tr></table></figure>
+
+<p>需要注意的是，这里通过make altinstall的方式可保证安装出来的python文件带有版本信息，如python2.7。同时通过configure制定prefix，将python 2.7安装到/usr/local目录下。</p>
+<p>如上步骤完成后，会在/usr/local/bin目录下安装有python2.7等文件</p>
+<h3 id="-5b89-88c5-distribute">安装distribute</h3>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+</pre></td><td class="code"><pre>wget https://pypi<span class="preprocessor">.python</span><span class="preprocessor">.org</span>/packages/source/d/distribute/distribute-<span class="number">0.7</span><span class="number">.3</span><span class="preprocessor">.zip</span><span class="preprocessor">#md5=c6c59594a7b180af57af8a0cc0cf5b4a</span>
+
+unzip distribute-<span class="number">0.7</span><span class="number">.3</span><span class="preprocessor">.zip</span>
+
+cd distribute-<span class="number">0.7</span><span class="number">.3</span>
+
+python2<span class="number">.7</span> setup<span class="preprocessor">.py</span> install
+</pre></td></tr></table></figure>
+
+<p>通过如上命令，python2.7的程序包路径为/usr/local/lib/python2.7/site-packages/</p>
+<h3 id="-5b89-88c5-virtualenv">安装virtualenv</h3>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre><span class="comment">easy_install</span><span class="literal">-</span><span class="comment">2</span><span class="string">.</span><span class="comment">7</span> <span class="comment">virtualenv</span>
+</pre></td></tr></table></figure>
+
+<ol>
+<li>使用virtualenv</li>
+</ol>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+</pre></td><td class="code"><pre><span class="comment">cd</span> <span class="comment">/opt</span>
+
+<span class="comment">virtualenv</span><span class="literal">-</span><span class="comment">2</span><span class="string">.</span><span class="comment">7</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">distribute</span> <span class="comment">stackenv27</span>
+</pre></td></tr></table></figure>
+
+<p>如上命令会在/opt目录下创建名字为stackenv27的目录，该目录下会包含bin、include和lib等几个子目录，其实际是通过拷贝文件或者符号链接的方式创建python2.7的虚拟环境。如/opt/stackenv27/bin目录下的文件如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+</pre></td><td class="code"><pre><span class="literal">-</span><span class="comment">rw</span><span class="literal">-</span><span class="comment">r</span><span class="literal">-</span><span class="literal">-</span><span class="comment">r</span><span class="literal">-</span><span class="literal">-</span><span class="string">.</span> <span class="comment">1</span> <span class="comment">root</span> <span class="comment">root</span> <span class="comment">2196</span> <span class="comment">Apr</span> <span class="comment">30</span> <span class="comment">01:59</span> <span class="comment">activate</span>
+<span class="literal">-</span><span class="comment">rw</span><span class="literal">-</span><span class="comment">r</span><span class="literal">-</span><span class="literal">-</span><span class="comment">r</span><span class="literal">-</span><span class="literal">-</span><span class="string">.</span> <span class="comment">1</span> <span class="comment">root</span> <span class="comment">root</span> <span class="comment">1252</span> <span class="comment">Apr</span> <span class="comment">30</span> <span class="comment">01:59</span> <span class="comment">activate</span><span class="string">.</span><span class="comment">csh</span>
+<span class="literal">-</span><span class="comment">rw</span><span class="literal">-</span><span class="comment">r</span><span class="literal">-</span><span class="literal">-</span><span class="comment">r</span><span class="literal">-</span><span class="literal">-</span><span class="string">.</span> <span class="comment">1</span> <span class="comment">root</span> <span class="comment">root</span> <span class="comment">2465</span> <span class="comment">Apr</span> <span class="comment">30</span> <span class="comment">01:59</span> <span class="comment">activate</span><span class="string">.</span><span class="comment">fish</span>
+<span class="literal">-</span><span class="comment">rw</span><span class="literal">-</span><span class="comment">r</span><span class="literal">-</span><span class="literal">-</span><span class="comment">r</span><span class="literal">-</span><span class="literal">-</span><span class="string">.</span> <span class="comment">1</span> <span class="comment">root</span> <span class="comment">root</span> <span class="comment">1129</span> <span class="comment">Apr</span> <span class="comment">30</span> <span class="comment">01:59</span> <span class="comment">activate_this</span><span class="string">.</span><span class="comment">py</span>
+<span class="literal">-</span><span class="comment">rwxr</span><span class="literal">-</span><span class="comment">xr</span><span class="literal">-</span><span class="comment">x</span><span class="string">.</span> <span class="comment">1</span> <span class="comment">root</span> <span class="comment">root</span>  <span class="comment">246</span> <span class="comment">Apr</span> <span class="comment">30</span> <span class="comment">01:59</span> <span class="comment">easy_install</span>
+<span class="literal">-</span><span class="comment">rwxr</span><span class="literal">-</span><span class="comment">xr</span><span class="literal">-</span><span class="comment">x</span><span class="string">.</span> <span class="comment">1</span> <span class="comment">root</span> <span class="comment">root</span>  <span class="comment">246</span> <span class="comment">Apr</span> <span class="comment">30</span> <span class="comment">01:59</span> <span class="comment">easy_install</span><span class="literal">-</span><span class="comment">2</span><span class="string">.</span><span class="comment">7</span>
+<span class="literal">-</span><span class="comment">rwxr</span><span class="literal">-</span><span class="comment">xr</span><span class="literal">-</span><span class="comment">x</span><span class="string">.</span> <span class="comment">1</span> <span class="comment">root</span> <span class="comment">root</span>  <span class="comment">218</span> <span class="comment">Apr</span> <span class="comment">30</span> <span class="comment">01:59</span> <span class="comment">pip</span>
+<span class="literal">-</span><span class="comment">rwxr</span><span class="literal">-</span><span class="comment">xr</span><span class="literal">-</span><span class="comment">x</span><span class="string">.</span> <span class="comment">1</span> <span class="comment">root</span> <span class="comment">root</span>  <span class="comment">218</span> <span class="comment">Apr</span> <span class="comment">30</span> <span class="comment">01:59</span> <span class="comment">pip2</span>
+<span class="literal">-</span><span class="comment">rwxr</span><span class="literal">-</span><span class="comment">xr</span><span class="literal">-</span><span class="comment">x</span><span class="string">.</span> <span class="comment">1</span> <span class="comment">root</span> <span class="comment">root</span>  <span class="comment">218</span> <span class="comment">Apr</span> <span class="comment">30</span> <span class="comment">01:59</span> <span class="comment">pip2</span><span class="string">.</span><span class="comment">7</span>
+<span class="comment">lrwxrwxrwx</span><span class="string">.</span> <span class="comment">1</span> <span class="comment">root</span> <span class="comment">root</span>    <span class="comment">9</span> <span class="comment">Apr</span> <span class="comment">30</span> <span class="comment">01:59</span> <span class="comment">python</span> <span class="literal">-</span>&gt; <span class="comment">python2</span><span class="string">.</span><span class="comment">7</span>
+<span class="comment">lrwxrwxrwx</span><span class="string">.</span> <span class="comment">1</span> <span class="comment">root</span> <span class="comment">root</span>    <span class="comment">9</span> <span class="comment">Apr</span> <span class="comment">30</span> <span class="comment">01:59</span> <span class="comment">python2</span> <span class="literal">-</span>&gt; <span class="comment">python2</span><span class="string">.</span><span class="comment">7</span>
+<span class="literal">-</span><span class="comment">rwxr</span><span class="literal">-</span><span class="comment">xr</span><span class="literal">-</span><span class="comment">x</span><span class="string">.</span> <span class="comment">1</span> <span class="comment">root</span> <span class="comment">root</span> <span class="comment">9776</span> <span class="comment">Apr</span> <span class="comment">30</span> <span class="comment">01:59</span> <span class="comment">python2</span><span class="string">.</span><span class="comment">7</span>
+</pre></td></tr></table></figure>
+
+<p>如上所示，此目录下会有python2.7文件，同时会有python和python2俩符号链接指向此文件。</p>
+<p>要启用此python2.7环境，可以通过上述目录的activate文件来启动：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+</pre></td><td class="code"><pre><span class="title">source</span> /opt/stackenv27/bin/activate
+
+<span class="comment">#output：</span>
+[root<span class="variable">@stack</span> bin]<span class="comment"># source /opt/stackenv27/bin/activate</span>
+(stackenv27)[root<span class="variable">@stack</span> bin]<span class="comment"># which python</span>
+/opt/stackenv27/bin/python
+</pre></td></tr></table></figure>
+
+<h2 id="-5347-7ea7-devstack">升级devstack</h2>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+</pre></td><td class="code"><pre><span class="comment">cd</span> <span class="comment">/opt/stack</span>
+
+<span class="comment">find</span> <span class="string">.</span> <span class="literal">-</span><span class="comment">name</span> <span class="comment">"requirements</span><span class="string">.</span><span class="comment">txt"</span> <span class="literal">-</span><span class="comment">exec</span> <span class="comment">pip</span> <span class="comment">install</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">upgrade</span> <span class="literal">-</span><span class="comment">r</span> <span class="comment">{}</span> <span class="comment">\;</span>
+</pre></td></tr></table></figure>
+
+<h2 id="-91cd-542f-devstack-4e2d-670d-52a1-">重启devstack中服务</h2>
+<p>退出之前的screen session</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+</pre></td><td class="code"><pre>[stack<span class="property">@stack</span> ~]$ screen -ls
+There <span class="keyword">is</span> a screen <span class="attribute">on</span>:
+	<span class="number">9181.</span>stack	(Detached)
+<span class="number">1</span> Socket <span class="keyword">in</span> /<span class="reserved">var</span>/run/screen/S-stack.
+
+[stack<span class="property">@stack</span> ~]$ screen -X -S <span class="number">9181</span> quit
+</pre></td></tr></table></figure>
+
+<p>然后activate Python2.7虚拟环境，并重新启动screen</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+</pre></td><td class="code"><pre><span class="built_in">source</span> /opt/stackenv27/bin/activate
+
+<span class="built_in">cd</span> /home/stack/devstack/
+
+./rejoin-stack.sh
+</pre></td></tr></table></figure>
+
+<p>其中一些服务的启动入口是/usr/bin/xxx, 比如/usr/bin/cinder-api, 其默认是用/usr/bin/python来执行的，需要将其启动方式进行相应更改, 以强制其使用虚拟环境下的python进行运行。</p>
+<p>比如如果启动方式为:</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre><span class="comment">/usr/bin/cinder</span><span class="literal">-</span><span class="comment">api</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">config</span><span class="literal">-</span><span class="comment">file</span> <span class="comment">/etc/cinder/cinder</span><span class="string">.</span><span class="comment">conf</span>
+</pre></td></tr></table></figure>
+
+<p>则可改为：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre><span class="comment">`which</span> <span class="comment">python`</span> <span class="comment">/usr/bin/cinder</span><span class="literal">-</span><span class="comment">api</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">config</span><span class="literal">-</span><span class="comment">file</span> <span class="comment">/etc/cinder/cinder</span><span class="string">.</span><span class="comment">conf</span>
+</pre></td></tr></table></figure>
+
+<h2 id="-5178-578b-95ee-9898-8bb0-5f55-">典型问题记录</h2>
+<p>当启动cinder-api服务时，报如下错误：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre><span class="constant">ImportError</span><span class="symbol">:</span> <span class="constant">No</span> <span class="class"><span class="keyword">module</span> <span class="title">named</span> <span class="title">MySQLdb</span></span>
+</pre></td></tr></table></figure>
+
+<p>则是因为在升级devstack时没有安装成功相关python库导致，此时手动安装：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre><span class="comment">pip</span> <span class="comment">install</span> <span class="literal">-</span><span class="literal">-</span><span class="comment">upgrade</span> <span class="comment">mysql</span><span class="literal">-</span><span class="comment">python</span>
+</pre></td></tr></table></figure>
+
+<p>但此过程中会在gcc编译时报类似如下错误：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+</pre></td><td class="code"><pre>    <span class="title">_mysql</span>.c:<span class="number">2195</span>: error: ‘<span class="title">_mysql</span>_ConnectionObject’ has no member named ‘<span class="built_in">open</span>’
+    <span class="title">_mysql</span>.c:<span class="number">2196</span>: error: ‘<span class="title">_mysql</span>_ConnectionObject’ has no member named ‘converter’
+    <span class="title">_mysql</span>.c:<span class="number">2205</span>: error: ‘<span class="title">_mysql</span>_ResultObject’ has no member named ‘<span class="built_in">result</span>’
+    <span class="title">_mysql</span>.c: In <span class="function"><span class="keyword">function</span> ‘<span class="title">_mysql_ConnectionObject_dealloc</span>’:</span>
+</pre></td></tr></table></figure>
+
+<p>此类错误是因为mysql-devel rpm未安装导致，需要首先通过yum安装mysql-devel包，然后再安装mysql-python即可</p>
+
+      
+    </div>
+    <footer>
+      
+        
+        
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+  
+    <article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header>
+      
+        <div class="icon"></div>
         <time datetime="2014-04-25T14:50:31.000Z"><a href="/2014/04/2014-04-25-glance-image-properties-travel-in-system/">Apr 25 2014</a></time>
       
       
@@ -1863,82 +2086,6 @@ RESP BODY: {<span class="string">"access"</span>: {<span class="string">"token"<
 
 
   
-    <article class="post">
-  
-    <div class="gallery">
-  <div class="photoset">
-    
-      <img src="">
-    
-  </div>
-  <div class="control">
-    <div class="prev"></div>
-    <div class="next"></div>
-  </div>
-</div>
-  
-  <div class="post-content">
-    <header>
-      
-        <div class="icon"></div>
-        <time datetime="2014-02-09T14:55:31.000Z"><a href="/2014/02/2014-02-09-nova-v3-api-extension-framework/">Feb 9 2014</a></time>
-      
-      
-  
-    <h1 class="title"><a href="/2014/02/2014-02-09-nova-v3-api-extension-framework/">NOVA V3 API Extension Framework</a></h1>
-  
-
-    </header>
-    <div class="entry">
-      
-        <h1 id="NOVA_V3_API_Extension_Framework">NOVA V3 API Extension Framework</h1>
-<p><strong>背景</strong></p>
-<ol>
-<li>基于stable/havana分支</li>
-<li>基于CentOS 6.4，以Redhat的RDO库进行的环境安装</li>
-</ol>
-<p><strong>内容</strong></p>
-<ol>
-<li>V2扩展机制存在的问题</li>
-<li>Nova API V3中Plugin的实现机制和现状</li>
-<li>总结</li>
-</ol>
-<h2 id="V2-7684-6269-5c55-673a-5236-5b58-5728-7684-95ee-9898-">V2的扩展机制存在的问题</h2>
-<p>参考V3 API framework的Spec，当前V2 API存在的问题如下：</p>
-<p>The development of the Nova v3 API will give us the opportunity to rework the extension framework. The current framework suffers from:</p>
-<ul>
-<li>extension specific code required to exist in core code for specific extensions to work<ul>
-<li>eg nova/api/openstack/compute/servers.py:Controller:create where there are hard coded references to parameters specific to extensions to pass kwargs to the server create call</li>
-</ul>
-</li>
-<li>issues around efficiency with extensions each doing their own db lookup loops<ul>
-<li><a href="https://bugs.launchpad.net/nova/+bug/1160487" target="_blank">https://bugs.launchpad.net/nova/+bug/1160487</a></li>
-</ul>
-</li>
-<li>Can’t have CamelCase class names for extension classes due to extension loading mechanism</li>
-</ul>
-<p>这里主要展开说明前两点。</p>
-
-      
-    </div>
-    <footer>
-      
-        
-          <div class="alignleft">
-            <a href="/2014/02/2014-02-09-nova-v3-api-extension-framework/#more" class="more-link">Read More</a>
-          </div>
-        
-        
-      
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-  
 
   <nav id="pagination">
   
@@ -1963,7 +2110,7 @@ RESP BODY: {<span class="string">"access"</span>: {<span class="string">"token"<
   
     <li><a href="/categories/Linux/">Linux</a><small>3</small></li>
   
-    <li><a href="/categories/OpenStack/">OpenStack</a><small>7</small></li>
+    <li><a href="/categories/OpenStack/">OpenStack</a><small>8</small></li>
   
     <li><a href="/categories/VIM/">VIM</a><small>3</small></li>
   
@@ -1983,7 +2130,7 @@ RESP BODY: {<span class="string">"access"</span>: {<span class="string">"token"<
 <div class="widget tagcloud">
   <h3 class="title">Tag Cloud</h3>
   <div class="entry">
-    <a href="/tags/CIM/" style="font-size: 10.00px;">CIM</a><a href="/tags/CORS/" style="font-size: 10.00px;">CORS</a><a href="/tags/Cinder/" style="font-size: 10.00px;">Cinder</a><a href="/tags/DBPM/" style="font-size: 10.00px;">DBPM</a><a href="/tags/Deploy/" style="font-size: 10.00px;">Deploy</a><a href="/tags/ELI/" style="font-size: 10.00px;">ELI</a><a href="/tags/Glance/" style="font-size: 10.00px;">Glance</a><a href="/tags/HAProxy/" style="font-size: 10.00px;">HAProxy</a><a href="/tags/Horizon/" style="font-size: 10.00px;">Horizon</a><a href="/tags/IRC/" style="font-size: 10.00px;">IRC</a><a href="/tags/Metadata/" style="font-size: 10.00px;">Metadata</a><a href="/tags/NUMA/" style="font-size: 10.00px;">NUMA</a><a href="/tags/Nova/" style="font-size: 15.00px;">Nova</a><a href="/tags/OPTIONS/" style="font-size: 10.00px;">OPTIONS</a><a href="/tags/Paste/" style="font-size: 10.00px;">Paste</a><a href="/tags/QEMU/" style="font-size: 20.00px;">QEMU</a><a href="/tags/RabbitMQ/" style="font-size: 10.00px;">RabbitMQ</a><a href="/tags/SSL/" style="font-size: 10.00px;">SSL</a><a href="/tags/Stevedore/" style="font-size: 10.00px;">Stevedore</a><a href="/tags/WSGI/" style="font-size: 10.00px;">WSGI</a><a href="/tags/Websocket/" style="font-size: 10.00px;">Websocket</a><a href="/tags/bfc/" style="font-size: 10.00px;">bfc</a><a href="/tags/block-stream/" style="font-size: 10.00px;">block-stream</a><a href="/tags/blockcopy/" style="font-size: 12.50px;">blockcopy</a><a href="/tags/cache/" style="font-size: 10.00px;">cache</a><a href="/tags/css/" style="font-size: 12.50px;">css</a><a href="/tags/dataplane/" style="font-size: 10.00px;">dataplane</a><a href="/tags/device-mapper/" style="font-size: 10.00px;">device-mapper</a><a href="/tags/ervernote/" style="font-size: 10.00px;">ervernote</a><a href="/tags/etag/" style="font-size: 10.00px;">etag</a><a href="/tags/eval/" style="font-size: 10.00px;">eval</a><a href="/tags/fdisk/" style="font-size: 10.00px;">fdisk</a><a href="/tags/fedora/" style="font-size: 10.00px;">fedora</a><a href="/tags/gpt/" style="font-size: 10.00px;">gpt</a><a href="/tags/greasemonkey/" style="font-size: 10.00px;">greasemonkey</a><a href="/tags/http/" style="font-size: 12.50px;">http</a><a href="/tags/isolinux/" style="font-size: 10.00px;">isolinux</a><a href="/tags/javascript/" style="font-size: 10.00px;">javascript</a><a href="/tags/libvirt/" style="font-size: 17.50px;">libvirt</a><a href="/tags/lighthttpd/" style="font-size: 10.00px;">lighthttpd</a>
+    <a href="/tags/CIM/" style="font-size: 10.00px;">CIM</a><a href="/tags/CORS/" style="font-size: 10.00px;">CORS</a><a href="/tags/Cinder/" style="font-size: 10.00px;">Cinder</a><a href="/tags/DBPM/" style="font-size: 10.00px;">DBPM</a><a href="/tags/Deploy/" style="font-size: 10.00px;">Deploy</a><a href="/tags/ELI/" style="font-size: 10.00px;">ELI</a><a href="/tags/Glance/" style="font-size: 10.00px;">Glance</a><a href="/tags/HAProxy/" style="font-size: 10.00px;">HAProxy</a><a href="/tags/Horizon/" style="font-size: 10.00px;">Horizon</a><a href="/tags/IRC/" style="font-size: 10.00px;">IRC</a><a href="/tags/Metadata/" style="font-size: 10.00px;">Metadata</a><a href="/tags/NUMA/" style="font-size: 10.00px;">NUMA</a><a href="/tags/Nova/" style="font-size: 15.00px;">Nova</a><a href="/tags/OPTIONS/" style="font-size: 10.00px;">OPTIONS</a><a href="/tags/Paste/" style="font-size: 10.00px;">Paste</a><a href="/tags/QEMU/" style="font-size: 20.00px;">QEMU</a><a href="/tags/RabbitMQ/" style="font-size: 10.00px;">RabbitMQ</a><a href="/tags/SSL/" style="font-size: 10.00px;">SSL</a><a href="/tags/Stevedore/" style="font-size: 10.00px;">Stevedore</a><a href="/tags/WSGI/" style="font-size: 10.00px;">WSGI</a><a href="/tags/Websocket/" style="font-size: 10.00px;">Websocket</a><a href="/tags/bfc/" style="font-size: 10.00px;">bfc</a><a href="/tags/block-stream/" style="font-size: 10.00px;">block-stream</a><a href="/tags/blockcopy/" style="font-size: 12.50px;">blockcopy</a><a href="/tags/cache/" style="font-size: 10.00px;">cache</a><a href="/tags/css/" style="font-size: 12.50px;">css</a><a href="/tags/dataplane/" style="font-size: 10.00px;">dataplane</a><a href="/tags/device-mapper/" style="font-size: 10.00px;">device-mapper</a><a href="/tags/devstack/" style="font-size: 10.00px;">devstack</a><a href="/tags/ervernote/" style="font-size: 10.00px;">ervernote</a><a href="/tags/etag/" style="font-size: 10.00px;">etag</a><a href="/tags/eval/" style="font-size: 10.00px;">eval</a><a href="/tags/fdisk/" style="font-size: 10.00px;">fdisk</a><a href="/tags/fedora/" style="font-size: 10.00px;">fedora</a><a href="/tags/gpt/" style="font-size: 10.00px;">gpt</a><a href="/tags/greasemonkey/" style="font-size: 10.00px;">greasemonkey</a><a href="/tags/http/" style="font-size: 12.50px;">http</a><a href="/tags/isolinux/" style="font-size: 10.00px;">isolinux</a><a href="/tags/javascript/" style="font-size: 10.00px;">javascript</a><a href="/tags/libvirt/" style="font-size: 17.50px;">libvirt</a>
   </div>
 </div>
 
