@@ -1,8 +1,13 @@
 # XEN Hypervisor信息查看方法介绍
 
 声明：
+
 本博客欢迎转发，但请保留原作者信息!
+
 博客地址：http://openstack.wiaapp.cn
+
+博客地址：http://www.leiqzhang.com
+
 新浪微博：[@leivli](http://www.weibo.com/leivli "leiqzhang")
 
 内容系本人学习、研究和总结，如有雷同，实属荣幸！
